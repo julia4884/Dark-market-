@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Поиск по Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Результаты поиска</h1>
+  </header>
+
+  <main>
+    <p>Вы искали: <strong id="query"></strong></p>
+    <ul id="results"></ul>
+  </main>
+
+  <script>
+    // Страницы, по которым ищем
+    const pages = [
+      { title: "Игры", url: "games.html" },
+      { title: "Фильмы", url: "movies.html" },
+      { title: "Музыка", url: "music.html" },
+      { title: "Программы", url: "apps.html" },
+      { title: "Приложения", url: "tools.html" }
+    ];
+
+    // Получаем запрос из адресной строки
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("q")?.toLowerCase();
+    document.getElementById("query").textContent = query || "";
+
+    const resultsList = document.getElementById("results");
+
+    if (query) {
+      let found = 0;
+      pages.forEach(page => {
+        if (page.title.toLowerCase().includes(query)) {
+          const li = document.createElement("li");
+          li.innerHTML = `<a href="${page.url}">${page.title}</a>`;
+          resultsList.appendChild(li);
+          found++;
+        }
+      });
+
+      if (found === 0) {
+        resultsList.innerHTML = `<li style="color:red;">Ничего не найдено 😔</li>`;
+      }
+    }
+  </script>
+</body>
+</html>
