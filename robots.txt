@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://dark-market.netlify.app/sitemap.xml
