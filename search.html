@@ -1,53 +1,71 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Поиск по Dark Market Ultra</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск — Dark Market Ultra</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
+<header>
     <h1>Результаты поиска</h1>
-  </header>
+    <nav>
+        <a href="index.html">Главная</a>
+        <a href="home.html">Личный кабинет</a>
+        <a href="games.html">Игры</a>
+        <a href="movies.html">Фильмы</a>
+        <a href="music.html">Музыка</a>
+        <a href="images.html">Картинки</a>
+        <a href="books.html">Книги</a>
+        <a href="apps.html">Программы</a>
+        <a href="tools.html">Приложения</a>
+    </nav>
+</header>
 
-  <main>
+<main>
     <p>Вы искали: <strong id="query"></strong></p>
     <ul id="results"></ul>
-  </main>
+</main>
 
-  <script>
-    // Страницы, по которым ищем
-    const pages = [
-      { title: "Игры", url: "games.html" },
-      { title: "Фильмы", url: "movies.html" },
-      { title: "Музыка", url: "music.html" },
-      { title: "Программы", url: "apps.html" },
-      { title: "Приложения", url: "tools.html" }
-    ];
+<script>
+// Список страниц для поиска
+const pages = [
+    { title: "Главная", url: "index.html" },
+    { title: "Личный кабинет", url: "home.html" },
+    { title: "Игры", url: "games.html" },
+    { title: "Фильмы", url: "movies.html" },
+    { title: "Музыка", url: "music.html" },
+    { title: "Картинки", url: "images.html" },
+    { title: "Книги", url: "books.html" },
+    { title: "Программы", url: "apps.html" },
+    { title: "Приложения", url: "tools.html" }
+];
 
-    // Получаем запрос из адресной строки
-    const params = new URLSearchParams(window.location.search);
-    const query = params.get("q")?.toLowerCase();
-    document.getElementById("query").textContent = query || "";
+// Получаем запрос из строки браузера
+const params = new URLSearchParams(window.location.search);
+const query = params.get("q")?.toLowerCase() || "";
+document.getElementById("query").textContent = query || "ничего";
 
-    const resultsList = document.getElementById("results");
+// Блок для вывода результатов
+const resultList = document.getElementById("results");
 
-    if (query) {
-      let found = 0;
-      pages.forEach(page => {
+if (query) {
+    let found = 0;
+    pages.forEach(page => {
         if (page.title.toLowerCase().includes(query)) {
-          const li = document.createElement("li");
-          li.innerHTML = `<a href="${page.url}">${page.title}</a>`;
-          resultsList.appendChild(li);
-          found++;
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${page.url}">${page.title}</a>`;
+            resultList.appendChild(li);
+            found++;
         }
-      });
+    });
 
-      if (found === 0) {
-        resultsList.innerHTML = `<li style="color:red;">Ничего не найдено 😔</li>`;
-      }
+    if (found === 0) {
+        resultList.innerHTML = "<li>Ничего не найдено 😢</li>";
     }
-  </script>
+} else {
+    resultList.innerHTML = "<li>Введите запрос для поиска</li>";
+}
+</script>
 </body>
 </html>
