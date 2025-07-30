@@ -7,69 +7,42 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Подключение общего хедера -->
-  <div id="header-placeholder"></div>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="home.html">Личный кабинет</a>
+    <a href="games.html">Игры</a>
+    <a href="movies.html">Фильмы</a>
+    <a href="music.html">Музыка</a>
+    <a href="images.html">Картинки</a>
+    <a href="books.html">Книги</a>
+    <a href="apps.html" class="active">Программы</a>
+    <a href="tools.html">Приложения</a>
+  </nav>
 
   <main>
-    <h1>Программы</h1>
+    <h1 class="neon-title">Программы</h1>
 
-    <!-- Галерея приложений -->
-    <div id="gallery" class="gallery"></div>
-
-    <!-- Форма загрузки (только для админов/разработчиков) -->
-    <section id="uploadSection" class="upload-section" style="display:none;">
+    <!-- Форма загрузки программы -->
+    <section id="uploadAppSection" style="display:none;">
       <h2>Загрузить программу</h2>
-      <form id="uploadForm">
-        <input type="text" id="appTitle" placeholder="Название программы" required>
-        <input type="number" id="appPrice" placeholder="Цена (0 = бесплатно)" required>
-        <input type="file" id="appFile" accept=".exe,.apk,.zip,.rar" required>
-        <button type="submit">Загрузить</button>
-        <div id="uploadProgress">0%</div>
-      </form>
+      <input type="text" id="appTitle" placeholder="Название программы">
+      <input type="number" id="appPrice" placeholder="Цена (0 = бесплатно)">
+      <input type="file" id="appFile">
+      <button onclick="uploadApp()" class="neon-button">Загрузить</button>
+      <progress id="uploadProgress" value="0" max="100" style="width:100%;"></progress>
+      <p id="uploadStatus"></p>
+    </section>
+
+    <!-- Галерея программ -->
+    <section class="gallery-section">
+      <h2>Доступные программы</h2>
+      <div id="appsGallery" class="gallery"></div>
     </section>
   </main>
 
-  <script src="header.js"></script>
-  <script src="script.js"></script>
   <script>
     const API_URL = "https://dark-market-backend.onrender.com";
 
-    async function loadApps() {
-      try {
-        const res = await fetch(API_URL + "/apps/list");
-        const data = await res.json();
-
-        if (data.success) {
-          const gallery = document.getElementById("gallery");
-          gallery.innerHTML = "";
-
-          data.items.forEach(item => {
-            const card = document.createElement("div");
-            card.className = "card";
-
-            const title = document.createElement("h3");
-            title.textContent = item.title;
-
-            const downloadBtn = document.createElement("button");
-            if (item.price === 0) {
-              downloadBtn.textContent = "Скачать бесплатно";
-              downloadBtn.onclick = () => window.location.href = API_URL + "/uploads/" + item.file;
-            } else {
-              downloadBtn.textContent = "Купить за " + item.price + "€";
-              downloadBtn.onclick = () => alert("Оплата через PayPal скоро будет доступна!");
-            }
-
-            card.appendChild(title);
-            card.appendChild(downloadBtn);
-            gallery.appendChild(card);
-          });
-        }
-      } catch (err) {
-        console.error("Ошибка загрузки программ:", err);
-      }
-    }
-
-    // Проверка роли пользователя
     async function checkRole() {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -79,45 +52,85 @@
           headers: { "Authorization": "Bearer " + token }
         });
         const data = await res.json();
-
-        if (data.success && (data.user.role === "admin" || data.user.role === "developer")) {
-          document.getElementById("uploadSection").style.display = "block";
+        if (data.success && (data.user.role === "developer" || data.user.role === "admin")) {
+          document.getElementById("uploadAppSection").style.display = "block";
         }
       } catch (err) {
         console.error("Ошибка проверки роли:", err);
       }
     }
 
-    // Обработка загрузки файла
-    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData();
-      formData.append("title", document.getElementById("appTitle").value);
-      formData.append("price", document.getElementById("appPrice").value);
-      formData.append("file", document.getElementById("appFile").files[0]);
-
+    async function loadApps() {
       try {
-        const res = await fetch(API_URL + "/apps/upload", {
-          method: "POST",
-          headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
-          body: formData
-        });
-
+        const res = await fetch(API_URL + "/apps");
         const data = await res.json();
+
         if (data.success) {
-          alert("Программа успешно загружена!");
-          loadApps();
-        } else {
-          alert("Ошибка: " + data.message);
+          const gallery = document.getElementById("appsGallery");
+          gallery.innerHTML = "";
+
+          data.apps.forEach(app => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <h3>${app.title}</h3>
+              <p>Цена: ${app.price > 0 ? app.price + "€" : "Бесплатно"}</p>
+              ${app.price > 0 
+                ? `<button onclick="buyApp('${app._id}')" class="neon-button">Купить</button>` 
+                : `<a href="${API_URL}/uploads/apps/${app.filename}" class="neon-button">Скачать</a>`}
+            `;
+            gallery.appendChild(card);
+          });
         }
       } catch (err) {
-        console.error("Ошибка при загрузке:", err);
+        console.error("Ошибка загрузки программ:", err);
       }
-    });
+    }
 
-    loadApps();
+    function uploadApp() {
+      const token = localStorage.getItem("token");
+      const title = document.getElementById("appTitle").value;
+      const price = document.getElementById("appPrice").value || 0;
+      const file = document.getElementById("appFile").files[0];
+
+      if (!file) return alert("Выберите файл!");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("price", price);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API_URL + "/upload-app", true);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          document.getElementById("uploadProgress").value = (event.loaded / event.total) * 100;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            alert("Программа загружена!");
+            loadApps();
+          } else {
+            alert("Ошибка: " + response.error);
+          }
+        }
+      };
+
+      xhr.send(formData);
+    }
+
+    function buyApp(appId) {
+      alert("Тут будет подключение PayPal для покупки программы " + appId);
+    }
+
     checkRole();
+    loadApps();
   </script>
 </body>
 </html>
