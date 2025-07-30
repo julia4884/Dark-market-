@@ -18,6 +18,7 @@
         button:hover { background:darkred; }
         #dev-panel { margin-top:30px; padding:20px; background:#1c1c1c; border-radius:10px; display:none; }
         input { margin:5px; padding:8px; width:80%; background:#222; color:#eee; border:none; border-radius:6px; }
+        progress { width:100%; height:20px; margin-top:10px; display:none; }
     </style>
 </head>
 <body>
@@ -46,6 +47,7 @@
         <input type="file" id="imageUpload" accept="image/*"><br>
         <input type="text" id="imageTitle" placeholder="Название"><br>
         <input type="number" step="0.01" id="imagePrice" placeholder="Цена (€)"><br>
+        <progress id="uploadProgress" value="0" max="100"></progress><br>
         <button id="uploadImageBtn">Загрузить</button>
     </section>
 </main>
@@ -59,38 +61,42 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const gallery = document.getElementById("gallery");
+    const progressBar = document.getElementById("uploadProgress");
 
-    try {
-        const res = await fetch(`${API_URL}/images/list`);
-        const data = await res.json();
+    // Загружаем картинки
+    async function loadImages() {
+        try {
+            const res = await fetch(`${API_URL}/images/list`);
+            const data = await res.json();
 
-        gallery.innerHTML = "";
-        if (data.success && data.images.length > 0) {
-            data.images.forEach(img => {
-                const div = document.createElement("div");
-                div.className = "image-card";
-                div.innerHTML = `
-                    <img src="${API_URL + img.preview}" alt="${img.title}">
-                    <p><b>${img.title}</b></p>
-                    <p class="price">${img.price} €</p>
-                    <div id="actions-${img.id}">
-                        <button onclick="buyImage(${img.id})">Купить</button>
-                    </div>
-                `;
-                gallery.appendChild(div);
+            gallery.innerHTML = "";
+            if (data.success && data.images.length > 0) {
+                data.images.forEach(img => {
+                    const div = document.createElement("div");
+                    div.className = "image-card";
+                    div.innerHTML = `
+                        <img src="${API_URL + img.preview}" alt="${img.title}">
+                        <p><b>${img.title}</b></p>
+                        <p class="price">${img.price} €</p>
+                        <div id="actions-${img.id}">
+                            <button onclick="buyImage(${img.id})">Купить</button>
+                        </div>
+                    `;
+                    gallery.appendChild(div);
 
-                // Проверяем, купил ли пользователь эту картинку
-                if (token) checkPurchase(img.id);
-            });
-        } else {
-            gallery.innerHTML = "<p>Пока нет картинок.</p>";
+                    if (token) checkPurchase(img.id);
+                });
+            } else {
+                gallery.innerHTML = "<p>Пока нет картинок.</p>";
+            }
+        } catch (err) {
+            console.error("Ошибка загрузки картинок", err);
+            gallery.innerHTML = "<p>Ошибка загрузки картинок.</p>";
         }
-    } catch (err) {
-        console.error("Ошибка загрузки картинок", err);
-        gallery.innerHTML = "<p>Ошибка загрузки картинок.</p>";
     }
+    await loadImages();
 
-    // Панель разработчика
+    // Проверяем права разработчика
     if (token) {
         try {
             const res = await fetch(`${API_URL}/profile`, {
@@ -104,7 +110,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Загрузка новой картинки
-    document.getElementById("uploadImageBtn").addEventListener("click", async () => {
+    document.getElementById("uploadImageBtn").addEventListener("click", () => {
         const file = document.getElementById("imageUpload").files[0];
         const title = document.getElementById("imageTitle").value;
         const price = document.getElementById("imagePrice").value;
@@ -116,18 +122,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         formData.append("title", title);
         formData.append("price", price);
 
-        const res = await fetch(`${API_URL}/upload-image`, {
-            method: "POST",
-            headers: { Authorization: "Bearer " + token },
-            body: formData
-        });
-        const result = await res.json();
-        if (result.success) {
-            alert("Картинка загружена!");
-            location.reload();
-        } else {
-            alert("Ошибка: " + result.error);
-        }
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${API_URL}/upload-image`);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+        progressBar.style.display = "block";
+        xhr.upload.onprogress = (e) => {
+            if (e.lengthComputable) {
+                progressBar.value = (e.loaded / e.total) * 100;
+            }
+        };
+
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                alert("Картинка загружена!");
+                loadImages();
+                progressBar.style.display = "none";
+            } else {
+                alert("Ошибка загрузки");
+            }
+        };
+        xhr.send(formData);
     });
 });
 
@@ -145,7 +160,7 @@ async function checkPurchase(imageId) {
     const result = await res.json();
     if (result.success && result.purchased) {
         const actions = document.getElementById(`actions-${imageId}`);
-        actions.innerHTML = `<a href="/images/${result.file}" download><button>Скачать</button></a>`;
+        actions.innerHTML = `<a href="${API_URL}/images/${result.file}" download><button>Скачать</button></a>`;
     }
 }
 
