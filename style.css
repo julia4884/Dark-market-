@@ -1,193 +1,173 @@
-/* === Фон с мягкой лиловой дымкой === */
+/* Общие стили */
 body {
-    background: radial-gradient(circle at top, #2a1f3d, #1a1426, #0d0d14);
-    color: #e8e0ff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    background-attachment: fixed;
-    overflow-x: hidden;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: radial-gradient(circle at top, #d8b4fe 0%, #2a003f 100%);
+  color: #e0e0e0;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
-/* Дымка поверх фона */
+/* Дымка */
 body::before {
-    content: "";
-    position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(170, 120, 255, 0.08), transparent 70%);
-    animation: smokeMove 20s infinite linear;
-    z-index: -1;
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url('https://i.ibb.co/W5kzV5Q/smoke.png') repeat;
+  opacity: 0.15;
+  z-index: -1;
+  animation: drift 30s infinite linear;
 }
 
-@keyframes smokeMove {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(30px, 30px) scale(1.1); }
-    100% { transform: translate(0, 0) scale(1); }
+@keyframes drift {
+  from { background-position: 0 0; }
+  to { background-position: 1000px 1000px; }
 }
 
-/* === Навигация === */
+/* Навигация */
 nav {
-    background: rgba(20, 15, 40, 0.9);
-    padding: 15px;
-    text-align: center;
-    border-bottom: 2px solid #bb86fc;
-    box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+  display: flex;
+  justify-content: center;
+  background: rgba(20, 0, 40, 0.8);
+  padding: 15px;
+  border-bottom: 2px solid #6d28d9;
 }
 
 nav a {
-    color: #cfc0ff;
-    text-decoration: none;
-    margin: 0 15px;
-    font-weight: bold;
-    transition: color 0.3s, text-shadow 0.3s;
+  margin: 0 12px;
+  text-decoration: none;
+  color: #c084fc;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  padding: 8px 14px;
+  border-radius: 8px;
 }
 
-nav a:hover, nav a.active {
-    color: #00e5ff;
-    text-shadow: 0 0 10px #00e5ff;
+nav a:hover,
+nav a.active {
+  border: 1px solid #8b5cf6;
+  color: #fff;
+  box-shadow: 0 0 12px #a78bfa, 0 0 20px #6d28d9;
 }
 
-/* === Логотип сайта === */
-.logo {
-    font-size: 2.5em;
-    font-style: italic;
-    color: #00e5ff;
-    text-align: center;
-    margin: 25px 0;
-    text-shadow: 
-        0 0 8px #00e5ff,
-        0 0 15px #00ffff,
-        0 0 30px #00ffff;
-    letter-spacing: 2px;
-    font-weight: bold;
-    animation: neonPulse 3s infinite alternate;
+/* Логотип */
+.neon-logo {
+  text-align: center;
+  font-size: 2.8rem;
+  color: #5eead4;
+  font-style: italic;
+  text-shadow: 0 0 7px #5eead4, 0 0 14px #0ea5e9, 0 0 28px #22d3ee;
+  margin-top: 30px;
 }
 
-@keyframes neonPulse {
-    from { text-shadow: 0 0 8px #00e5ff, 0 0 15px #00ffff; }
-    to   { text-shadow: 0 0 20px #00ffff, 0 0 40px #00e5ff; }
+/* Подзаголовок */
+.subtitle {
+  text-align: center;
+  font-size: 1.3rem;
+  color: #d8b4fe;
+  margin-top: -10px;
+  margin-bottom: 40px;
 }
 
-/* === Заголовки === */
-h1, h2 {
-    text-align: center;
-    color: #bb86fc;
-    text-shadow: 0 0 15px #6a0dad;
-    margin-bottom: 20px;
+/* Заголовки разделов */
+.neon-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #c084fc;
+  text-shadow: 0 0 8px #9333ea, 0 0 20px #6d28d9;
+  margin: 40px 0 20px;
 }
 
-/* === Галерея === */
+/* Сетка карточек */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Карточки и кнопки */
+.card, .neon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 0, 50, 0.7);
+  padding: 20px;
+  border-radius: 12px;
+  color: #e0e0e0;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  border: 2px solid #8b5cf6;
+  box-shadow: 0 0 12px #8b5cf6, inset 0 0 8px #5b21b6;
+}
+
+.card:hover,
+.neon-button:hover {
+  color: #fff;
+  box-shadow: 0 0 20px #a78bfa, 0 0 40px #7c3aed;
+  transform: translateY(-5px);
+}
+
+/* Галерея */
+.gallery-section {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
 .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 25px;
-    margin-top: 20px;
-    padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
 }
 
-.card {
-    background: rgba(25, 20, 50, 0.9);
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0 0 25px rgba(106, 13, 173, 0.4);
-    text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
-    border: 1px solid rgba(106, 13, 173, 0.6);
+.gallery .card {
+  flex-direction: column;
+  padding: 15px;
+  text-align: center;
 }
 
-.card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 0 35px rgba(0, 229, 255, 0.7);
-    border-color: #00e5ff;
+.gallery .card h3 {
+  margin: 10px 0;
+  font-size: 1.2rem;
+  color: #f0abfc;
 }
 
-.card img {
-    width: 100%;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
-}
-
-/* === Кнопки === */
-button {
-    background: transparent;
-    color: #e8e0ff;
-    border: 2px solid #6a0dad;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-weight: bold;
-    text-shadow: 0 0 8px #6a0dad;
-}
-
-button:hover {
-    background: rgba(106, 13, 173, 0.25);
-    color: #00e5ff;
-    border-color: #00e5ff;
-    box-shadow: 0 0 15px #00e5ff;
-}
-
-/* === Прогресс-бар === */
+/* Прогресс бар */
 progress {
-    width: 100%;
-    height: 20px;
-    margin-top: 10px;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+  width: 100%;
+  height: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 10px;
 }
 
 progress::-webkit-progress-bar {
-    background-color: #222;
-    border-radius: 10px;
+  background-color: #2a003f;
+  border-radius: 8px;
 }
 
 progress::-webkit-progress-value {
-    background-color: #00e5ff;
-    border-radius: 10px;
-    box-shadow: 0 0 15px #00e5ff;
+  background: linear-gradient(90deg, #9333ea, #5eead4);
+  border-radius: 8px;
 }
 
 progress::-moz-progress-bar {
-    background-color: #00e5ff;
-    border-radius: 10px;
+  background: linear-gradient(90deg, #9333ea, #5eead4);
+  border-radius: 8px;
 }
 
-/* === Блок профиля === */
-#profileInfo {
-    background: rgba(25, 20, 50, 0.95);
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    margin-bottom: 35px;
-    box-shadow: 0 0 25px rgba(106, 13, 173, 0.4);
-    border: 1px solid rgba(106, 13, 173, 0.7);
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9rem;
+  background: rgba(20, 0, 40, 0.8);
+  border-top: 2px solid #6d28d9;
+  color: #c084fc;
 }
-
-#profileInfo img {
-    border: 3px solid #00e5ff;
-    margin-bottom: 15px;
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
-    border-radius: 50%;
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-}
-
-/* === Ник админа с коронкой 👑 === */
-#username {
-    font-size: 1.5em;
-    color: #bb86fc;
-    text-shadow: 0 0 12px #6a0dad;
-}
-
-#username.admin::after {
-    content: " 👑";
-    color: #ffd700;
-    text-shadow: 0 0 12px #ffd700;
-        }
