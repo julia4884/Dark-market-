@@ -1,299 +1,243 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет — Dark Market Ultra</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: #eee;
-            text-align: center;
-            padding: 20px;
-        }
-        header, footer {
-            margin-bottom: 20px;
-        }
-        #profile-photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-        section {
-            background: #1c1c1c;
-            padding: 20px;
-            margin: 20px auto;
-            border-radius: 10px;
-            max-width: 500px;
-        }
-        button {
-            background: crimson;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 6px;
-        }
-        button:hover {
-            background: darkred;
-        }
-        textarea, input[type="text"], input[type="email"] {
-            width: 90%;
-            margin-top: 10px;
-            padding: 8px;
-            border-radius: 6px;
-            border: none;
-            background: #222;
-            color: #eee;
-        }
-        #developer-panel, #admin-panel {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #444;
-            border-radius: 8px;
-            background: #222;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Личный кабинет — Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: Arial, sans-serif;
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    nav a {
+      margin-right: 15px;
+      color: #fff;
+      text-decoration: none;
+    }
+    .tab-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .tab-button {
+      background: #1c1c1c;
+      color: #e0e0e0;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+    .tab-button.active {
+      background: #444;
+      border-bottom: 2px solid crimson;
+    }
+    .tab-content {
+      display: none;
+      padding: 20px;
+      background: #1c1c1c;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+      border: 2px solid crimson;
+    }
+    input, textarea {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      padding: 10px;
+      width: 100%;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    button {
+      background: crimson;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: darkred;
+    }
+    .progress-bar {
+      width: 100%;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+      display: none;
+    }
+    .progress-bar-inner {
+      height: 15px;
+      background: crimson;
+      width: 0%;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Dark Market Ultra</h1>
-    <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-  <a href="images.html">Картинки</a>
-  <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
-    </nav>
-        <h3>Тёмный уголок свободы</h3>
-    </header>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="games.html">Игры</a>
+    <a href="movies.html">Фильмы</a>
+    <a href="music.html">Музыка</a>
+    <a href="images.html">Картинки</a>
+    <a href="books.html">Книги</a>
+    <a href="apps.html">Программы</a>
+    <a href="tools.html">Приложения</a>
+  </nav>
 
-    <main>
-        <section id="user-info">
-            <img id="profile-photo" src="default-avatar.png" alt="Фото профиля">
-            <h2 id="welcomeMessage">Загрузка...</h2>
-            <p><b>Никнейм:</b> <span id="nickname">...</span></p>
-            <p><b>Статус:</b> <span id="status">...</span></p>
-            <p><b>Подписка:</b> <span id="subscription">...</span></p>
-            <input type="file" id="photoUpload" accept="image/*">
-            <button id="savePhotoBtn">Загрузить фото</button>
-            <hr>
-            <h3>О себе</h3>
-            <textarea id="aboutMe" placeholder="Напиши о себе..."></textarea><br>
-            <button id="saveAboutBtn">Сохранить</button>
+  <h1>Личный кабинет</h1>
 
-            <!-- Панель разработчика -->
-            <div id="developer-panel">
-                <h3>👑 Панель разработчика</h3>
-                <input type="file" id="fileUpload" multiple>
-                <button id="uploadFileBtn">Загрузить файлы</button>
-            </div>
+  <div class="tab-container">
+    <button class="tab-button active" onclick="openTab('profile')">Профиль</button>
+    <button class="tab-button" onclick="openTab('purchases')">Мои покупки</button>
+    <button class="tab-button" onclick="openTab('uploads')">Мои загрузки</button>
+    <button class="tab-button" onclick="openTab('admin')">Админка</button>
+  </div>
 
-            <!-- Панель администратора -->
-            <div id="admin-panel">
-                <h3>⚔ Панель администратора</h3>
-                
-                <h4>Заблокировать пользователя</h4>
-                <input type="email" id="blockUserEmail" placeholder="Email пользователя">
-                <button id="blockUserBtn">Заблокировать</button>
+  <!-- Профиль -->
+  <div id="profile" class="tab-content active">
+    <h2>Профиль</h2>
+    <img id="profilePic" src="default-avatar.png" alt="Фото профиля" class="profile-pic">
+    <form id="profileForm">
+      <label for="avatar">Загрузить новое фото:</label>
+      <input type="file" id="avatar" name="avatar" accept="image/*">
+      <label for="nickname">Никнейм:</label>
+      <input type="text" id="nickname" placeholder="Введите ник">
+      <label for="about">О себе:</label>
+      <textarea id="about" rows="4" placeholder="Расскажите о себе..."></textarea>
+      <button type="submit">Сохранить изменения</button>
+    </form>
+    <p id="status">Статус: <strong>Пользователь</strong></p>
+  </div>
 
-                <h4>Заблокировать приложение</h4>
-                <input type="text" id="blockAppName" placeholder="ID или название приложения">
-                <button id="blockAppBtn">Заблокировать</button>
-            </div>
+  <!-- Покупки -->
+  <div id="purchases" class="tab-content">
+    <h2>Мои покупки</h2>
+    <ul id="purchaseList">
+      <li>Пока ничего не куплено</li>
+    </ul>
+  </div>
 
-            <hr>
-            <button id="logoutBtn">🚪 Выйти</button>
-        </section>
-    </main>
+  <!-- Загрузки -->
+  <div id="uploads" class="tab-content">
+    <h2>Мои загрузки</h2>
+    <form id="uploadForm">
+      <label for="file">Загрузить файл:</label>
+      <input type="file" id="file" name="file">
+      <label for="price">Цена (€):</label>
+      <input type="number" id="price" name="price" min="0" step="0.01">
+      <button type="submit">Загрузить</button>
+    </form>
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-bar-inner" id="progressBarInner"></div>
+    </div>
+    <div class="status" id="uploadStatus"></div>
+    <ul id="myUploads">
+      <li>Пока нет загруженных файлов</li>
+    </ul>
+  </div>
 
-    <footer>
-        <p>© Dark Market Ultra © 2025. Все права защищены</p>
-    </footer>
+  <!-- Админка -->
+  <div id="admin" class="tab-content">
+    <h2>Админка</h2>
+    <form id="blockUserForm">
+      <label for="blockUser">Заблокировать пользователя:</label>
+      <input type="text" id="blockUser" placeholder="Введите email">
+      <button type="submit">Заблокировать</button>
+    </form>
+    <form id="blockAppForm">
+      <label for="blockApp">Заблокировать приложение:</label>
+      <input type="text" id="blockApp" placeholder="Введите ID приложения">
+      <button type="submit">Заблокировать</button>
+    </form>
+  </div>
 
-    <script src="config.js"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("Сначала войдите!");
-            window.location.href = "index.html";
-            return;
+  <script>
+    const backendUrl = "https://dark-market-backend.onrender.com";
+
+    function openTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Загрузка аватара
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const file = document.getElementById('avatar').files[0];
+      if (!file) return alert("Выберите фото!");
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const res = await fetch(`${backendUrl}/upload-photo`, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await res.json();
+        if (result.url) {
+          document.getElementById('profilePic').src = result.url;
+          alert("Фото профиля обновлено!");
+        } else {
+          alert("Ошибка при загрузке фото");
         }
-
-        try {
-            const res = await fetch(`${API_URL}/profile`, {
-                headers: { Authorization: "Bearer " + token }
-            });
-            const data = await res.json();
-
-            if (!data.success) {
-                alert("Ошибка: " + data.error);
-                window.location.href = "index.html";
-                return;
-            }
-
-            document.getElementById("welcomeMessage").innerText = `Привет, ${data.username} 👋`;
-            document.getElementById("nickname").innerText = data.username;
-            document.getElementById("status").innerText = data.role;
-            document.getElementById("subscription").innerText = data.subscription;
-            if (data.photo) document.getElementById("profile-photo").src = API_URL + data.photo;
-            document.getElementById("aboutMe").value = data.about || "";
-
-            // Разработчик
-            if (data.role === "admin" || data.subscription === "Разработчик") {
-                document.getElementById("developer-panel").style.display = "block";
-            }
-
-            // Админ именно твой аккаунт
-            if (data.email === "juliaangelss26@gmail.com") {
-                document.getElementById("admin-panel").style.display = "block";
-            }
-
-        } catch (err) {
-            console.error(err);
-            window.location.href = "index.html";
-        }
-
-        // Сохранение О себе
-        document.getElementById("saveAboutBtn").addEventListener("click", async () => {
-            const about = document.getElementById("aboutMe").value;
-            try {
-                const res = await fetch(`${API_URL}/profile/update`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                    body: JSON.stringify({ about }),
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert("Описание обновлено!");
-                } else {
-                    alert("Ошибка: " + result.error);
-                }
-            } catch (err) {
-                alert("Ошибка при сохранении описания.");
-            }
-        });
-
-        // Загрузка фото
-        document.getElementById("savePhotoBtn").addEventListener("click", async () => {
-            const fileInput = document.getElementById("photoUpload");
-            if (!fileInput.files[0]) return alert("Выберите файл!");
-
-            const formData = new FormData();
-            formData.append("photo", fileInput.files[0]);
-
-            try {
-                const res = await fetch(`${API_URL}/upload-photo`, {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token },
-                    body: formData,
-                });
-                const result = await res.json();
-                if (result.success) {
-                    document.getElementById("profile-photo").src = API_URL + result.url;
-                    alert("Фото обновлено!");
-                } else {
-                    alert("Ошибка: " + result.error);
-                }
-            } catch (err) {
-                alert("Ошибка при загрузке фото.");
-            }
-        });
-
-        // Загрузка файлов разработчика
-        document.getElementById("uploadFileBtn").addEventListener("click", async () => {
-            const fileInput = document.getElementById("fileUpload");
-            if (!fileInput.files.length) return alert("Выберите файлы!");
-
-            const formData = new FormData();
-            for (let file of fileInput.files) {
-                formData.append("files", file);
-            }
-
-            try {
-                const res = await fetch(`${API_URL}/upload-dev-files`, {
-                    method: "POST",
-                    headers: { Authorization: "Bearer " + token },
-                    body: formData,
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert("Файлы загружены!");
-                } else {
-                    alert("Ошибка: " + result.error);
-                }
-            } catch (err) {
-                alert("Ошибка при загрузке файлов.");
-            }
-        });
-
-        // Блокировка пользователя
-        document.getElementById("blockUserBtn").addEventListener("click", async () => {
-            const email = document.getElementById("blockUserEmail").value;
-            if (!email) return alert("Введите email!");
-            try {
-                const res = await fetch(`${API_URL}/admin/block-user`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                    body: JSON.stringify({ email }),
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert("Пользователь заблокирован!");
-                } else {
-                    alert("Ошибка: " + result.error);
-                }
-            } catch (err) {
-                alert("Ошибка при блокировке пользователя.");
-            }
-        });
-
-        // Блокировка приложения
-        document.getElementById("blockAppBtn").addEventListener("click", async () => {
-            const appName = document.getElementById("blockAppName").value;
-            if (!appName) return alert("Введите ID или название приложения!");
-            try {
-                const res = await fetch(`${API_URL}/admin/block-app`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bearer " + token,
-                    },
-                    body: JSON.stringify({ appName }),
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert("Приложение заблокировано!");
-                } else {
-                    alert("Ошибка: " + result.error);
-                }
-            } catch (err) {
-                alert("Ошибка при блокировке приложения.");
-            }
-        });
-
-        // Выход
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-            localStorage.removeItem("token");
-            window.location.href = "index.html";
-        });
+      } catch (err) {
+        alert("Ошибка сервера: " + err.message);
+      }
     });
-    </script>
+
+    // Загрузка файлов с прогресс-баром
+    document.getElementById('uploadForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const file = document.getElementById('file').files[0];
+      const price = document.getElementById('price').value;
+      if (!file) return alert("Выберите файл!");
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('price', price);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${backendUrl}/upload-file`, true);
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          document.getElementById('progressBar').style.display = 'block';
+          document.getElementById('progressBarInner').style.width = percent + '%';
+          document.getElementById('uploadStatus').innerText = `Загрузка: ${percent}%`;
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          document.getElementById('uploadStatus').innerText = "Файл успешно загружен!";
+        } else {
+          document.getElementById('uploadStatus').innerText = "Ошибка при загрузке.";
+        }
+      };
+
+      xhr.send(formData);
+    });
+  </script>
 </body>
 </html>
