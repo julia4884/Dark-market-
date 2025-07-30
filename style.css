@@ -1,73 +1,158 @@
+/* 🌑 Dark Market Ultra — стили с дымкой и glow */
+
 body {
-  margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #0a0a0a; /* Чёрный фон */
-  color: #f1f1f1;
-  overflow-x: hidden;
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #0a0a0a; /* Черный фон */
+    color: #f1f1f1;
+    overflow-x: hidden;
+    position: relative;
 }
 
+/* 🔥 Дымка */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 1%, transparent 80%) repeat;
+    background-size: 200px 200px;
+    animation: fogMove 60s linear infinite;
+    z-index: 0;
+}
+
+@keyframes fogMove {
+    from { background-position: 0 0; }
+    to { background-position: 2000px 2000px; }
+}
+
+/* Заголовок */
 header {
-  text-align: center;
-  padding: 60px 20px 40px;
-  animation: fadein 2s ease-in-out;
+    text-align: center;
+    padding: 60px 20px 40px;
+    position: relative;
+    z-index: 1;
 }
-
 header h1 {
-  font-size: 3em;
-  margin: 0;
-  color: #e63946; /* Красный заголовок */
-  text-shadow: 0 0 15px #e63946;
+    font-size: 3em;
+    margin: 0;
+    color: #e63946; /* Красный */
+    text-shadow: 0 0 20px #e63946, 0 0 40px #e63946;
 }
 
+/* Навигация */
 nav {
-  margin-top: 20px;
+    margin-top: 20px;
+    z-index: 1;
+    position: relative;
 }
-
 nav a {
-  margin: 0 15px;
-  text-decoration: none;
-  color: #f1f1f1;
-  font-weight: bold;
-  transition: color 0.3s, text-shadow 0.3s;
+    margin: 15px;
+    text-decoration: none;
+    color: #f1f1f1;
+    font-weight: bold;
+    transition: color 0.3s, text-shadow 0.3s;
 }
-
 nav a:hover {
-  color: #e63946;
-  text-shadow: 0 0 10px #e63946;
+    color: #e63946;
+    text-shadow: 0 0 10px #e63946, 0 0 20px #e63946;
 }
 
-.section {
-  padding: 60px 20px;
-  text-align: center;
-  animation: fadein 2s ease-in-out;
-}
-
-.btn {
-  display: inline-block;
-  margin-top: 30px;
-  padding: 15px 30px;
-  background: #e63946;
-  color: #fff;
-  font-size: 1.2em;
-  font-weight: bold;
-  border-radius: 10px;
-  text-decoration: none;
-  transition: background 0.3s, transform 0.3s;
-}
-
-.btn:hover {
-  background: #c91829;
-  transform: scale(1.05);
+/* Основные секции */
+.section, section {
+    padding: 40px 20px;
+    text-align: center;
+    animation: fadein 2s ease-in-out;
+    position: relative;
+    z-index: 1;
 }
 
 @keyframes fadein {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
+/* 🔑 Формы (регистрация и вход) */
+form {
+    background: rgba(20, 20, 20, 0.85);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(230,57,70,0.5);
+}
+form input {
+    width: 90%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 8px;
+    background: #111;
+    color: #f1f1f1;
+    font-size: 1em;
+    outline: none;
+}
+form input:focus {
+    box-shadow: 0 0 10px #e63946;
+}
+form button {
+    background: #e63946;
+    color: #fff;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+form button:hover {
+    background: #c9182b;
+    transform: scale(1.05);
+}
+
+/* 📦 Личный кабинет */
+.profile-card {
+    background: rgba(25,25,25,0.9);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 30px auto;
+    max-width: 600px;
+    box-shadow: 0 0 25px rgba(255,255,255,0.1);
+    text-align: left;
+    z-index: 1;
+    position: relative;
+}
+.profile-card h2 {
+    margin-top: 0;
+    color: #e63946;
+    text-align: center;
+    text-shadow: 0 0 15px #e63946;
+}
+.profile-card img {
+    display: block;
+    margin: 15px auto;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid #e63946;
+    box-shadow: 0 0 15px #e63946;
+}
+.profile-info {
+    margin-top: 20px;
+}
+.profile-info p {
+    margin: 8px 0;
+    font-size: 1.1em;
+}
+
+/* Футер */
 footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 0.9em;
-  background: #111;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9em;
+    background: #111;
+    z-index: 1;
+    position: relative;
 }
