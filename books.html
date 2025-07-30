@@ -61,7 +61,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("token");
     const gallery = document.getElementById("bookGallery");
 
-    // Загружаем книги с реальными данными
     try {
         const res = await fetch(`${API_URL}/list-books`);
         const books = await res.json();
@@ -75,9 +74,16 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <img src="/books/${book.cover}" alt="Обложка книги">
                     <p><b>${book.title}</b></p>
                     <p class="price">${book.price} €</p>
-                    <button onclick="buyBook('${book.title}')">Купить</button>
+                    <div id="actions-${book.id}">
+                        <button onclick="buyBook(${book.id}, '${book.title}')">Купить</button>
+                    </div>
                 `;
                 gallery.appendChild(div);
+
+                // Проверяем, купил ли пользователь эту книгу
+                if (token) {
+                    checkPurchase(book.id);
+                }
             });
         } else {
             gallery.innerHTML = "<p>Книг пока нет.</p>";
@@ -131,8 +137,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 });
 
+// Проверка покупки книги
+async function checkPurchase(bookId) {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_URL}/check-purchase`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ bookId })
+    });
+    const result = await res.json();
+    if (result.success && result.purchased) {
+        const actions = document.getElementById(`actions-${bookId}`);
+        actions.innerHTML = `<a href="/books/${result.file}" download><button>Скачать</button></a>`;
+    }
+}
+
 // Покупка книги
-async function buyBook(bookName) {
+async function buyBook(bookId, bookName) {
     const token = localStorage.getItem("token");
     if (!token) return alert("Войдите для покупки!");
     const res = await fetch(`${API_URL}/buy-book`, {
@@ -141,11 +165,12 @@ async function buyBook(bookName) {
             "Content-Type": "application/json",
             Authorization: "Bearer " + token
         },
-        body: JSON.stringify({ bookName })
+        body: JSON.stringify({ bookId, bookName })
     });
     const result = await res.json();
     if (result.success) {
         alert(result.message);
+        location.reload();
     } else {
         alert("Ошибка: " + result.error);
     }
@@ -169,4 +194,4 @@ document.addEventListener("contextmenu", (e) => {
 });
 </script>
 </body>
-    </html>
+</html>
