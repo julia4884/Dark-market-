@@ -7,44 +7,62 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Шапка загружается автоматически -->
+  <!-- Подключение общего хедера -->
   <div id="header-placeholder"></div>
 
-  <main>
-    <section class="hero">
-      <h1 class="logo">Dark Market Ultra</h1>
-      <p>Добро пожаловать в тёмный маркет — игры, фильмы, музыка, книги и приложения в одном месте.</p>
-    </section>
+  <main class="home-main">
+    <h1 class="neon-title">Добро пожаловать в <span>Dark Market Ultra</span></h1>
+    <p class="intro-text">
+      Здесь ты найдёшь игры, фильмы, музыку, книги и многое другое.  
+      Вступи в семью и получи доступ к эксклюзивному контенту!
+    </p>
 
-    <section class="auth">
-      <h2>Вход или регистрация</h2>
-      <form id="loginForm">
-        <input type="email" id="email" placeholder="Введите email" required>
-        <input type="password" id="password" placeholder="Введите пароль" required>
-        <button type="submit">Войти</button>
-      </form>
-
-      <form id="registerForm">
-        <input type="text" id="regUsername" placeholder="Ваш ник" required>
-        <input type="email" id="regEmail" placeholder="Email" required>
-        <input type="password" id="regPassword" placeholder="Пароль" required>
-        <button type="submit">Зарегистрироваться</button>
-      </form>
-
-      <div class="donate">
-        <a href="donate.html" class="donate-btn">Стать частью семьи</a>
+    <!-- Галерея разделов -->
+    <section class="sections">
+      <div class="section-card">
+        <h2>🎮 Игры</h2>
+        <p>Новые и редкие игры.</p>
+        <a href="games.html" class="neon-button">Перейти</a>
       </div>
-    </section>
 
-    <section class="search">
-      <h2>Поиск</h2>
-      <input type="text" id="searchInput" placeholder="Искать по сайту...">
-      <button onclick="performSearch()">Поиск</button>
-      <div id="searchResults"></div>
+      <div class="section-card">
+        <h2>🎬 Фильмы</h2>
+        <p>Смотри без ограничений.</p>
+        <a href="movies.html" class="neon-button">Перейти</a>
+      </div>
+
+      <div class="section-card">
+        <h2>🎵 Музыка</h2>
+        <p>Любимые треки всегда с тобой.</p>
+        <a href="music.html" class="neon-button">Перейти</a>
+      </div>
+
+      <div class="section-card">
+        <h2>📚 Книги</h2>
+        <p>Читай где угодно.</p>
+        <a href="books.html" class="neon-button">Перейти</a>
+      </div>
+
+      <div class="section-card">
+        <h2>🖼 Картинки</h2>
+        <p>Уникальные изображения.</p>
+        <a href="images.html" class="neon-button">Перейти</a>
+      </div>
+
+      <div class="section-card">
+        <h2>⚙️ Программы</h2>
+        <p>Инструменты и приложения.</p>
+        <a href="apps.html" class="neon-button">Перейти</a>
+      </div>
+
+      <div class="section-card">
+        <h2>💎 Поддержка</h2>
+        <p>Стань частью семьи.</p>
+        <a href="donate.html" class="neon-button">Поддержать</a>
+      </div>
     </section>
   </main>
 
   <script src="header.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
