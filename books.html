@@ -1,94 +1,59 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Книги — Dark Market Ultra</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Книги — Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-   <header>   
-  <h1 class="logo">Dark Market Ultra</h1>  
-    <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-        <a href="games.html">Игры</a>
-        <a href="movies.html">Фильмы</a>
-        <a href="music.html">Музыка</a>
-        <a href="images.html">Картинки</a>
-        <a href="books.html" class="active">Книги</a>
-        <a href="apps.html">Программы</a>
-        <a href="tools.html">Приложения</a>
-    </nav>
-   </header>
+  <!-- Место для подгрузки header -->
+  <div id="header-placeholder"></div>
 
-    <main>
-        <h1>Книги</h1>
-        <div id="gallery" class="gallery"></div>
-    </main>
-</body>
+  <main>
+    <h1>Книги</h1>
+    <div id="gallery" class="gallery"></div>
+  </main>
 
-    <script>
-        const API_URL = "https://dark-market-backend.onrender.com";
+  <script src="header.js"></script>
+  <script>
+    const API_URL = "https://dark-market-backend.onrender.com";
 
-        async function loadBooks() {
-            const res = await fetch(API_URL + "/books/list");
-            const data = await res.json();
+    async function loadBooks() {
+      const res = await fetch(API_URL + "/books/list");
+      const data = await res.json();
 
-            if (data.success) {
-                const gallery = document.getElementById("gallery");
-                gallery.innerHTML = "";
+      if (data.success) {
+        const gallery = document.getElementById("gallery");
+        gallery.innerHTML = "";
 
-                data.items.forEach(item => {
-                    const card = document.createElement("div");
-                    card.className = "card";
+        data.items.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "card";
 
-                    const title = document.createElement("h3");
-                    title.textContent = item.title;
+          const title = document.createElement("h3");
+          title.textContent = item.title;
 
-                    const price = document.createElement("p");
-                    price.textContent = item.price > 0 ? `Цена: €${item.price}` : "Бесплатно";
+          const img = document.createElement("img");
+          img.src = API_URL + "/uploads/" + item.image;
+          img.alt = item.title;
 
-                    const button = document.createElement("button");
-                    if (item.price > 0) {
-                        button.textContent = "Купить";
-                        button.onclick = () => buyItem("books", item.id);
-                    } else {
-                        button.textContent = "Скачать";
-                        button.onclick = () => downloadItem("books", item.filename);
-                    }
+          const button = document.createElement("button");
+          if (item.price === 0) {
+            button.textContent = "Скачать бесплатно";
+          } else {
+            button.textContent = "Купить за " + item.price + "₽";
+          }
 
-                    card.appendChild(title);
-                    card.appendChild(price);
-                    card.appendChild(button);
-                    gallery.appendChild(card);
-                });
-            }
-        }
+          card.appendChild(title);
+          card.appendChild(img);
+          card.appendChild(button);
+          gallery.appendChild(card);
+        });
+      }
+    }
 
-        async function buyItem(section, itemId) {
-            const token = localStorage.getItem("token");
-            if (!token) return alert("Сначала войдите!");
-
-            const res = await fetch(API_URL + `/buy-${section}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-                body: JSON.stringify({ itemId })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert("Файл куплен!");
-                loadBooks();
-            } else {
-                alert("Ошибка: " + data.error);
-            }
-        }
-
-        function downloadItem(section, filename) {
-            window.open(API_URL + `/${section}/` + filename, "_blank");
-        }
-
-        loadBooks();
-    </script>
+    loadBooks();
+  </script>
 </body>
 </html>
