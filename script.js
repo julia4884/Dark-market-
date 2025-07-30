@@ -1,16 +1,13 @@
-// script.js
-
+// Используем API_URL из config.js
 document.addEventListener("DOMContentLoaded", () => {
-    // ---------- Форма регистрации ----------
+    // Регистрация
     const registerForm = document.getElementById("registerForm");
     if (registerForm) {
         registerForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-            
-            const email = document.getElementById("email").value.trim();
-            const password = document.getElementById("password").value.trim();
-            const username = document.getElementById("username").value.trim();
-            const messageDiv = document.getElementById("registerMessage");
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const username = document.getElementById("username").value;
 
             try {
                 const response = await fetch(`${API_URL}/register`, {
@@ -21,29 +18,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const data = await response.json();
                 if (response.ok) {
-                    messageDiv.textContent = "✅ Регистрация успешна!";
-                    messageDiv.style.color = "green";
+                    document.getElementById("registerMessage").innerText =
+                        "✅ Регистрация прошла успешно!";
                 } else {
-                    messageDiv.textContent = `❌ Ошибка: ${data.error || "Неизвестная ошибка"}`;
-                    messageDiv.style.color = "red";
+                    document.getElementById("registerMessage").innerText =
+                        `❌ Ошибка: ${data.error || "Неизвестная ошибка"}`;
                 }
             } catch (error) {
-                console.error("Ошибка при регистрации:", error);
-                messageDiv.textContent = "⚠️ Ошибка соединения с сервером";
-                messageDiv.style.color = "orange";
+                document.getElementById("registerMessage").innerText =
+                    "⚠️ Ошибка соединения с сервером.";
             }
         });
     }
 
-    // ---------- Форма логина ----------
+    // Вход
     const loginForm = document.getElementById("loginForm");
     if (loginForm) {
         loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
-            
-            const email = document.getElementById("loginEmail").value.trim();
-            const password = document.getElementById("loginPassword").value.trim();
-            const messageDiv = document.getElementById("loginMessage");
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
 
             try {
                 const response = await fetch(`${API_URL}/login`, {
@@ -54,16 +48,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const data = await response.json();
                 if (response.ok) {
-                    messageDiv.textContent = `✅ Добро пожаловать, ${data.username || "пользователь"}!`;
-                    messageDiv.style.color = "green";
+                    document.getElementById("loginMessage").innerText =
+                        "✅ Вход выполнен!";
+                    // редирект через 1.5 сек
+                    setTimeout(() => {
+                        window.location.href = "home.html";
+                    }, 1500);
                 } else {
-                    messageDiv.textContent = `❌ Ошибка: ${data.error || "Неверные данные"}`;
-                    messageDiv.style.color = "red";
+                    document.getElementById("loginMessage").innerText =
+                        `❌ Ошибка: ${data.error || "Неверный логин или пароль"}`;
                 }
             } catch (error) {
-                console.error("Ошибка при логине:", error);
-                messageDiv.textContent = "⚠️ Ошибка соединения с сервером";
-                messageDiv.style.color = "orange";
+                document.getElementById("loginMessage").innerText =
+                    "⚠️ Ошибка соединения с сервером.";
             }
         });
     }
