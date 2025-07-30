@@ -1,10 +1,11 @@
-<h2>Профиль</h2>
+<h2>Личный кабинет</h2>
 
 <div id="profileInfo">
-    <img id="profileImage" src="" alt="Фото профиля" 
+    <img id="profileImage" src="" alt="Фото профиля"
          style="width:120px;height:120px;border-radius:50%;object-fit:cover;display:none;border:2px solid gold;">
     <p><strong>Ваш ник:</strong> <span id="nicknameDisplay"></span></p>
     <p><strong>Ваш статус:</strong> <span id="roleDisplay"></span></p>
+    <p><strong>Подписка:</strong> <span id="subscriptionDisplay"></span></p>
 </div>
 
 <form id="profileForm" enctype="multipart/form-data">
@@ -24,44 +25,52 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    const apiBase = "https://dark-market-backend.onrender.com";
+    const token = localStorage.getItem("token");
+
     const form = document.getElementById("profileForm");
     const progressBar = document.getElementById("uploadProgress");
     const nicknameDisplay = document.getElementById("nicknameDisplay");
     const roleDisplay = document.getElementById("roleDisplay");
+    const subscriptionDisplay = document.getElementById("subscriptionDisplay");
     const profileImage = document.getElementById("profileImage");
 
     // Загружаем данные профиля
-    fetch("/api/user-profile", {
-        headers: { "Authorization": "Bearer " + localStorage.getItem("token") }
+    fetch(`${apiBase}/profile`, {
+        headers: { "Authorization": "Bearer " + token }
     })
     .then(res => res.json())
     .then(user => {
-        // Ник + коронка для админа
+        if (!user.success) {
+            alert("Ошибка загрузки профиля: " + (user.error || "Неизвестно"));
+            return;
+        }
+
         nicknameDisplay.innerHTML = user.role === "admin" 
-            ? `${user.nickname} 👑` 
-            : user.nickname;
+            ? `${user.username} 👑` 
+            : user.username;
 
         roleDisplay.textContent = user.role === "admin" ? "Администратор" : "Пользователь";
-        document.getElementById("nickname").value = user.nickname;
+        subscriptionDisplay.textContent = user.subscription || "Нет";
+
+        document.getElementById("nickname").value = user.username;
         document.getElementById("about").value = user.about || "";
 
-        // Если есть фото — показываем
-        if (user.photoUrl) {
-            profileImage.src = user.photoUrl;
+        if (user.photo) {
+            profileImage.src = apiBase + user.photo;
             profileImage.style.display = "block";
         }
     });
 
-    // Отправка формы с прогрессом
+    // Отправка формы с фото и данными
     form.addEventListener("submit", e => {
         e.preventDefault();
 
         const formData = new FormData(form);
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/api/update-profile");
-        xhr.setRequestHeader("Authorization", "Bearer " + localStorage.getItem("token"));
+        xhr.open("POST", `${apiBase}/upload-photo`);
+        xhr.setRequestHeader("Authorization", "Bearer " + token);
 
-        // Отслеживаем прогресс
         xhr.upload.onprogress = (event) => {
             if (event.lengthComputable) {
                 progressBar.style.display = "block";
@@ -72,10 +81,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         xhr.onload = () => {
             if (xhr.status === 200) {
-                alert("Профиль обновлён!");
-                location.reload();
+                // После фото — обновляем ник/о себе
+                fetch(`${apiBase}/update-profile`, {
+                    method: "POST",
+                    headers: { 
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        nickname: document.getElementById("nickname").value,
+                        about: document.getElementById("about").value
+                    })
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.success) {
+                        alert("Профиль обновлён!");
+                        location.reload();
+                    } else {
+                        alert("Ошибка: " + d.error);
+                    }
+                });
             } else {
-                alert("Ошибка обновления профиля");
+                alert("Ошибка загрузки фото");
             }
         };
 
