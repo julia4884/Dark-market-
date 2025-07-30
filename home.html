@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Личный кабинет — Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
 </head>
 <body>
   <header>
-    <div class="logo">🌌 Dark Market Ultra</div>
+    <h1 class="logo">Dark Market Ultra</h1>
     <nav>
       <a href="index.html">Главная</a>
       <a href="games.html">Игры</a>
@@ -23,215 +24,65 @@
   </header>
 
   <main>
-    <h1>Личный кабинет</h1>
+    <h2>Ваш профиль</h2>
+    <div id="profile">
+      <img id="profile-avatar" src="default-avatar.png" alt="Аватар" width="120">
+      <p><strong>Ник:</strong> <span id="profile-username"></span> <span id="crown"></span></p>
+      <p><strong>Роль:</strong> <span id="profile-role"></span></p>
+      <p><strong>О себе:</strong> <span id="profile-about"></span></p>
+      
+      <h3>Обновить аватар</h3>
+      <input type="file" id="avatar-input">
+      <button onclick="uploadAvatar(document.getElementById('avatar-input').files[0])">Загрузить</button>
 
-    <!-- Профиль -->
-    <section id="profile">
-      <h2>Ваш профиль</h2>
-      <div id="userInfo">
-        <img id="avatarPreview" src="default-avatar.png" alt="Аватар" width="120">
-        <p><strong>Ник:</strong> <span id="username">Загрузка...</span></p>
-        <p><strong>Email:</strong> <span id="email">Загрузка...</span></p>
-        <p><strong>Статус:</strong> <span id="status">Загрузка...</span></p>
-      </div>
-      <form id="avatarForm">
-        <label>Загрузить аватар:</label>
-        <input type="file" id="avatarFile" accept="image/*" required>
-        <button type="submit">Загрузить</button>
-      </form>
-      <progress id="avatarProgress" value="0" max="100" style="display:none;"></progress>
-    </section>
+      <h3>Изменить информацию о себе</h3>
+      <textarea id="about-text" placeholder="Напишите о себе..."></textarea>
+      <button onclick="updateAbout(document.getElementById('about-text').value)">Сохранить</button>
+    </div>
 
-    <!-- О себе -->
-    <section id="aboutMeSection">
-      <h2>О себе</h2>
-      <textarea id="aboutMe" rows="5" placeholder="Напишите немного о себе..."></textarea>
-      <button id="saveAbout">Сохранить</button>
-      <p id="aboutMsg"></p>
-    </section>
+    <hr>
 
-    <!-- Файлы пользователя -->
-    <section id="myFiles">
-      <h2>Ваши файлы</h2>
-      <ul id="filesList"></ul>
-    </section>
+    <h2>Загрузка файлов</h2>
+    <input type="file" id="file-input">
+    <select id="section-select">
+      <option value="games">Игры</option>
+      <option value="movies">Фильмы</option>
+      <option value="music">Музыка</option>
+      <option value="images">Картинки</option>
+      <option value="books">Книги</option>
+      <option value="apps">Программы</option>
+      <option value="tools">Приложения</option>
+    </select>
+    <button onclick="uploadFile(document.getElementById('file-input').files[0], document.getElementById('section-select').value)">Загрузить</button>
+    
+    <progress id="upload-progress" value="0" max="100" style="display:none; width: 100%;"></progress>
 
-    <!-- Админский раздел -->
-    <section id="adminPanel" style="display:none;">
-      <h2>Админ-панель 👑</h2>
-      <h3>Управление пользователями</h3>
-      <form id="blockUserForm">
-        <input type="email" id="blockUserEmail" placeholder="Email пользователя" required>
-        <button type="submit">Заблокировать пользователя</button>
-      </form>
-      <p id="blockUserMsg"></p>
+    <hr>
 
-      <h3>Управление приложениями</h3>
-      <form id="blockAppForm">
-        <input type="text" id="blockAppName" placeholder="Название приложения" required>
-        <button type="submit">Заблокировать приложение</button>
-      </form>
-      <p id="blockAppMsg"></p>
-    </section>
+    <h2>Мои файлы</h2>
+    <div id="gallery" class="gallery"></div>
+
+    <hr>
+
+    <div id="admin-panel" style="display:none;">
+      <h2>Админ-панель</h2>
+      <h3>Блокировка пользователей</h3>
+      <input type="text" id="block-user-id" placeholder="ID пользователя">
+      <input type="text" id="block-reason" placeholder="Причина блокировки">
+      <button onclick="blockUser(document.getElementById('block-user-id').value, document.getElementById('block-reason').value)">Заблокировать пользователя</button>
+
+      <h3>Блокировка приложений</h3>
+      <input type="text" id="block-file-id" placeholder="ID файла">
+      <button onclick="blockApp(document.getElementById('block-file-id').value)">Заблокировать приложение</button>
+    </div>
   </main>
 
   <script>
-    const backendUrl = "https://dark-market-backend.onrender.com";
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      window.location.href = "index.html"; // если нет токена — выкидываем на вход
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        // Получаем данные профиля
-        const res = await fetch(`${backendUrl}/me`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (res.ok) {
-          document.getElementById("username").textContent = data.username;
-          document.getElementById("email").textContent = data.email;
-          document.getElementById("status").textContent = data.status;
-
-          if (data.avatarUrl) {
-            document.getElementById("avatarPreview").src = data.avatarUrl;
-          }
-
-          if (data.aboutMe) {
-            document.getElementById("aboutMe").value = data.aboutMe;
-          }
-
-          if (data.username === "administrator") {
-            document.getElementById("username").innerHTML = data.username + " 👑";
-            document.getElementById("adminPanel").style.display = "block";
-          }
-
-          // Загружаем список файлов
-          loadUserFiles();
-        } else {
-          window.location.href = "index.html";
-        }
-      } catch {
-        window.location.href = "index.html";
-      }
-    });
-
-    // Загрузка аватара
-    document.getElementById("avatarForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const file = document.getElementById("avatarFile").files[0];
-      if (!file) return;
-
-      const formData = new FormData();
-      formData.append("avatar", file);
-
-      const progressBar = document.getElementById("avatarProgress");
-      progressBar.style.display = "block";
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${backendUrl}/upload-avatar`);
-      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percent = (event.loaded / event.total) * 100;
-          progressBar.value = percent;
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const res = JSON.parse(xhr.responseText);
-          document.getElementById("avatarPreview").src = res.url;
-          progressBar.style.display = "none";
-        } else {
-          alert("Ошибка загрузки аватара");
-        }
-      };
-
-      xhr.send(formData);
-    });
-
-    // Сохранение "О себе"
-    document.getElementById("saveAbout").addEventListener("click", async () => {
-      const aboutMe = document.getElementById("aboutMe").value;
-      try {
-        const res = await fetch(`${backendUrl}/about-me`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ aboutMe })
-        });
-        if (res.ok) {
-          document.getElementById("aboutMsg").textContent = "Сохранено!";
-        } else {
-          document.getElementById("aboutMsg").textContent = "Ошибка сохранения.";
-        }
-      } catch {
-        document.getElementById("aboutMsg").textContent = "Сервер недоступен.";
-      }
-    });
-
-    // Загрузка списка файлов пользователя
-    async function loadUserFiles() {
-      try {
-        const res = await fetch(`${backendUrl}/my-files`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const files = await res.json();
-        const list = document.getElementById("filesList");
-        list.innerHTML = "";
-        files.forEach(f => {
-          const li = document.createElement("li");
-          li.textContent = f.name;
-          list.appendChild(li);
-        });
-      } catch (err) {
-        console.error("Ошибка загрузки файлов:", err);
-      }
-    }
-
-    // Блокировка пользователя
-    document.getElementById("blockUserForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("blockUserEmail").value;
-      try {
-        const res = await fetch(`${backendUrl}/block-user`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ email })
-        });
-        document.getElementById("blockUserMsg").textContent =
-          res.ok ? "Пользователь заблокирован" : "Ошибка при блокировке";
-      } catch {
-        document.getElementById("blockUserMsg").textContent = "Сервер недоступен";
-      }
-    });
-
-    // Блокировка приложения
-    document.getElementById("blockAppForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const appName = document.getElementById("blockAppName").value;
-      try {
-        const res = await fetch(`${backendUrl}/block-app`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ appName })
-        });
-        document.getElementById("blockAppMsg").textContent =
-          res.ok ? "Приложение заблокировано" : "Ошибка при блокировке";
-      } catch {
-        document.getElementById("blockAppMsg").textContent = "Сервер недоступен";
+    document.addEventListener("DOMContentLoaded", () => {
+      loadProfile();
+      if (localStorage.getItem("role") === "admin") {
+        document.getElementById("admin-panel").style.display = "block";
+        document.getElementById("crown").innerHTML = "👑";
       }
     });
   </script>
