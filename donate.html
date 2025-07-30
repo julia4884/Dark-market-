@@ -3,38 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Стать частью семьи | Dark Market Ultra</title>
+  <title>Поддержать проект — Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Dark Market Ultra</h1>
-    <nav>
-      <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-  <a href="images.html">Картинки</a>
-  <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
-    </nav>
-    <a href="donate.html" class="btn">Стать частью семьи</a>
-  </header>
+  <!-- Подключение общего хедера -->
+  <div id="header-placeholder"></div>
 
-  <main class="section">
-    <h2>Стать частью семьи</h2>
-    <p>Поддержи проект всего за 10€ и получи право загружать свой контент неограниченно! </p>
+  <main>
+    <h1>Поддержи Dark Market Ultra</h1>
+    <p class="donate-text">
+      Dark Market Ultra — это не просто сайт. Это наша семья.  
+      Поддержи проект, чтобы получить вечный доступ к эксклюзивным разделам:  
+      игры, фильмы, музыка, книги и многое другое.
+    </p>
 
-    <div style="margin-top:40px;">
-      <p>💀 После оплаты ты навсегда становишься частью Dark Market Ultra.</p>
-      <a href="#" class="btn">Оплатить через PayPal</a>
+    <div class="donate-card">
+      <h2>Стань частью семьи</h2>
+      <p>Разовый донат: <strong>10€</strong></p>
+
+      <button id="donateButton" class="neon-button">Поддержать через PayPal</button>
     </div>
   </main>
 
-  <footer>
-    <p>Dark Market Ultra © 2025. Все права защищены.</p>
-  </footer>
+  <script src="header.js"></script>
+  <script>
+    document.getElementById("donateButton").addEventListener("click", () => {
+      alert("В реальной версии здесь откроется окно PayPal. Пока это тестовая заглушка.");
+      // позже здесь будет переход к PayPal API
+    });
+  </script>
 </body>
 </html>
