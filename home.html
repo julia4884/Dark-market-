@@ -79,110 +79,94 @@
 
     <script src="config.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            // Загружаем данные пользователя с backend
-            try {
-                const response = await fetch(`${API_URL}/profile`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" }
-                });
-                const user = await response.json();
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Сначала войдите!");
+            window.location.href = "index.html";
+            return;
+        }
 
-                if (user.success) {
-                    document.getElementById("welcomeMessage").innerText = 
-                        `Привет, ${user.username} 👋`;
-                    document.getElementById("nickname").innerText = user.username;
-                    document.getElementById("status").innerText = user.role;
-                    document.getElementById("subscription").innerText = user.subscription ? "Активна ✅" : "Нет ❌";
-                    if (user.photo) {
-                        document.getElementById("profile-photo").src = user.photo;
-                    }
-                    if (user.about) {
-                        document.getElementById("aboutMe").value = user.about;
-                    }
-                } else {
-                    alert("Ошибка загрузки профиля. Перенаправление на вход.");
-                    window.location.href = "index.html";
-                }
-            } catch (error) {
-                console.error("Ошибка при загрузке профиля:", error);
+        try {
+            // Загружаем профиль
+            const res = await fetch(`${API_URL}/profile`, {
+                headers: { Authorization: "Bearer " + token }
+            });
+            const data = await res.json();
+
+            if (!data.success) {
+                alert("Ошибка: " + data.error);
                 window.location.href = "index.html";
+                return;
             }
 
-            // Кнопка выхода
-            document.getElementById("logoutBtn").addEventListener("click", () => {
-                alert("Вы вышли из системы.");
-                window.location.href = "index.html";
-            });
+            document.getElementById("welcomeMessage").innerText = `Привет, ${data.username} 👋`;
+            document.getElementById("nickname").innerText = data.username;
+            document.getElementById("status").innerText = data.role;
+            document.getElementById("subscription").innerText = data.subscription;
+            if (data.photo) document.getElementById("profile-photo").src = API_URL + data.photo;
+            document.getElementById("aboutMe").value = data.about || "";
 
-            // Загрузка фото
-            document.getElementById("savePhotoBtn").addEventListener("click", () => {
-                const fileInput = document.getElementById("photoUpload");
-                if (!fileInput.files[0]) return alert("Выберите файл!");
-                alert("Функция загрузки фото будет подключена к backend 📸");
-            });
-
-            // Сохранение 'О себе'
-            document.getElementById("saveAboutBtn").addEventListener("click", () => {
-                const about = document.getElementById("aboutMe").value;
-                alert(`Описание сохранено: ${about}`);
-                // Здесь тоже нужен POST-запрос на backend
-            });
-        });
-    <script>
-const API_URL = "http://localhost:3000"; // поменяй, если backend хостится в другом месте
-
-document.addEventListener("DOMContentLoaded", async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        window.location.href = "index.html";
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_URL}/profile`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + token
-            }
-        });
-
-        const user = await response.json();
-
-        if (user.success) {
-            document.getElementById("nickname").innerText = user.username;
-            document.getElementById("status").innerText = user.role;
-            document.getElementById("subscription").innerText = user.subscription;
-            if (user.photo) document.getElementById("profile-photo").src = user.photo;
-            document.getElementById("aboutMe").value = user.about || "";
-        } else {
+        } catch (err) {
+            console.error(err);
             window.location.href = "index.html";
         }
-    } catch (error) {
-        console.error("Ошибка:", error);
-        window.location.href = "index.html";
-    }
-});
 
-// Выход
-document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.removeItem("token");
-    window.location.href = "index.html";
-});
+        // Сохранение "О себе"
+        document.getElementById("saveAboutBtn").addEventListener("click", async () => {
+            const about = document.getElementById("aboutMe").value;
+            try {
+                const res = await fetch(`${API_URL}/profile/update`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token,
+                    },
+                    body: JSON.stringify({ about }),
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert("Описание обновлено!");
+                } else {
+                    alert("Ошибка: " + result.error);
+                }
+            } catch (err) {
+                alert("Ошибка при сохранении описания.");
+            }
+        });
 
-// Заглушка на загрузку фото (подключим позже)
-document.getElementById("savePhotoBtn").addEventListener("click", () => {
-    const fileInput = document.getElementById("photoUpload");
-    if (!fileInput.files[0]) return alert("Выбери файл!");
-    alert("Функция загрузки фото будет подключена на backend 💀");
-});
+        // Загрузка фото
+        document.getElementById("savePhotoBtn").addEventListener("click", async () => {
+            const fileInput = document.getElementById("photoUpload");
+            if (!fileInput.files[0]) return alert("Выберите файл!");
 
-// Сохранение "О себе" (подключим позже POST-запросом)
-document.getElementById("saveAboutBtn").addEventListener("click", () => {
-    const about = document.getElementById("aboutMe").value;
-    alert("Описание сохранено: " + about + "\n(реально подключим к backend позже)");
-});
-</script>
+            const formData = new FormData();
+            formData.append("photo", fileInput.files[0]);
+
+            try {
+                const res = await fetch(`${API_URL}/upload-photo`, {
+                    method: "POST",
+                    headers: { Authorization: "Bearer " + token },
+                    body: formData,
+                });
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById("profile-photo").src = API_URL + result.url;
+                    alert("Фото обновлено!");
+                } else {
+                    alert("Ошибка: " + result.error);
+                }
+            } catch (err) {
+                alert("Ошибка при загрузке фото.");
+            }
+        });
+
+        // Выход
+        document.getElementById("logoutBtn").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        });
+    });
+    </script>
 </body>
 </html>
