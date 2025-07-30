@@ -20,71 +20,97 @@
       <a href="apps.html">Программы</a>
       <a href="tools.html">Приложения</a>
       <a href="donate.html">Поддержка</a>
+      <a href="login.html" id="login-link">Войти</a>
+      <a href="#" id="logout-link" style="display:none;" onclick="logout()">Выйти</a>
     </nav>
   </header>
 
   <main>
-    <h2>Ваш профиль</h2>
-    <div id="profile">
-      <img id="profile-avatar" src="default-avatar.png" alt="Аватар" width="120">
-      <p><strong>Ник:</strong> <span id="profile-username"></span> <span id="crown"></span></p>
-      <p><strong>Роль:</strong> <span id="profile-role"></span></p>
-      <p><strong>О себе:</strong> <span id="profile-about"></span></p>
+    <section id="auth-guard" style="display:none;">
+      <h2>Ваш профиль</h2>
+      <div id="profile">
+        <img id="profile-avatar" src="default-avatar.png" alt="Аватар" width="120">
+        <p><strong>Ник:</strong> <span id="profile-username"></span> <span id="crown"></span></p>
+        <p><strong>Роль:</strong> <span id="profile-role"></span></p>
+        <p><strong>О себе:</strong> <span id="profile-about"></span></p>
+        
+        <h3>Обновить аватар</h3>
+        <input type="file" id="avatar-input">
+        <button onclick="uploadAvatar(document.getElementById('avatar-input').files[0])">Загрузить</button>
+
+        <h3>Изменить информацию о себе</h3>
+        <textarea id="about-text" placeholder="Напишите о себе..."></textarea>
+        <button onclick="updateAbout(document.getElementById('about-text').value)">Сохранить</button>
+      </div>
+
+      <hr>
+
+      <h2>Загрузка файлов</h2>
+      <input type="file" id="file-input">
+      <select id="section-select">
+        <option value="games">Игры</option>
+        <option value="movies">Фильмы</option>
+        <option value="music">Музыка</option>
+        <option value="images">Картинки</option>
+        <option value="books">Книги</option>
+        <option value="apps">Программы</option>
+        <option value="tools">Приложения</option>
+      </select>
+      <button onclick="uploadFile(document.getElementById('file-input').files[0], document.getElementById('section-select').value)">Загрузить</button>
       
-      <h3>Обновить аватар</h3>
-      <input type="file" id="avatar-input">
-      <button onclick="uploadAvatar(document.getElementById('avatar-input').files[0])">Загрузить</button>
+      <progress id="upload-progress" value="0" max="100" style="display:none; width: 100%;"></progress>
 
-      <h3>Изменить информацию о себе</h3>
-      <textarea id="about-text" placeholder="Напишите о себе..."></textarea>
-      <button onclick="updateAbout(document.getElementById('about-text').value)">Сохранить</button>
-    </div>
+      <hr>
 
-    <hr>
+      <h2>Мои файлы</h2>
+      <div id="gallery" class="gallery"></div>
 
-    <h2>Загрузка файлов</h2>
-    <input type="file" id="file-input">
-    <select id="section-select">
-      <option value="games">Игры</option>
-      <option value="movies">Фильмы</option>
-      <option value="music">Музыка</option>
-      <option value="images">Картинки</option>
-      <option value="books">Книги</option>
-      <option value="apps">Программы</option>
-      <option value="tools">Приложения</option>
-    </select>
-    <button onclick="uploadFile(document.getElementById('file-input').files[0], document.getElementById('section-select').value)">Загрузить</button>
-    
-    <progress id="upload-progress" value="0" max="100" style="display:none; width: 100%;"></progress>
+      <hr>
 
-    <hr>
+      <div id="admin-panel" style="display:none;">
+        <h2>Админ-панель</h2>
+        <h3>Блокировка пользователей</h3>
+        <input type="text" id="block-user-id" placeholder="ID пользователя">
+        <input type="text" id="block-reason" placeholder="Причина блокировки">
+        <button onclick="blockUser(document.getElementById('block-user-id').value, document.getElementById('block-reason').value)">Заблокировать пользователя</button>
 
-    <h2>Мои файлы</h2>
-    <div id="gallery" class="gallery"></div>
+        <h3>Блокировка приложений</h3>
+        <input type="text" id="block-file-id" placeholder="ID файла">
+        <button onclick="blockApp(document.getElementById('block-file-id').value)">Заблокировать приложение</button>
+      </div>
+    </section>
 
-    <hr>
-
-    <div id="admin-panel" style="display:none;">
-      <h2>Админ-панель</h2>
-      <h3>Блокировка пользователей</h3>
-      <input type="text" id="block-user-id" placeholder="ID пользователя">
-      <input type="text" id="block-reason" placeholder="Причина блокировки">
-      <button onclick="blockUser(document.getElementById('block-user-id').value, document.getElementById('block-reason').value)">Заблокировать пользователя</button>
-
-      <h3>Блокировка приложений</h3>
-      <input type="text" id="block-file-id" placeholder="ID файла">
-      <button onclick="blockApp(document.getElementById('block-file-id').value)">Заблокировать приложение</button>
-    </div>
+    <section id="unauth-guard">
+      <h2>Вы не авторизованы</h2>
+      <p>Пожалуйста, <a href="login.html">войдите</a> в систему, чтобы получить доступ к личному кабинету.</p>
+    </section>
   </main>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      loadProfile();
-      if (localStorage.getItem("role") === "admin") {
-        document.getElementById("admin-panel").style.display = "block";
-        document.getElementById("crown").innerHTML = "👑";
+      const token = localStorage.getItem("token");
+      if (token) {
+        document.getElementById("auth-guard").style.display = "block";
+        document.getElementById("unauth-guard").style.display = "none";
+        document.getElementById("login-link").style.display = "none";
+        document.getElementById("logout-link").style.display = "inline";
+        loadProfile();
+        if (localStorage.getItem("role") === "admin") {
+          document.getElementById("admin-panel").style.display = "block";
+          document.getElementById("crown").innerHTML = "👑";
+        }
+      } else {
+        document.getElementById("auth-guard").style.display = "none";
+        document.getElementById("unauth-guard").style.display = "block";
       }
     });
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
+      window.location.href = "index.html";
+    }
   </script>
 </body>
 </html>
