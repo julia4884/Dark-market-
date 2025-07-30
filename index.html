@@ -7,57 +7,44 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <form action="search.html" method="get" class="search-box">
-  <input type="text" name="q" placeholder="Поиск по сайту..." required>
-  <button type="submit">🔍 Искать</button>
-    </form>
-    <h1 class="logo">Dark Market Ultra</h1>
-    <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-  <a href="images.html">Картинки</a>
-  <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
-    </nav>
-    <a href="donate.html" class="btn">Стать частью семьи</a>
-  </header>
+  <!-- Шапка загружается автоматически -->
+  <div id="header-placeholder"></div>
 
-  <main class="section">
-    <h2>Добро пожаловать в Dark Market Ultra</h2>
-    <p>Тёмный уголок, где ты найдёшь игры, фильмы, музыку и многое другое.</p>
-    <p>Выбери раздел в меню и начни своё путешествие.</p>
-    <!-- 🔹 Форма регистрации -->
-<section id="register-section">
-  <h3>Регистрация</h3>
-  <form id="registerForm">
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Пароль" required>
-    <input type="text" id="username" placeholder="Имя пользователя" required>
-    <button type="submit">Зарегистрироваться</button>
-  </form>
-  <div id="registerMessage"></div>
-</section>
-     <!-- 🔹 Вход -->
-    <section id="login-section">
-      <h3>Вход</h3>
+  <main>
+    <section class="hero">
+      <h1 class="logo">Dark Market Ultra</h1>
+      <p>Добро пожаловать в тёмный маркет — игры, фильмы, музыка, книги и приложения в одном месте.</p>
+    </section>
+
+    <section class="auth">
+      <h2>Вход или регистрация</h2>
       <form id="loginForm">
-        <input type="email" id="loginEmail" placeholder="Email" required>
-        <input type="password" id="loginPassword" placeholder="Пароль" required>
+        <input type="email" id="email" placeholder="Введите email" required>
+        <input type="password" id="password" placeholder="Введите пароль" required>
         <button type="submit">Войти</button>
       </form>
-      <div id="loginMessage"></div>
+
+      <form id="registerForm">
+        <input type="text" id="regUsername" placeholder="Ваш ник" required>
+        <input type="email" id="regEmail" placeholder="Email" required>
+        <input type="password" id="regPassword" placeholder="Пароль" required>
+        <button type="submit">Зарегистрироваться</button>
+      </form>
+
+      <div class="donate">
+        <a href="donate.html" class="donate-btn">Стать частью семьи</a>
+      </div>
+    </section>
+
+    <section class="search">
+      <h2>Поиск</h2>
+      <input type="text" id="searchInput" placeholder="Искать по сайту...">
+      <button onclick="performSearch()">Поиск</button>
+      <div id="searchResults"></div>
     </section>
   </main>
 
-  <footer>
-    <p>Dark Market Ultra © 2025. Все права защищены.</p>
-  </footer>
- <script src="config.js"></script>
-<script src="script.js"></script> 
+  <script src="header.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
