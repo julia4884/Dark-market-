@@ -1,5 +1,5 @@
 // 📌 config.js должен содержать API_URL, например:
-// const API_URL = "http://localhost:3000";
+// const API_URL = "https://dark-market-backend.onrender.com";
 
 document.addEventListener("DOMContentLoaded", () => {
     // --- Регистрация ---
@@ -19,13 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById("registerMessage").innerText = "✅ Регистрация успешна!";
-                } else {
-                    document.getElementById("registerMessage").innerText = `❌ Ошибка: ${data.error}`;
-                }
-            } catch (err) {
+                document.getElementById("registerMessage").innerText = data.success 
+                    ? "✅ Регистрация успешна!" 
+                    : `❌ Ошибка: ${data.error}`;
+            } catch {
                 document.getElementById("registerMessage").innerText = "⚠️ Ошибка соединения с сервером.";
             }
         });
@@ -47,14 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 const data = await response.json();
-
                 if (data.success && data.token) {
                     localStorage.setItem("token", data.token);
                     window.location.href = "home.html";
                 } else {
                     document.getElementById("loginMessage").innerText = `❌ Ошибка: ${data.error || "Неверный логин/пароль"}`;
                 }
-            } catch (err) {
+            } catch {
                 document.getElementById("loginMessage").innerText = "⚠️ Ошибка соединения с сервером.";
             }
         });
@@ -76,9 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
 
                 const user = await response.json();
-
                 if (user.success) {
-                    document.getElementById("nickname").innerText = user.username;
+                    document.getElementById("nickname").innerText = 
+                        user.role === "admin" ? `👑 ${user.username}` : user.username;
                     document.getElementById("status").innerText = user.role;
                     document.getElementById("subscription").innerText = user.subscription ? "✅ Активна" : "❌ Нет";
                     if (user.photo) document.getElementById("profile-photo").src = user.photo;
@@ -87,8 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     localStorage.removeItem("token");
                     window.location.href = "index.html";
                 }
-            } catch (err) {
-                console.error("Ошибка загрузки профиля:", err);
+            } catch {
                 localStorage.removeItem("token");
                 window.location.href = "index.html";
             }
@@ -103,29 +98,23 @@ document.addEventListener("DOMContentLoaded", () => {
         // Сохранение "О себе"
         document.getElementById("saveAboutBtn").addEventListener("click", async () => {
             const about = document.getElementById("aboutMe").value;
-
             try {
                 const response = await fetch(`${API_URL}/profile/update`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + localStorage.getItem("token")
+                        "Authorization": "Bearer " + token
                     },
                     body: JSON.stringify({ about })
                 });
-
                 const data = await response.json();
-                if (data.success) {
-                    alert("✅ Информация сохранена!");
-                } else {
-                    alert("❌ Ошибка сохранения: " + data.error);
-                }
-            } catch (err) {
+                alert(data.success ? "✅ Информация сохранена!" : "❌ Ошибка: " + data.error);
+            } catch {
                 alert("⚠️ Ошибка соединения с сервером.");
             }
         });
 
-        // Загрузка фото
+        // --- Загрузка фото с прогрессом ---
         document.getElementById("savePhotoBtn").addEventListener("click", async () => {
             const fileInput = document.getElementById("photoUpload");
             if (!fileInput.files.length) return alert("⚠️ Выберите файл!");
@@ -133,25 +122,72 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new FormData();
             formData.append("photo", fileInput.files[0]);
 
-            try {
-                const response = await fetch(`${API_URL}/profile/photo`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": "Bearer " + localStorage.getItem("token")
-                    },
-                    body: formData
-                });
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `${API_URL}/profile/photo`, true);
+            xhr.setRequestHeader("Authorization", "Bearer " + token);
 
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById("profile-photo").src = data.photo;
-                    alert("✅ Фото обновлено!");
-                } else {
-                    alert("❌ Ошибка загрузки фото: " + data.error);
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    document.getElementById("uploadProgress").innerText = `Загрузка: ${percent}%`;
                 }
-            } catch (err) {
-                alert("⚠️ Ошибка соединения с сервером.");
-            }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        document.getElementById("profile-photo").src = data.photo;
+                        alert("✅ Фото обновлено!");
+                    } else {
+                        alert("❌ Ошибка: " + data.error);
+                    }
+                } else {
+                    alert("⚠️ Ошибка соединения с сервером.");
+                }
+            };
+
+            xhr.send(formData);
         });
     }
+
+    // --- Загрузка файлов в галереи (универсально) ---
+    const uploadForms = document.querySelectorAll(".uploadForm");
+    uploadForms.forEach(form => {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const token = localStorage.getItem("token");
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", `${API_URL}${form.dataset.endpoint}`, true);
+            xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+            const progressEl = form.querySelector(".uploadProgress");
+            if (progressEl) {
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        progressEl.innerText = `Загрузка: ${percent}%`;
+                    }
+                };
+            }
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        alert("✅ Файл загружен!");
+                        location.reload();
+                    } else {
+                        alert("❌ Ошибка: " + data.error);
+                    }
+                } else {
+                    alert("⚠️ Ошибка соединения с сервером.");
+                }
+            };
+
+            xhr.send(formData);
+        });
+    });
 });
