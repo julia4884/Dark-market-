@@ -129,6 +129,60 @@
                 // Здесь тоже нужен POST-запрос на backend
             });
         });
-    </script>
+    <script>
+const API_URL = "http://localhost:3000"; // поменяй, если backend хостится в другом месте
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        window.location.href = "index.html";
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/profile`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            }
+        });
+
+        const user = await response.json();
+
+        if (user.success) {
+            document.getElementById("nickname").innerText = user.username;
+            document.getElementById("status").innerText = user.role;
+            document.getElementById("subscription").innerText = user.subscription;
+            if (user.photo) document.getElementById("profile-photo").src = user.photo;
+            document.getElementById("aboutMe").value = user.about || "";
+        } else {
+            window.location.href = "index.html";
+        }
+    } catch (error) {
+        console.error("Ошибка:", error);
+        window.location.href = "index.html";
+    }
+});
+
+// Выход
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("token");
+    window.location.href = "index.html";
+});
+
+// Заглушка на загрузку фото (подключим позже)
+document.getElementById("savePhotoBtn").addEventListener("click", () => {
+    const fileInput = document.getElementById("photoUpload");
+    if (!fileInput.files[0]) return alert("Выбери файл!");
+    alert("Функция загрузки фото будет подключена на backend 💀");
+});
+
+// Сохранение "О себе" (подключим позже POST-запросом)
+document.getElementById("saveAboutBtn").addEventListener("click", () => {
+    const about = document.getElementById("aboutMe").value;
+    alert("Описание сохранено: " + about + "\n(реально подключим к backend позже)");
+});
+</script>
 </body>
 </html>
