@@ -1,93 +1,108 @@
-const API_URL = "https://dark-market-backend.onrender.com"; // замени на свой backend
+const API_URL = "https://dark-market-backend.onrender.com";
 
-// Храним токен
-let token = localStorage.getItem("token") || null;
-let userRole = localStorage.getItem("role") || "user";
+// ========================== АВТОРИЗАЦИЯ ==========================
 
-// ================== AUTH ==================
-async function register(email, password, username) {
-  const res = await fetch(`${API_URL}/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password, username })
-  });
-  return res.json();
-}
+// Загрузка профиля при входе
+async function loadProfile() {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-async function login(email, password) {
-  const res = await fetch(`${API_URL}/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-  const data = await res.json();
-  if (data.token) {
-    token = data.token;
-    localStorage.setItem("token", token);
+    const res = await fetch(`${API_URL}/profile`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (!res.ok) throw new Error("Ошибка авторизации");
+
+    const data = await res.json();
+
+    document.getElementById("profile-username").textContent = data.username;
+    document.getElementById("profile-role").textContent = data.role;
+    document.getElementById("profile-about").textContent = data.about || "Не указано";
+    if (data.avatarUrl) {
+      document.getElementById("profile-avatar").src = `${API_URL}/${data.avatarUrl}`;
+    }
+
+    // Сохраняем роль и ник в localStorage
     localStorage.setItem("role", data.role);
     localStorage.setItem("username", data.username);
-    window.location.href = "home.html"; // переброс в личный кабинет
-  } else {
-    alert(data.error || "Ошибка входа");
+
+    // Проверяем — если админ, показываем панель
+    if (data.role === "admin") {
+      document.getElementById("admin-panel").style.display = "block";
+      document.getElementById("crown").innerHTML = "👑";
+    }
+  } catch (err) {
+    console.error(err);
+    logout();
   }
 }
 
-// ================== PROFILE ==================
-async function loadProfile() {
-  if (!token) return;
-  const res = await fetch(`${API_URL}/profile`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const user = await res.json();
-  document.getElementById("profile-username").innerText = user.username;
-  document.getElementById("profile-role").innerText = user.role;
-  document.getElementById("profile-about").innerText = user.about || "Нет информации";
-
-  if (user.avatar) {
-    document.getElementById("profile-avatar").src = `${API_URL}/uploads/${user.avatar}`;
-  }
+// Выход
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("username");
+  window.location.href = "index.html";
 }
 
-// Загрузка аватара
+// ========================== АВАТАР ==========================
+
 async function uploadAvatar(file) {
-  if (!token) return alert("Сначала войдите!");
+  if (!file) return alert("Выберите файл!");
+  
+  const token = localStorage.getItem("token");
   const formData = new FormData();
   formData.append("avatar", file);
 
-  const res = await fetch(`${API_URL}/upload-avatar`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData
-  });
-  const data = await res.json();
-  if (data.success) {
-    alert("Аватар обновлён!");
-    loadProfile();
-  } else {
-    alert("Ошибка загрузки аватара");
+  try {
+    const res = await fetch(`${API_URL}/upload-avatar`, {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}` },
+      body: formData
+    });
+
+    if (!res.ok) throw new Error("Ошибка загрузки аватара");
+
+    const data = await res.json();
+    document.getElementById("profile-avatar").src = `${API_URL}/${data.path}`;
+    alert("Аватар обновлен!");
+  } catch (err) {
+    console.error(err);
+    alert("Не удалось загрузить аватар");
   }
 }
 
-// Обновить "о себе"
-async function updateAbout(text) {
-  const res = await fetch(`${API_URL}/about-me`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ about: text })
-  });
-  const data = await res.json();
-  if (data.success) {
+// ========================== ОБНОВЛЕНИЕ О СЕБЕ ==========================
+
+async function updateAbout(about) {
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`${API_URL}/update-about`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ about })
+    });
+
+    if (!res.ok) throw new Error("Ошибка при обновлении профиля");
+
     alert("Информация обновлена!");
-    loadProfile();
+    document.getElementById("profile-about").textContent = about;
+  } catch (err) {
+    console.error(err);
+    alert("Не удалось обновить информацию");
   }
 }
 
-// ================== FILE UPLOAD ==================
+// ========================== ЗАГРУЗКА ФАЙЛОВ ==========================
+
 async function uploadFile(file, section) {
-  if (!token) return alert("Сначала войдите!");
+  if (!file) return alert("Выберите файл!");
+
+  const token = localStorage.getItem("token");
   const formData = new FormData();
   formData.append("file", file);
   formData.append("section", section);
@@ -96,82 +111,106 @@ async function uploadFile(file, section) {
   progressBar.style.display = "block";
   progressBar.value = 0;
 
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", `${API_URL}/upload-file`, true);
-  xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/upload`, true);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
-  xhr.upload.onprogress = (e) => {
-    if (e.lengthComputable) {
-      const percent = Math.round((e.loaded / e.total) * 100);
-      progressBar.value = percent;
-    }
-  };
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        progressBar.value = percent;
+      }
+    };
 
-  xhr.onload = () => {
-    if (xhr.status === 200) {
-      alert("Файл загружен!");
-      loadGallery(section);
-    } else {
-      alert("Ошибка загрузки");
-    }
-    progressBar.style.display = "none";
-  };
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        alert("Файл успешно загружен!");
+        loadGallery(section);
+      } else {
+        alert("Ошибка при загрузке файла!");
+      }
+    };
 
-  xhr.send(formData);
+    xhr.send(formData);
+  } catch (err) {
+    console.error(err);
+    alert("Ошибка сети");
+  }
 }
 
-// ================== GALLERY ==================
-async function loadGallery(section) {
-  const res = await fetch(`${API_URL}/my-files`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  const files = await res.json();
-  const gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
+// ========================== ГАЛЕРЕЯ ==========================
 
-  files.filter(f => f.section === section && f.blocked === 0).forEach(f => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `
-      <p>${f.filename}</p>
-      <a href="${API_URL}/uploads/${f.filename}" target="_blank">Скачать</a>
-    `;
-    gallery.appendChild(div);
-  });
+async function loadGallery(section = "images") {
+  try {
+    const res = await fetch(`${API_URL}/files?section=${section}`);
+    const files = await res.json();
+
+    const gallery = document.getElementById("gallery");
+    gallery.innerHTML = "";
+
+    if (files.length === 0) {
+      gallery.innerHTML = "<p>Файлов пока нет.</p>";
+      return;
+    }
+
+    files.forEach(file => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <img src="${API_URL}/${file.path}" alt="${file.name}">
+        <p>${file.name}</p>
+        ${file.price > 0 
+          ? `<button onclick="buyFile(${file.id})">Купить за ${file.price} $</button>` 
+          : `<a href="${API_URL}/${file.path}" download>Скачать</a>`}
+      `;
+      gallery.appendChild(card);
+    });
+  } catch (err) {
+    console.error(err);
+  }
 }
 
-// ================== ADMIN FUNCTIONS ==================
+// ========================== АДМИН-ПАНЕЛЬ ==========================
+
 async function blockUser(userId, reason) {
-  if (userRole !== "admin") return alert("Нет доступа");
-  const res = await fetch(`${API_URL}/block-user`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ userId, reason })
-  });
-  const data = await res.json();
-  alert(data.success ? "Пользователь заблокирован" : "Ошибка");
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`${API_URL}/block-user`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ userId, reason })
+    });
+
+    if (!res.ok) throw new Error("Ошибка блокировки");
+
+    alert("Пользователь заблокирован!");
+  } catch (err) {
+    console.error(err);
+    alert("Не удалось заблокировать пользователя");
+  }
 }
 
 async function blockApp(fileId) {
-  if (userRole !== "admin") return alert("Нет доступа");
-  const res = await fetch(`${API_URL}/block-app`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({ fileId })
-  });
-  const data = await res.json();
-  alert(data.success ? "Приложение заблокировано" : "Ошибка");
-}
+  const token = localStorage.getItem("token");
+  try {
+    const res = await fetch(`${API_URL}/block-app`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ fileId })
+    });
 
-// ================== INIT ==================
-document.addEventListener("DOMContentLoaded", () => {
-  if (document.getElementById("profile-username")) {
-    loadProfile();
+    if (!res.ok) throw new Error("Ошибка блокировки приложения");
+
+    alert("Приложение заблокировано!");
+  } catch (err) {
+    console.error(err);
+    alert("Не удалось заблокировать приложение");
   }
-});
+}
