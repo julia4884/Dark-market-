@@ -1,158 +1,193 @@
-/* 🌑 Dark Market Ultra — стили с дымкой и glow */
-
+/* === Фон с мягкой лиловой дымкой === */
 body {
+    background: radial-gradient(circle at top, #2a1f3d, #1a1426, #0d0d14);
+    color: #e8e0ff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: #0a0a0a; /* Черный фон */
-    color: #f1f1f1;
+    padding: 0;
+    min-height: 100vh;
+    background-attachment: fixed;
     overflow-x: hidden;
-    position: relative;
 }
 
-/* 🔥 Дымка */
+/* Дымка поверх фона */
 body::before {
     content: "";
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: radial-gradient(circle, rgba(255,255,255,0.05) 1%, transparent 80%) repeat;
-    background-size: 200px 200px;
-    animation: fogMove 60s linear infinite;
-    z-index: 0;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(170, 120, 255, 0.08), transparent 70%);
+    animation: smokeMove 20s infinite linear;
+    z-index: -1;
 }
 
-@keyframes fogMove {
-    from { background-position: 0 0; }
-    to { background-position: 2000px 2000px; }
+@keyframes smokeMove {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, 30px) scale(1.1); }
+    100% { transform: translate(0, 0) scale(1); }
 }
 
-/* Заголовок */
-header {
-    text-align: center;
-    padding: 60px 20px 40px;
-    position: relative;
-    z-index: 1;
-}
-header h1 {
-    font-size: 3em;
-    margin: 0;
-    color: #e63946; /* Красный */
-    text-shadow: 0 0 20px #e63946, 0 0 40px #e63946;
-}
-
-/* Навигация */
+/* === Навигация === */
 nav {
-    margin-top: 20px;
-    z-index: 1;
-    position: relative;
+    background: rgba(20, 15, 40, 0.9);
+    padding: 15px;
+    text-align: center;
+    border-bottom: 2px solid #bb86fc;
+    box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
 }
+
 nav a {
-    margin: 15px;
+    color: #cfc0ff;
     text-decoration: none;
-    color: #f1f1f1;
+    margin: 0 15px;
     font-weight: bold;
     transition: color 0.3s, text-shadow 0.3s;
 }
-nav a:hover {
-    color: #e63946;
-    text-shadow: 0 0 10px #e63946, 0 0 20px #e63946;
+
+nav a:hover, nav a.active {
+    color: #00e5ff;
+    text-shadow: 0 0 10px #00e5ff;
 }
 
-/* Основные секции */
-.section, section {
-    padding: 40px 20px;
+/* === Логотип сайта === */
+.logo {
+    font-size: 2.5em;
+    font-style: italic;
+    color: #00e5ff;
     text-align: center;
-    animation: fadein 2s ease-in-out;
-    position: relative;
-    z-index: 1;
-}
-
-@keyframes fadein {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* 🔑 Формы (регистрация и вход) */
-form {
-    background: rgba(20, 20, 20, 0.85);
-    border-radius: 12px;
-    padding: 30px;
-    margin: 20px auto;
-    max-width: 400px;
-    box-shadow: 0 0 20px rgba(230,57,70,0.5);
-}
-form input {
-    width: 90%;
-    padding: 12px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 8px;
-    background: #111;
-    color: #f1f1f1;
-    font-size: 1em;
-    outline: none;
-}
-form input:focus {
-    box-shadow: 0 0 10px #e63946;
-}
-form button {
-    background: #e63946;
-    color: #fff;
-    font-size: 1.1em;
+    margin: 25px 0;
+    text-shadow: 
+        0 0 8px #00e5ff,
+        0 0 15px #00ffff,
+        0 0 30px #00ffff;
+    letter-spacing: 2px;
     font-weight: bold;
-    border: none;
-    padding: 12px 25px;
+    animation: neonPulse 3s infinite alternate;
+}
+
+@keyframes neonPulse {
+    from { text-shadow: 0 0 8px #00e5ff, 0 0 15px #00ffff; }
+    to   { text-shadow: 0 0 20px #00ffff, 0 0 40px #00e5ff; }
+}
+
+/* === Заголовки === */
+h1, h2 {
+    text-align: center;
+    color: #bb86fc;
+    text-shadow: 0 0 15px #6a0dad;
+    margin-bottom: 20px;
+}
+
+/* === Галерея === */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(25, 20, 50, 0.9);
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(106, 13, 173, 0.4);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid rgba(106, 13, 173, 0.6);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 0 35px rgba(0, 229, 255, 0.7);
+    border-color: #00e5ff;
+}
+
+.card img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+}
+
+/* === Кнопки === */
+button {
+    background: transparent;
+    color: #e8e0ff;
+    border: 2px solid #6a0dad;
+    padding: 10px 15px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background 0.3s, transform 0.3s;
-}
-form button:hover {
-    background: #c9182b;
-    transform: scale(1.05);
+    transition: all 0.3s;
+    font-weight: bold;
+    text-shadow: 0 0 8px #6a0dad;
 }
 
-/* 📦 Личный кабинет */
-.profile-card {
-    background: rgba(25,25,25,0.9);
-    border-radius: 15px;
+button:hover {
+    background: rgba(106, 13, 173, 0.25);
+    color: #00e5ff;
+    border-color: #00e5ff;
+    box-shadow: 0 0 15px #00e5ff;
+}
+
+/* === Прогресс-бар === */
+progress {
+    width: 100%;
+    height: 20px;
+    margin-top: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+}
+
+progress::-webkit-progress-bar {
+    background-color: #222;
+    border-radius: 10px;
+}
+
+progress::-webkit-progress-value {
+    background-color: #00e5ff;
+    border-radius: 10px;
+    box-shadow: 0 0 15px #00e5ff;
+}
+
+progress::-moz-progress-bar {
+    background-color: #00e5ff;
+    border-radius: 10px;
+}
+
+/* === Блок профиля === */
+#profileInfo {
+    background: rgba(25, 20, 50, 0.95);
     padding: 25px;
-    margin: 30px auto;
-    max-width: 600px;
-    box-shadow: 0 0 25px rgba(255,255,255,0.1);
-    text-align: left;
-    z-index: 1;
-    position: relative;
-}
-.profile-card h2 {
-    margin-top: 0;
-    color: #e63946;
+    border-radius: 12px;
     text-align: center;
-    text-shadow: 0 0 15px #e63946;
+    margin-bottom: 35px;
+    box-shadow: 0 0 25px rgba(106, 13, 173, 0.4);
+    border: 1px solid rgba(106, 13, 173, 0.7);
 }
-.profile-card img {
-    display: block;
-    margin: 15px auto;
+
+#profileInfo img {
+    border: 3px solid #00e5ff;
+    margin-bottom: 15px;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
     border-radius: 50%;
     width: 120px;
     height: 120px;
     object-fit: cover;
-    border: 3px solid #e63946;
-    box-shadow: 0 0 15px #e63946;
-}
-.profile-info {
-    margin-top: 20px;
-}
-.profile-info p {
-    margin: 8px 0;
-    font-size: 1.1em;
 }
 
-/* Футер */
-footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 0.9em;
-    background: #111;
-    z-index: 1;
-    position: relative;
+/* === Ник админа с коронкой 👑 === */
+#username {
+    font-size: 1.5em;
+    color: #bb86fc;
+    text-shadow: 0 0 12px #6a0dad;
 }
+
+#username.admin::after {
+    content: " 👑";
+    color: #ffd700;
+    text-shadow: 0 0 12px #ffd700;
+        }
