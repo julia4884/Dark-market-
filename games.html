@@ -3,48 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dark Market Ultra</title>
+  <title>Игры — Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Шапка загружается автоматически -->
-  <div id="header-placeholder"></div>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="home.html">Личный кабинет</a>
+    <a href="games.html" class="active">Игры</a>
+    <a href="movies.html">Фильмы</a>
+    <a href="music.html">Музыка</a>
+    <a href="images.html">Картинки</a>
+    <a href="books.html">Книги</a>
+    <a href="apps.html">Программы</a>
+    <a href="tools.html">Приложения</a>
+  </nav>
 
   <main>
-    <section class="hero">
-      <h1 class="logo">Dark Market Ultra</h1>
-      <p>Добро пожаловать в тёмный маркет — игры, фильмы, музыка, книги и приложения в одном месте.</p>
+    <h1 class="neon-title">Игры</h1>
+
+    <!-- Форма загрузки игры (только для разработчиков) -->
+    <section id="uploadGameSection" style="display:none;">
+      <h2>Загрузить игру</h2>
+      <input type="text" id="gameTitle" placeholder="Название игры">
+      <input type="number" id="gamePrice" placeholder="Цена (0 = бесплатно)">
+      <input type="file" id="gameFile">
+      <button onclick="uploadGame()" class="neon-button">Загрузить</button>
+      <progress id="uploadProgress" value="0" max="100" style="width:100%;"></progress>
+      <p id="uploadStatus"></p>
     </section>
 
-    <section class="auth">
-      <h2>Вход или регистрация</h2>
-      <form id="loginForm">
-        <input type="email" id="email" placeholder="Введите email" required>
-        <input type="password" id="password" placeholder="Введите пароль" required>
-        <button type="submit">Войти</button>
-      </form>
-
-      <form id="registerForm">
-        <input type="text" id="regUsername" placeholder="Ваш ник" required>
-        <input type="email" id="regEmail" placeholder="Email" required>
-        <input type="password" id="regPassword" placeholder="Пароль" required>
-        <button type="submit">Зарегистрироваться</button>
-      </form>
-
-      <div class="donate">
-        <a href="donate.html" class="donate-btn">Стать частью семьи</a>
-      </div>
-    </section>
-
-    <section class="search">
-      <h2>Поиск</h2>
-      <input type="text" id="searchInput" placeholder="Искать по сайту...">
-      <button onclick="performSearch()">Поиск</button>
-      <div id="searchResults"></div>
+    <!-- Галерея игр -->
+    <section class="gallery-section">
+      <h2>Доступные игры</h2>
+      <div id="gamesGallery" class="gallery"></div>
     </section>
   </main>
 
-  <script src="header.js"></script>
-  <script src="script.js"></script>
+  <script>
+    const API_URL = "https://dark-market-backend.onrender.com";
+
+    async function checkRole() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(API_URL + "/auth/me", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+        if (data.success && (data.user.role === "developer" || data.user.role === "admin")) {
+          document.getElementById("uploadGameSection").style.display = "block";
+        }
+      } catch (err) {
+        console.error("Ошибка проверки роли:", err);
+      }
+    }
+
+    async function loadGames() {
+      try {
+        const res = await fetch(API_URL + "/games");
+        const data = await res.json();
+
+        if (data.success) {
+          const gallery = document.getElementById("gamesGallery");
+          gallery.innerHTML = "";
+
+          data.games.forEach(game => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <h3>${game.title}</h3>
+              <p>Цена: ${game.price > 0 ? game.price + "€" : "Бесплатно"}</p>
+              ${game.price > 0 
+                ? `<button onclick="buyGame('${game._id}')" class="neon-button">Купить</button>` 
+                : `<a href="${API_URL}/uploads/games/${game.filename}" class="neon-button">Скачать</a>`}
+            `;
+            gallery.appendChild(card);
+          });
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки игр:", err);
+      }
+    }
+
+    function uploadGame() {
+      const token = localStorage.getItem("token");
+      const title = document.getElementById("gameTitle").value;
+      const price = document.getElementById("gamePrice").value || 0;
+      const file = document.getElementById("gameFile").files[0];
+
+      if (!file) return alert("Выберите файл!");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("price", price);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API_URL + "/upload-game", true);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          document.getElementById("uploadProgress").value = (event.loaded / event.total) * 100;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            alert("Игра загружена!");
+            loadGames();
+          } else {
+            alert("Ошибка: " + response.error);
+          }
+        }
+      };
+
+      xhr.send(formData);
+    }
+
+    function buyGame(gameId) {
+      alert("Тут будет подключение PayPal для покупки игры " + gameId);
+    }
+
+    checkRole();
+    loadGames();
+  </script>
 </body>
 </html>
