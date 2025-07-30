@@ -20,9 +20,9 @@
     </nav>
 
     <main>
-        <h1>Личный кабинет</h1>
+        <h1 class="neon-title">Личный кабинет</h1>
         <div id="profileInfo">
-            <img id="profilePhoto" src="" alt="Фото профиля" style="width:150px;height:150px;border-radius:50%;border:2px solid white;">
+            <img id="profilePhoto" src="default-avatar.png" alt="Фото профиля" class="profile-photo">
             <h2 id="username"></h2>
             <p><strong>Email:</strong> <span id="email"></span></p>
             <p><strong>Подписка:</strong> <span id="subscription"></span></p>
@@ -30,7 +30,7 @@
             <p><strong>О себе:</strong> <span id="about"></span></p>
 
             <input type="file" id="photoInput">
-            <button onclick="uploadPhoto()">Загрузить фото</button>
+            <button onclick="uploadPhoto()" class="neon-button">Загрузить фото</button>
         </div>
 
         <hr>
@@ -48,10 +48,22 @@
         <input type="text" id="fileTitle" placeholder="Название файла">
         <input type="number" id="filePrice" placeholder="Цена (0 — бесплатно)">
         <input type="file" id="fileInput">
-        <button onclick="uploadFile()">Загрузить</button>
+        <button onclick="uploadFile()" class="neon-button">Загрузить</button>
         <progress id="uploadProgress" value="0" max="100" style="width:100%;"></progress>
-
         <p id="uploadStatus"></p>
+
+        <!-- Панель администратора -->
+        <section id="adminPanel" class="admin-panel" style="display:none;">
+            <h2>👑 Панель администратора</h2>
+            <div>
+                <input type="text" id="blockUserEmail" placeholder="Email пользователя">
+                <button id="blockUserBtn" class="neon-button">Заблокировать пользователя</button>
+            </div>
+            <div>
+                <input type="text" id="blockAppName" placeholder="Название контента">
+                <button id="blockAppBtn" class="neon-button">Заблокировать контент</button>
+            </div>
+        </section>
     </main>
 
     <script>
@@ -80,6 +92,9 @@
                 document.getElementById("about").textContent = data.about || "Не заполнено";
                 if (data.photo) {
                     document.getElementById("profilePhoto").src = API_URL + data.photo;
+                }
+                if (data.role === "admin") {
+                    document.getElementById("adminPanel").style.display = "block";
                 }
             } else {
                 alert("Ошибка: " + data.error);
@@ -110,7 +125,7 @@
             }
         }
 
-        // === Загрузка файлов в разделы с прогрессом ===
+        // === Загрузка файлов с прогрессом ===
         async function uploadFile() {
             const token = localStorage.getItem("token");
             const section = document.getElementById("sectionSelect").value;
@@ -153,7 +168,31 @@
             xhr.send(formData);
         }
 
-        // Запуск при загрузке страницы
+        // === Админские функции ===
+        document.getElementById("blockUserBtn")?.addEventListener("click", async () => {
+            const email = document.getElementById("blockUserEmail").value;
+            if (!email) return alert("Введите email!");
+            const res = await fetch(API_URL + "/admin/block-user", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+                body: JSON.stringify({ email })
+            });
+            const data = await res.json();
+            alert(data.message);
+        });
+
+        document.getElementById("blockAppBtn")?.addEventListener("click", async () => {
+            const appName = document.getElementById("blockAppName").value;
+            if (!appName) return alert("Введите название!");
+            const res = await fetch(API_URL + "/admin/block-app", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
+                body: JSON.stringify({ appName })
+            });
+            const data = await res.json();
+            alert(data.message);
+        });
+
         loadProfile();
     </script>
 </body>
