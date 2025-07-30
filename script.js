@@ -1,193 +1,177 @@
-// 📌 config.js должен содержать API_URL, например:
-// const API_URL = "https://dark-market-backend.onrender.com";
+const API_URL = "https://dark-market-backend.onrender.com"; // замени на свой backend
 
+// Храним токен
+let token = localStorage.getItem("token") || null;
+let userRole = localStorage.getItem("role") || "user";
+
+// ================== AUTH ==================
+async function register(email, password, username) {
+  const res = await fetch(`${API_URL}/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, username })
+  });
+  return res.json();
+}
+
+async function login(email, password) {
+  const res = await fetch(`${API_URL}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (data.token) {
+    token = data.token;
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", data.role);
+    localStorage.setItem("username", data.username);
+    window.location.href = "home.html"; // переброс в личный кабинет
+  } else {
+    alert(data.error || "Ошибка входа");
+  }
+}
+
+// ================== PROFILE ==================
+async function loadProfile() {
+  if (!token) return;
+  const res = await fetch(`${API_URL}/profile`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const user = await res.json();
+  document.getElementById("profile-username").innerText = user.username;
+  document.getElementById("profile-role").innerText = user.role;
+  document.getElementById("profile-about").innerText = user.about || "Нет информации";
+
+  if (user.avatar) {
+    document.getElementById("profile-avatar").src = `${API_URL}/uploads/${user.avatar}`;
+  }
+}
+
+// Загрузка аватара
+async function uploadAvatar(file) {
+  if (!token) return alert("Сначала войдите!");
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const res = await fetch(`${API_URL}/upload-avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData
+  });
+  const data = await res.json();
+  if (data.success) {
+    alert("Аватар обновлён!");
+    loadProfile();
+  } else {
+    alert("Ошибка загрузки аватара");
+  }
+}
+
+// Обновить "о себе"
+async function updateAbout(text) {
+  const res = await fetch(`${API_URL}/about-me`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ about: text })
+  });
+  const data = await res.json();
+  if (data.success) {
+    alert("Информация обновлена!");
+    loadProfile();
+  }
+}
+
+// ================== FILE UPLOAD ==================
+async function uploadFile(file, section) {
+  if (!token) return alert("Сначала войдите!");
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("section", section);
+
+  const progressBar = document.getElementById("upload-progress");
+  progressBar.style.display = "block";
+  progressBar.value = 0;
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", `${API_URL}/upload-file`, true);
+  xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+      const percent = Math.round((e.loaded / e.total) * 100);
+      progressBar.value = percent;
+    }
+  };
+
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      alert("Файл загружен!");
+      loadGallery(section);
+    } else {
+      alert("Ошибка загрузки");
+    }
+    progressBar.style.display = "none";
+  };
+
+  xhr.send(formData);
+}
+
+// ================== GALLERY ==================
+async function loadGallery(section) {
+  const res = await fetch(`${API_URL}/my-files`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const files = await res.json();
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = "";
+
+  files.filter(f => f.section === section && f.blocked === 0).forEach(f => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <p>${f.filename}</p>
+      <a href="${API_URL}/uploads/${f.filename}" target="_blank">Скачать</a>
+    `;
+    gallery.appendChild(div);
+  });
+}
+
+// ================== ADMIN FUNCTIONS ==================
+async function blockUser(userId, reason) {
+  if (userRole !== "admin") return alert("Нет доступа");
+  const res = await fetch(`${API_URL}/block-user`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ userId, reason })
+  });
+  const data = await res.json();
+  alert(data.success ? "Пользователь заблокирован" : "Ошибка");
+}
+
+async function blockApp(fileId) {
+  if (userRole !== "admin") return alert("Нет доступа");
+  const res = await fetch(`${API_URL}/block-app`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ fileId })
+  });
+  const data = await res.json();
+  alert(data.success ? "Приложение заблокировано" : "Ошибка");
+}
+
+// ================== INIT ==================
 document.addEventListener("DOMContentLoaded", () => {
-    // --- Регистрация ---
-    const registerForm = document.getElementById("registerForm");
-    if (registerForm) {
-        registerForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const username = document.getElementById("username").value;
-
-            try {
-                const response = await fetch(`${API_URL}/register`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password, username })
-                });
-
-                const data = await response.json();
-                document.getElementById("registerMessage").innerText = data.success 
-                    ? "✅ Регистрация успешна!" 
-                    : `❌ Ошибка: ${data.error}`;
-            } catch {
-                document.getElementById("registerMessage").innerText = "⚠️ Ошибка соединения с сервером.";
-            }
-        });
-    }
-
-    // --- Логин ---
-    const loginForm = document.getElementById("loginForm");
-    if (loginForm) {
-        loginForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const email = document.getElementById("loginEmail").value;
-            const password = document.getElementById("loginPassword").value;
-
-            try {
-                const response = await fetch(`${API_URL}/login`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const data = await response.json();
-                if (data.success && data.token) {
-                    localStorage.setItem("token", data.token);
-                    window.location.href = "home.html";
-                } else {
-                    document.getElementById("loginMessage").innerText = `❌ Ошибка: ${data.error || "Неверный логин/пароль"}`;
-                }
-            } catch {
-                document.getElementById("loginMessage").innerText = "⚠️ Ошибка соединения с сервером.";
-            }
-        });
-    }
-
-    // --- Личный кабинет ---
-    if (window.location.pathname.includes("home.html")) {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            window.location.href = "index.html";
-            return;
-        }
-
-        (async () => {
-            try {
-                const response = await fetch(`${API_URL}/profile`, {
-                    method: "GET",
-                    headers: { "Authorization": "Bearer " + token }
-                });
-
-                const user = await response.json();
-                if (user.success) {
-                    document.getElementById("nickname").innerText = 
-                        user.role === "admin" ? `👑 ${user.username}` : user.username;
-                    document.getElementById("status").innerText = user.role;
-                    document.getElementById("subscription").innerText = user.subscription ? "✅ Активна" : "❌ Нет";
-                    if (user.photo) document.getElementById("profile-photo").src = user.photo;
-                    if (user.about) document.getElementById("aboutMe").value = user.about;
-                } else {
-                    localStorage.removeItem("token");
-                    window.location.href = "index.html";
-                }
-            } catch {
-                localStorage.removeItem("token");
-                window.location.href = "index.html";
-            }
-        })();
-
-        // Выход
-        document.getElementById("logoutBtn").addEventListener("click", () => {
-            localStorage.removeItem("token");
-            window.location.href = "index.html";
-        });
-
-        // Сохранение "О себе"
-        document.getElementById("saveAboutBtn").addEventListener("click", async () => {
-            const about = document.getElementById("aboutMe").value;
-            try {
-                const response = await fetch(`${API_URL}/profile/update`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token
-                    },
-                    body: JSON.stringify({ about })
-                });
-                const data = await response.json();
-                alert(data.success ? "✅ Информация сохранена!" : "❌ Ошибка: " + data.error);
-            } catch {
-                alert("⚠️ Ошибка соединения с сервером.");
-            }
-        });
-
-        // --- Загрузка фото с прогрессом ---
-        document.getElementById("savePhotoBtn").addEventListener("click", async () => {
-            const fileInput = document.getElementById("photoUpload");
-            if (!fileInput.files.length) return alert("⚠️ Выберите файл!");
-
-            const formData = new FormData();
-            formData.append("photo", fileInput.files[0]);
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", `${API_URL}/profile/photo`, true);
-            xhr.setRequestHeader("Authorization", "Bearer " + token);
-
-            xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                    const percent = Math.round((e.loaded / e.total) * 100);
-                    document.getElementById("uploadProgress").innerText = `Загрузка: ${percent}%`;
-                }
-            };
-
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.success) {
-                        document.getElementById("profile-photo").src = data.photo;
-                        alert("✅ Фото обновлено!");
-                    } else {
-                        alert("❌ Ошибка: " + data.error);
-                    }
-                } else {
-                    alert("⚠️ Ошибка соединения с сервером.");
-                }
-            };
-
-            xhr.send(formData);
-        });
-    }
-
-    // --- Загрузка файлов в галереи (универсально) ---
-    const uploadForms = document.querySelectorAll(".uploadForm");
-    uploadForms.forEach(form => {
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const formData = new FormData(form);
-            const token = localStorage.getItem("token");
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", `${API_URL}${form.dataset.endpoint}`, true);
-            xhr.setRequestHeader("Authorization", "Bearer " + token);
-
-            const progressEl = form.querySelector(".uploadProgress");
-            if (progressEl) {
-                xhr.upload.onprogress = (e) => {
-                    if (e.lengthComputable) {
-                        const percent = Math.round((e.loaded / e.total) * 100);
-                        progressEl.innerText = `Загрузка: ${percent}%`;
-                    }
-                };
-            }
-
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    if (data.success) {
-                        alert("✅ Файл загружен!");
-                        location.reload();
-                    } else {
-                        alert("❌ Ошибка: " + data.error);
-                    }
-                } else {
-                    alert("⚠️ Ошибка соединения с сервером.");
-                }
-            };
-
-            xhr.send(formData);
-        });
-    });
+  if (document.getElementById("profile-username")) {
+    loadProfile();
+  }
 });
