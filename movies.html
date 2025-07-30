@@ -3,39 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Фильмы | Dark Market Ultra</title>
+  <title>Фильмы — Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Dark Market Ulta</h1>
-    <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-  <a href="images.html">Картинки</a>
-  <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
-    </nav>
-    <a href="donate.html" class="btn">Стать частью семьи</a>
-  </header>
+  <!-- Подключение общего хедера -->
+  <div id="header-placeholder"></div>
 
-  <main class="section">
-    <h2>Фильмы</h2>
-    <p>Коллекция тёмного кино, которое нельзя забыть.</p>
+  <main>
+    <h1>Фильмы</h1>
 
-    <div style="margin-top:40px;">
-      <p>🎬 Пример: <strong>Ворон</strong> — культовая мистика.</p>
-      <p>👁️ Пример: <strong>Сайлент Хилл</strong> — кошмар оживает.</p>
-      <p>🩸 Пример: <strong>Дракула</strong> — вечная история тьмы.</p>
-    </div>
+    <!-- Галерея фильмов -->
+    <div id="gallery" class="gallery"></div>
+
+    <!-- Форма загрузки (только для админов/разработчиков) -->
+    <section id="uploadSection" class="upload-section" style="display:none;">
+      <h2>Загрузить фильм</h2>
+      <form id="uploadForm">
+        <input type="text" id="movieTitle" placeholder="Название фильма" required>
+        <input type="number" id="moviePrice" placeholder="Цена (0 = бесплатно)" required>
+        <input type="file" id="movieFile" accept=".mp4,.avi,.mkv" required>
+        <button type="submit">Загрузить</button>
+        <div id="uploadProgress">0%</div>
+      </form>
+    </section>
   </main>
 
-  <footer>
-    <p>Dark Market Ultra © 2025. Все права защищены.</p>
-  </footer>
+  <script src="header.js"></script>
+  <script src="script.js"></script>
+  <script>
+    const API_URL = "https://dark-market-backend.onrender.com";
+
+    async function loadMovies() {
+      try {
+        const res = await fetch(API_URL + "/movies/list");
+        const data = await res.json();
+
+        if (data.success) {
+          const gallery = document.getElementById("gallery");
+          gallery.innerHTML = "";
+
+          data.items.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const title = document.createElement("h3");
+            title.textContent = item.title;
+
+            const downloadBtn = document.createElement("button");
+            if (item.price === 0) {
+              downloadBtn.textContent = "Скачать бесплатно";
+              downloadBtn.onclick = () => window.location.href = API_URL + "/uploads/" + item.file;
+            } else {
+              downloadBtn.textContent = "Купить за " + item.price + "€";
+              downloadBtn.onclick = () => alert("Оплата через PayPal скоро будет доступна!");
+            }
+
+            card.appendChild(title);
+            card.appendChild(downloadBtn);
+            gallery.appendChild(card);
+          });
+        }
+      } catch (err) {
+        console.error("Ошибка загрузки фильмов:", err);
+      }
+    }
+
+    // Проверка роли пользователя
+    async function checkRole() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await fetch(API_URL + "/auth/me", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const data = await res.json();
+
+        if (data.success && (data.user.role === "admin" || data.user.role === "developer")) {
+          document.getElementById("uploadSection").style.display = "block";
+        }
+      } catch (err) {
+        console.error("Ошибка проверки роли:", err);
+      }
+    }
+
+    // Обработка загрузки файла
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append("title", document.getElementById("movieTitle").value);
+      formData.append("price", document.getElementById("moviePrice").value);
+      formData.append("file", document.getElementById("movieFile").files[0]);
+
+      try {
+        const res = await fetch(API_URL + "/movies/upload", {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
+          body: formData
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert("Фильм успешно загружен!");
+          loadMovies();
+        } else {
+          alert("Ошибка: " + data.message);
+        }
+      } catch (err) {
+        console.error("Ошибка при загрузке:", err);
+      }
+    });
+
+    loadMovies();
+    checkRole();
+  </script>
 </body>
 </html>
