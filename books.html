@@ -6,223 +6,167 @@
     <title>Книги — Dark Market Ultra</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        body {
-            background: #111;
-            color: #eee;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        nav a {
-            margin: 0 10px;
-            color: #eee;
-            text-decoration: none;
-        }
-        nav a:hover {
-            color: crimson;
-        }
-        .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .book-card {
-            background: #1c1c1c;
-            padding: 15px;
-            border-radius: 8px;
-            transition: transform 0.2s ease-in-out;
-        }
-        .book-card:hover {
-            transform: scale(1.05);
-        }
-        .book-card img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-        .price {
-            color: crimson;
-            font-weight: bold;
-            margin: 8px 0;
-        }
-        button {
-            background: crimson;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover { background: darkred; }
-        #dev-panel {
-            margin-top: 30px;
-            padding: 20px;
-            background: #1c1c1c;
-            border-radius: 10px;
-            display: none;
-        }
-        input {
-            margin: 5px;
-            padding: 8px;
-            width: 80%;
-            background: #222;
-            color: #eee;
-            border: none;
-            border-radius: 6px;
-        }
+        body { background:#111; color:#eee; font-family:Arial,sans-serif; text-align:center; padding:20px; }
+        nav a { margin:0 10px; color:#eee; text-decoration:none; }
+        nav a:hover { color:crimson; }
+        .gallery { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-top:20px; }
+        .book-card { background:#1c1c1c; padding:15px; border-radius:8px; transition:transform .2s; }
+        .book-card:hover { transform:scale(1.05); }
+        .book-card img { width:100%; height:250px; object-fit:cover; border-radius:6px; }
+        .price { color:crimson; font-weight:bold; margin:8px 0; }
+        button { background:crimson; border:none; padding:8px 15px; border-radius:6px; color:white; cursor:pointer; }
+        button:hover { background:darkred; }
+        #dev-panel { margin-top:30px; padding:20px; background:#1c1c1c; border-radius:10px; display:none; }
+        input { margin:5px; padding:8px; width:80%; background:#222; color:#eee; border:none; border-radius:6px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Книги — Dark Market Ultra</h1>
-        <nav>
-            <a href="index.html">Главная</a>
-            <a href="home.html">Личный кабинет</a>
-            <a href="games.html">Игры</a>
-            <a href="movies.html">Фильмы</a>
-            <a href="music.html">Музыка</a>
-            <a href="images.html">Картинки</a>
-            <a href="books.html">Книги</a>
-            <a href="apps.html">Программы</a>
-            <a href="tools.html">Приложения</a>
-        </nav>
-        <p>Обложки бесплатны. Полные книги доступны после покупки 💎</p>
-    </header>
+<header>
+    <h1>Книги — Dark Market Ultra</h1>
+    <nav>
+        <a href="index.html">Главная</a>
+        <a href="home.html">Личный кабинет</a>
+        <a href="games.html">Игры</a>
+        <a href="movies.html">Фильмы</a>
+        <a href="music.html">Музыка</a>
+        <a href="images.html">Картинки</a>
+        <a href="books.html">Книги</a>
+        <a href="apps.html">Программы</a>
+        <a href="tools.html">Приложения</a>
+    </nav>
+    <p>Обложки бесплатны. Полные книги доступны после покупки 💎</p>
+</header>
 
-    <main>
-        <div class="gallery" id="bookGallery"></div>
+<main>
+    <div class="gallery" id="bookGallery"></div>
 
-        <!-- Панель разработчика -->
-        <section id="dev-panel">
-            <h2>Загрузить книгу</h2>
-            <input type="file" id="bookFile" accept=".pdf,.epub,.txt"><br>
-            <input type="file" id="bookCover" accept="image/*"><br>
-            <input type="text" id="bookTitle" placeholder="Название"><br>
-            <input type="number" step="0.01" id="bookPrice" placeholder="Цена (€)"><br>
-            <button id="uploadBookBtn">Загрузить</button>
-        </section>
-    </main>
+    <!-- Панель разработчика -->
+    <section id="dev-panel">
+        <h2>Загрузить книгу</h2>
+        <input type="file" id="bookFile" accept=".pdf,.epub,.txt"><br>
+        <input type="file" id="bookCover" accept="image/*"><br>
+        <input type="text" id="bookTitle" placeholder="Название"><br>
+        <input type="number" step="0.01" id="bookPrice" placeholder="Цена (€)"><br>
+        <button id="uploadBookBtn">Загрузить</button>
+    </section>
+</main>
 
-    <footer>
-        <p>© Dark Market Ultra © 2025</p>
-    </footer>
+<footer>
+    <p>© Dark Market Ultra © 2025</p>
+</footer>
 
-    <script src="config.js"></script>
-    <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("token");
-        const gallery = document.getElementById("bookGallery");
+<script src="config.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const token = localStorage.getItem("token");
+    const gallery = document.getElementById("bookGallery");
 
-        // Загружаем список книг
-        try {
-            const res = await fetch(`${API_URL}/list-books`);
-            const files = await res.json();
+    // Загружаем книги с реальными данными
+    try {
+        const res = await fetch(`${API_URL}/list-books`);
+        const books = await res.json();
 
-            gallery.innerHTML = "";
-            if (files && files.length > 0) {
-                files.forEach(book => {
-                    const div = document.createElement("div");
-                    div.className = "book-card";
-                    div.innerHTML = `
-                        <img src="default-book-cover.jpg" alt="Обложка книги">
-                        <p><b>${book}</b></p>
-                        <p class="price">1.00 €</p>
-                        <button onclick="buyBook('${book}')">Купить</button>
-                    `;
-                    gallery.appendChild(div);
-                });
-            } else {
-                gallery.innerHTML = "<p>Книг пока нет.</p>";
-            }
-        } catch (err) {
-            console.error("Ошибка загрузки книг", err);
-            gallery.innerHTML = "<p>Ошибка загрузки книг.</p>";
-        }
-
-        // Проверка роли для панели разработчика
-        if (token) {
-            try {
-                const res = await fetch(`${API_URL}/profile`, {
-                    headers: { Authorization: "Bearer " + token }
-                });
-                const user = await res.json();
-                if (user.role === "admin" || user.subscription === "Разработчик") {
-                    document.getElementById("dev-panel").style.display = "block";
-                }
-            } catch {}
-        }
-
-        // Загрузка новой книги
-        document.getElementById("uploadBookBtn").addEventListener("click", async () => {
-            const bookFile = document.getElementById("bookFile").files[0];
-            const bookCover = document.getElementById("bookCover").files[0];
-            const title = document.getElementById("bookTitle").value;
-            const price = document.getElementById("bookPrice").value;
-
-            if (!bookFile || !bookCover || !price) 
-                return alert("Выберите файл книги, обложку и укажите цену!");
-
-            const formData = new FormData();
-            formData.append("book", bookFile);
-            formData.append("cover", bookCover);
-            formData.append("title", title);
-            formData.append("price", price);
-
-            const res = await fetch(`${API_URL}/upload-book`, {
-                method: "POST",
-                headers: { Authorization: "Bearer " + token },
-                body: formData
+        gallery.innerHTML = "";
+        if (books && books.length > 0) {
+            books.forEach(book => {
+                const div = document.createElement("div");
+                div.className = "book-card";
+                div.innerHTML = `
+                    <img src="/books/${book.cover}" alt="Обложка книги">
+                    <p><b>${book.title}</b></p>
+                    <p class="price">${book.price} €</p>
+                    <button onclick="buyBook('${book.title}')">Купить</button>
+                `;
+                gallery.appendChild(div);
             });
-            const result = await res.json();
-            if (result.success) {
-                alert("Книга добавлена!");
-                location.reload();
-            } else {
-                alert("Ошибка: " + result.error);
-            }
-        });
-    });
+        } else {
+            gallery.innerHTML = "<p>Книг пока нет.</p>";
+        }
+    } catch (err) {
+        console.error("Ошибка загрузки книг", err);
+        gallery.innerHTML = "<p>Ошибка загрузки книг.</p>";
+    }
 
-    // Покупка книги
-    async function buyBook(bookName) {
-        const token = localStorage.getItem("token");
-        if (!token) return alert("Войдите для покупки!");
-        const res = await fetch(`${API_URL}/buy-book`, {
+    // Панель разработчика
+    if (token) {
+        try {
+            const res = await fetch(`${API_URL}/profile`, {
+                headers: { Authorization: "Bearer " + token }
+            });
+            const user = await res.json();
+            if (user.role === "admin" || user.subscription === "Разработчик") {
+                document.getElementById("dev-panel").style.display = "block";
+            }
+        } catch {}
+    }
+
+    // Загрузка новой книги
+    document.getElementById("uploadBookBtn").addEventListener("click", async () => {
+        const bookFile = document.getElementById("bookFile").files[0];
+        const bookCover = document.getElementById("bookCover").files[0];
+        const title = document.getElementById("bookTitle").value;
+        const price = document.getElementById("bookPrice").value;
+
+        if (!bookFile || !bookCover || !title || !price) 
+            return alert("Заполните все поля и выберите файлы!");
+
+        const formData = new FormData();
+        formData.append("book", bookFile);
+        formData.append("cover", bookCover);
+        formData.append("title", title);
+        formData.append("price", price);
+
+        const res = await fetch(`${API_URL}/upload-book`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token
-            },
-            body: JSON.stringify({ bookName })
+            headers: { Authorization: "Bearer " + token },
+            body: formData
         });
         const result = await res.json();
         if (result.success) {
-            alert(result.message);
+            alert("Книга добавлена!");
+            location.reload();
         } else {
             alert("Ошибка: " + result.error);
         }
-    }
-
-    // 🚫 Антискриншот
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "PrintScreen") {
-            document.body.style.filter = "brightness(0%)"; 
-            setTimeout(() => {
-                document.body.style.filter = "brightness(100%)";
-            }, 2000);
-            alert("Скриншоты запрещены!");
-        }
-        if (e.ctrlKey && (e.key === "c" || e.key === "s" || e.key === "p")) {
-            e.preventDefault();
-            alert("Копирование запрещено!");
-        }
     });
-    document.addEventListener("contextmenu", (e) => {
+});
+
+// Покупка книги
+async function buyBook(bookName) {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Войдите для покупки!");
+    const res = await fetch(`${API_URL}/buy-book`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ bookName })
+    });
+    const result = await res.json();
+    if (result.success) {
+        alert(result.message);
+    } else {
+        alert("Ошибка: " + result.error);
+    }
+}
+
+// 🚫 Антискриншот
+document.addEventListener("keydown", (e) => {
+    if (e.key === "PrintScreen") {
+        document.body.style.filter = "brightness(0%)";
+        setTimeout(() => { document.body.style.filter = "brightness(100%)"; }, 2000);
+        alert("Скриншоты запрещены!");
+    }
+    if (e.ctrlKey && (e.key === "c" || e.key === "s" || e.key === "p")) {
         e.preventDefault();
         alert("Копирование запрещено!");
-    });
-    </script>
+    }
+});
+document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    alert("Копирование запрещено!");
+});
+</script>
 </body>
-</html>
+    </html>
