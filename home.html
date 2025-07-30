@@ -1,113 +1,160 @@
-<h2>Личный кабинет</h2>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет — Dark Market Ultra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html">Главная</a>
+        <a href="home.html">Личный кабинет</a>
+        <a href="games.html">Игры</a>
+        <a href="movies.html">Фильмы</a>
+        <a href="music.html">Музыка</a>
+        <a href="images.html">Картинки</a>
+        <a href="books.html">Книги</a>
+        <a href="apps.html">Программы</a>
+        <a href="tools.html">Приложения</a>
+    </nav>
 
-<div id="profileInfo">
-    <img id="profileImage" src="" alt="Фото профиля"
-         style="width:120px;height:120px;border-radius:50%;object-fit:cover;display:none;border:2px solid gold;">
-    <p><strong>Ваш ник:</strong> <span id="nicknameDisplay"></span></p>
-    <p><strong>Ваш статус:</strong> <span id="roleDisplay"></span></p>
-    <p><strong>Подписка:</strong> <span id="subscriptionDisplay"></span></p>
-</div>
+    <main>
+        <h1>Личный кабинет</h1>
+        <div id="profileInfo">
+            <img id="profilePhoto" src="" alt="Фото профиля" style="width:150px;height:150px;border-radius:50%;border:2px solid white;">
+            <h2 id="username"></h2>
+            <p><strong>Email:</strong> <span id="email"></span></p>
+            <p><strong>Подписка:</strong> <span id="subscription"></span></p>
+            <p><strong>Роль:</strong> <span id="role"></span></p>
+            <p><strong>О себе:</strong> <span id="about"></span></p>
 
-<form id="profileForm" enctype="multipart/form-data">
-    <label>Загрузить новое фото:</label><br>
-    <input type="file" name="profilePhoto" id="profilePhoto" accept="image/*"><br><br>
+            <input type="file" id="photoInput">
+            <button onclick="uploadPhoto()">Загрузить фото</button>
+        </div>
 
-    <label>Никнейм:</label><br>
-    <input type="text" name="nickname" id="nickname"><br><br>
+        <hr>
 
-    <label>О себе:</label><br>
-    <textarea name="about" id="about"></textarea><br><br>
+        <h2>Загрузить файл</h2>
+        <select id="sectionSelect">
+            <option value="images">Картинки</option>
+            <option value="books">Книги</option>
+            <option value="games">Игры</option>
+            <option value="movies">Фильмы</option>
+            <option value="music">Музыка</option>
+            <option value="apps">Программы</option>
+            <option value="tools">Приложения</option>
+        </select>
+        <input type="text" id="fileTitle" placeholder="Название файла">
+        <input type="number" id="filePrice" placeholder="Цена (0 — бесплатно)">
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">Загрузить</button>
+        <progress id="uploadProgress" value="0" max="100" style="width:100%;"></progress>
 
-    <progress id="uploadProgress" value="0" max="100" style="width:100%; display:none;"></progress><br><br>
+        <p id="uploadStatus"></p>
+    </main>
 
-    <button type="submit">Сохранить изменения</button>
-</form>
+    <script>
+        const API_URL = "https://dark-market-backend.onrender.com";
 
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const apiBase = "https://dark-market-backend.onrender.com";
-    const token = localStorage.getItem("token");
-
-    const form = document.getElementById("profileForm");
-    const progressBar = document.getElementById("uploadProgress");
-    const nicknameDisplay = document.getElementById("nicknameDisplay");
-    const roleDisplay = document.getElementById("roleDisplay");
-    const subscriptionDisplay = document.getElementById("subscriptionDisplay");
-    const profileImage = document.getElementById("profileImage");
-
-    // Загружаем данные профиля
-    fetch(`${apiBase}/profile`, {
-        headers: { "Authorization": "Bearer " + token }
-    })
-    .then(res => res.json())
-    .then(user => {
-        if (!user.success) {
-            alert("Ошибка загрузки профиля: " + (user.error || "Неизвестно"));
-            return;
-        }
-
-        nicknameDisplay.innerHTML = user.role === "admin" 
-            ? `${user.username} 👑` 
-            : user.username;
-
-        roleDisplay.textContent = user.role === "admin" ? "Администратор" : "Пользователь";
-        subscriptionDisplay.textContent = user.subscription || "Нет";
-
-        document.getElementById("nickname").value = user.username;
-        document.getElementById("about").value = user.about || "";
-
-        if (user.photo) {
-            profileImage.src = apiBase + user.photo;
-            profileImage.style.display = "block";
-        }
-    });
-
-    // Отправка формы с фото и данными
-    form.addEventListener("submit", e => {
-        e.preventDefault();
-
-        const formData = new FormData(form);
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${apiBase}/upload-photo`);
-        xhr.setRequestHeader("Authorization", "Bearer " + token);
-
-        xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-                progressBar.style.display = "block";
-                const percent = (event.loaded / event.total) * 100;
-                progressBar.value = percent;
+        // === Подгрузка профиля ===
+        async function loadProfile() {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Сначала войдите!");
+                window.location.href = "index.html";
+                return;
             }
-        };
 
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                // После фото — обновляем ник/о себе
-                fetch(`${apiBase}/update-profile`, {
-                    method: "POST",
-                    headers: { 
-                        "Authorization": "Bearer " + token,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        nickname: document.getElementById("nickname").value,
-                        about: document.getElementById("about").value
-                    })
-                })
-                .then(r => r.json())
-                .then(d => {
-                    if (d.success) {
-                        alert("Профиль обновлён!");
-                        location.reload();
-                    } else {
-                        alert("Ошибка: " + d.error);
-                    }
-                });
+            const res = await fetch(API_URL + "/profile", {
+                headers: { Authorization: "Bearer " + token }
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById("username").innerHTML =
+                    data.username + (data.role === "admin" ? " 👑" : "");
+                document.getElementById("email").textContent = data.email;
+                document.getElementById("subscription").textContent = data.subscription;
+                document.getElementById("role").textContent = data.role;
+                document.getElementById("about").textContent = data.about || "Не заполнено";
+                if (data.photo) {
+                    document.getElementById("profilePhoto").src = API_URL + data.photo;
+                }
             } else {
-                alert("Ошибка загрузки фото");
+                alert("Ошибка: " + data.error);
             }
-        };
+        }
 
-        xhr.send(formData);
-    });
-});
-</script>
+        // === Загрузка фото профиля ===
+        async function uploadPhoto() {
+            const token = localStorage.getItem("token");
+            const input = document.getElementById("photoInput");
+            if (!input.files.length) return alert("Выберите фото!");
+
+            const formData = new FormData();
+            formData.append("photo", input.files[0]);
+
+            const res = await fetch(API_URL + "/upload-photo", {
+                method: "POST",
+                headers: { Authorization: "Bearer " + token },
+                body: formData
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById("profilePhoto").src = API_URL + data.photo;
+                alert("Фото обновлено!");
+            } else {
+                alert("Ошибка: " + data.error);
+            }
+        }
+
+        // === Загрузка файлов в разделы с прогрессом ===
+        async function uploadFile() {
+            const token = localStorage.getItem("token");
+            const section = document.getElementById("sectionSelect").value;
+            const title = document.getElementById("fileTitle").value;
+            const price = document.getElementById("filePrice").value || 0;
+            const input = document.getElementById("fileInput");
+
+            if (!input.files.length) return alert("Выберите файл!");
+
+            const formData = new FormData();
+            formData.append("file", input.files[0]);
+            formData.append("title", title);
+            formData.append("price", price);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", API_URL + `/upload-${section}`, true);
+            xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+            xhr.upload.onprogress = (event) => {
+                if (event.lengthComputable) {
+                    const percent = (event.loaded / event.total) * 100;
+                    document.getElementById("uploadProgress").value = percent;
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        document.getElementById("uploadStatus").textContent = "Файл успешно загружен!";
+                        document.getElementById("uploadProgress").value = 0;
+                    } else {
+                        document.getElementById("uploadStatus").textContent = "Ошибка: " + response.error;
+                    }
+                } else {
+                    document.getElementById("uploadStatus").textContent = "Ошибка загрузки!";
+                }
+            };
+
+            xhr.send(formData);
+        }
+
+        // Запуск при загрузке страницы
+        loadProfile();
+    </script>
+</body>
+</html>
