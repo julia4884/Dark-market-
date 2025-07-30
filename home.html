@@ -41,14 +41,17 @@
         button:hover {
             background: darkred;
         }
-        textarea {
+        textarea, input[type="text"], input[type="email"] {
             width: 90%;
-            height: 80px;
-            resize: none;
             margin-top: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            background: #222;
+            color: #eee;
         }
-        #developer-panel {
-            display: none; /* скрыт для обычных */
+        #developer-panel, #admin-panel {
+            display: none;
             margin-top: 20px;
             padding: 15px;
             border: 1px solid #444;
@@ -77,11 +80,24 @@
             <textarea id="aboutMe" placeholder="Напиши о себе..."></textarea><br>
             <button id="saveAboutBtn">Сохранить</button>
 
-            <!-- 📌 Панель разработчика -->
+            <!-- Панель разработчика -->
             <div id="developer-panel">
                 <h3>👑 Панель разработчика</h3>
                 <input type="file" id="fileUpload" multiple>
                 <button id="uploadFileBtn">Загрузить файлы</button>
+            </div>
+
+            <!-- Панель администратора -->
+            <div id="admin-panel">
+                <h3>⚔ Панель администратора</h3>
+                
+                <h4>Заблокировать пользователя</h4>
+                <input type="email" id="blockUserEmail" placeholder="Email пользователя">
+                <button id="blockUserBtn">Заблокировать</button>
+
+                <h4>Заблокировать приложение</h4>
+                <input type="text" id="blockAppName" placeholder="ID или название приложения">
+                <button id="blockAppBtn">Заблокировать</button>
             </div>
 
             <hr>
@@ -104,7 +120,6 @@
         }
 
         try {
-            // Загружаем профиль
             const res = await fetch(`${API_URL}/profile`, {
                 headers: { Authorization: "Bearer " + token }
             });
@@ -123,9 +138,14 @@
             if (data.photo) document.getElementById("profile-photo").src = API_URL + data.photo;
             document.getElementById("aboutMe").value = data.about || "";
 
-            // Если админ → показываем панель разработчика
+            // Разработчик
             if (data.role === "admin" || data.subscription === "Разработчик") {
                 document.getElementById("developer-panel").style.display = "block";
+            }
+
+            // Админ именно твой аккаунт
+            if (data.email === "juliaangelss26@gmail.com") {
+                document.getElementById("admin-panel").style.display = "block";
             }
 
         } catch (err) {
@@ -133,7 +153,7 @@
             window.location.href = "index.html";
         }
 
-        // Сохранение "О себе"
+        // Сохранение О себе
         document.getElementById("saveAboutBtn").addEventListener("click", async () => {
             const about = document.getElementById("aboutMe").value;
             try {
@@ -182,7 +202,7 @@
             }
         });
 
-        // 📌 Загрузка файлов разработчика
+        // Загрузка файлов разработчика
         document.getElementById("uploadFileBtn").addEventListener("click", async () => {
             const fileInput = document.getElementById("fileUpload");
             if (!fileInput.files.length) return alert("Выберите файлы!");
@@ -209,6 +229,54 @@
             }
         });
 
+        // Блокировка пользователя
+        document.getElementById("blockUserBtn").addEventListener("click", async () => {
+            const email = document.getElementById("blockUserEmail").value;
+            if (!email) return alert("Введите email!");
+            try {
+                const res = await fetch(`${API_URL}/admin/block-user`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token,
+                    },
+                    body: JSON.stringify({ email }),
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert("Пользователь заблокирован!");
+                } else {
+                    alert("Ошибка: " + result.error);
+                }
+            } catch (err) {
+                alert("Ошибка при блокировке пользователя.");
+            }
+        });
+
+        // Блокировка приложения
+        document.getElementById("blockAppBtn").addEventListener("click", async () => {
+            const appName = document.getElementById("blockAppName").value;
+            if (!appName) return alert("Введите ID или название приложения!");
+            try {
+                const res = await fetch(`${API_URL}/admin/block-app`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bearer " + token,
+                    },
+                    body: JSON.stringify({ appName }),
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert("Приложение заблокировано!");
+                } else {
+                    alert("Ошибка: " + result.error);
+                }
+            } catch (err) {
+                alert("Ошибка при блокировке приложения.");
+            }
+        });
+
         // Выход
         document.getElementById("logoutBtn").addEventListener("click", () => {
             localStorage.removeItem("token");
@@ -217,4 +285,4 @@
     });
     </script>
 </body>
-</html>        
+</html>
