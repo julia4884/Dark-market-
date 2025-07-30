@@ -7,69 +7,42 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Подключение общего хедера -->
-  <div id="header-placeholder"></div>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="home.html">Личный кабинет</a>
+    <a href="games.html">Игры</a>
+    <a href="movies.html" class="active">Фильмы</a>
+    <a href="music.html">Музыка</a>
+    <a href="images.html">Картинки</a>
+    <a href="books.html">Книги</a>
+    <a href="apps.html">Программы</a>
+    <a href="tools.html">Приложения</a>
+  </nav>
 
   <main>
-    <h1>Фильмы</h1>
+    <h1 class="neon-title">Фильмы</h1>
+
+    <!-- Форма загрузки фильма -->
+    <section id="uploadMovieSection" style="display:none;">
+      <h2>Загрузить фильм</h2>
+      <input type="text" id="movieTitle" placeholder="Название фильма">
+      <input type="number" id="moviePrice" placeholder="Цена (0 = бесплатно)">
+      <input type="file" id="movieFile">
+      <button onclick="uploadMovie()" class="neon-button">Загрузить</button>
+      <progress id="uploadProgress" value="0" max="100" style="width:100%;"></progress>
+      <p id="uploadStatus"></p>
+    </section>
 
     <!-- Галерея фильмов -->
-    <div id="gallery" class="gallery"></div>
-
-    <!-- Форма загрузки (только для админов/разработчиков) -->
-    <section id="uploadSection" class="upload-section" style="display:none;">
-      <h2>Загрузить фильм</h2>
-      <form id="uploadForm">
-        <input type="text" id="movieTitle" placeholder="Название фильма" required>
-        <input type="number" id="moviePrice" placeholder="Цена (0 = бесплатно)" required>
-        <input type="file" id="movieFile" accept=".mp4,.avi,.mkv" required>
-        <button type="submit">Загрузить</button>
-        <div id="uploadProgress">0%</div>
-      </form>
+    <section class="gallery-section">
+      <h2>Доступные фильмы</h2>
+      <div id="moviesGallery" class="gallery"></div>
     </section>
   </main>
 
-  <script src="header.js"></script>
-  <script src="script.js"></script>
   <script>
     const API_URL = "https://dark-market-backend.onrender.com";
 
-    async function loadMovies() {
-      try {
-        const res = await fetch(API_URL + "/movies/list");
-        const data = await res.json();
-
-        if (data.success) {
-          const gallery = document.getElementById("gallery");
-          gallery.innerHTML = "";
-
-          data.items.forEach(item => {
-            const card = document.createElement("div");
-            card.className = "card";
-
-            const title = document.createElement("h3");
-            title.textContent = item.title;
-
-            const downloadBtn = document.createElement("button");
-            if (item.price === 0) {
-              downloadBtn.textContent = "Скачать бесплатно";
-              downloadBtn.onclick = () => window.location.href = API_URL + "/uploads/" + item.file;
-            } else {
-              downloadBtn.textContent = "Купить за " + item.price + "€";
-              downloadBtn.onclick = () => alert("Оплата через PayPal скоро будет доступна!");
-            }
-
-            card.appendChild(title);
-            card.appendChild(downloadBtn);
-            gallery.appendChild(card);
-          });
-        }
-      } catch (err) {
-        console.error("Ошибка загрузки фильмов:", err);
-      }
-    }
-
-    // Проверка роли пользователя
     async function checkRole() {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -79,45 +52,85 @@
           headers: { "Authorization": "Bearer " + token }
         });
         const data = await res.json();
-
-        if (data.success && (data.user.role === "admin" || data.user.role === "developer")) {
-          document.getElementById("uploadSection").style.display = "block";
+        if (data.success && (data.user.role === "developer" || data.user.role === "admin")) {
+          document.getElementById("uploadMovieSection").style.display = "block";
         }
       } catch (err) {
         console.error("Ошибка проверки роли:", err);
       }
     }
 
-    // Обработка загрузки файла
-    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData();
-      formData.append("title", document.getElementById("movieTitle").value);
-      formData.append("price", document.getElementById("moviePrice").value);
-      formData.append("file", document.getElementById("movieFile").files[0]);
-
+    async function loadMovies() {
       try {
-        const res = await fetch(API_URL + "/movies/upload", {
-          method: "POST",
-          headers: { "Authorization": "Bearer " + localStorage.getItem("token") },
-          body: formData
-        });
-
+        const res = await fetch(API_URL + "/movies");
         const data = await res.json();
+
         if (data.success) {
-          alert("Фильм успешно загружен!");
-          loadMovies();
-        } else {
-          alert("Ошибка: " + data.message);
+          const gallery = document.getElementById("moviesGallery");
+          gallery.innerHTML = "";
+
+          data.movies.forEach(movie => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+              <h3>${movie.title}</h3>
+              <p>Цена: ${movie.price > 0 ? movie.price + "€" : "Бесплатно"}</p>
+              ${movie.price > 0 
+                ? `<button onclick="buyMovie('${movie._id}')" class="neon-button">Купить</button>` 
+                : `<a href="${API_URL}/uploads/movies/${movie.filename}" class="neon-button">Скачать</a>`}
+            `;
+            gallery.appendChild(card);
+          });
         }
       } catch (err) {
-        console.error("Ошибка при загрузке:", err);
+        console.error("Ошибка загрузки фильмов:", err);
       }
-    });
+    }
 
-    loadMovies();
+    function uploadMovie() {
+      const token = localStorage.getItem("token");
+      const title = document.getElementById("movieTitle").value;
+      const price = document.getElementById("moviePrice").value || 0;
+      const file = document.getElementById("movieFile").files[0];
+
+      if (!file) return alert("Выберите файл!");
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("price", price);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", API_URL + "/upload-movie", true);
+      xhr.setRequestHeader("Authorization", "Bearer " + token);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          document.getElementById("uploadProgress").value = (event.loaded / event.total) * 100;
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            alert("Фильм загружен!");
+            loadMovies();
+          } else {
+            alert("Ошибка: " + response.error);
+          }
+        }
+      };
+
+      xhr.send(formData);
+    }
+
+    function buyMovie(movieId) {
+      alert("Тут будет подключение PayPal для покупки фильма " + movieId);
+    }
+
     checkRole();
+    loadMovies();
   </script>
 </body>
 </html>
