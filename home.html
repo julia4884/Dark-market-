@@ -1,199 +1,147 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Личный кабинет — Dark Market Ultra</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет | Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-    <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-        <a href="games.html">Игры</a>
-        <a href="movies.html">Фильмы</a>
-        <a href="music.html">Музыка</a>
-        <a href="images.html">Картинки</a>
-        <a href="books.html">Книги</a>
-        <a href="apps.html">Программы</a>
-        <a href="tools.html">Приложения</a>
-    </nav>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="home.html" class="active">Личный кабинет</a>
+    <a href="games.html">Игры</a>
+    <a href="movies.html">Фильмы</a>
+    <a href="music.html">Музыка</a>
+    <a href="images.html">Картинки</a>
+    <a href="books.html">Книги</a>
+    <a href="apps.html">Программы</a>
+    <a href="tools.html">Приложения</a>
+    <a href="donate.html">Поддержать проект</a>
+  </nav>
 
-    <main>
-        <h1 class="neon-title">Личный кабинет</h1>
-        <div id="profileInfo">
-            <img id="profilePhoto" src="default-avatar.png" alt="Фото профиля" class="profile-photo">
-            <h2 id="username"></h2>
-            <p><strong>Email:</strong> <span id="email"></span></p>
-            <p><strong>Подписка:</strong> <span id="subscription"></span></p>
-            <p><strong>Роль:</strong> <span id="role"></span></p>
-            <p><strong>О себе:</strong> <span id="about"></span></p>
+  <main>
+    <header>
+      <h1 class="neon-logo">Личный кабинет</h1>
+      <p class="subtitle">Добро пожаловать, <span id="username">Гость</span>!</p>
+    </header>
 
-            <input type="file" id="photoInput">
-            <button onclick="uploadPhoto()" class="neon-button">Загрузить фото</button>
-        </div>
+    <section class="profile-section">
+      <div class="profile-card">
+        <img id="avatarPreview" src="default-avatar.png" alt="Аватар" class="avatar">
+        <form id="avatarForm" enctype="multipart/form-data">
+          <input type="file" id="avatarUpload" name="avatar" accept="image/*">
+          <button type="submit" class="neon-button">Загрузить фото</button>
+        </form>
+        <progress id="avatarProgress" value="0" max="100" style="display:none;"></progress>
+      </div>
 
-        <hr>
+      <div class="profile-info">
+        <h2>Информация</h2>
+        <p><strong>Email:</strong> <span id="email">guest@example.com</span></p>
+        <p><strong>Статус:</strong> <span id="status">Пользователь</span></p>
+        <p><strong>Подписка:</strong> <span id="subscription">Нет</span></p>
+        <label for="about">О себе:</label>
+        <textarea id="about" placeholder="Напишите пару слов о себе..."></textarea>
+        <button id="saveAbout" class="neon-button">Сохранить</button>
+      </div>
+    </section>
 
-        <h2>Загрузить файл</h2>
-        <select id="sectionSelect">
-            <option value="images">Картинки</option>
-            <option value="books">Книги</option>
-            <option value="games">Игры</option>
-            <option value="movies">Фильмы</option>
-            <option value="music">Музыка</option>
-            <option value="apps">Программы</option>
-            <option value="tools">Приложения</option>
+    <!-- Загрузка файлов -->
+    <section class="upload-section">
+      <h2 class="neon-title">Загрузить файлы</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <select id="category" name="category" required>
+          <option value="games">Игры</option>
+          <option value="movies">Фильмы</option>
+          <option value="music">Музыка</option>
+          <option value="images">Картинки</option>
+          <option value="books">Книги</option>
+          <option value="apps">Программы</option>
+          <option value="tools">Приложения</option>
         </select>
-        <input type="text" id="fileTitle" placeholder="Название файла">
-        <input type="number" id="filePrice" placeholder="Цена (0 — бесплатно)">
-        <input type="file" id="fileInput">
-        <button onclick="uploadFile()" class="neon-button">Загрузить</button>
-        <progress id="uploadProgress" value="0" max="100" style="width:100%;"></progress>
-        <p id="uploadStatus"></p>
+        <input type="file" id="fileUpload" name="file" required>
+        <input type="number" id="price" name="price" placeholder="Цена (0 = бесплатно)" min="0" value="0">
+        <button type="submit" class="neon-button">Загрузить</button>
+        <progress id="fileProgress" value="0" max="100" style="display:none;"></progress>
+      </form>
+    </section>
 
-        <!-- Панель администратора -->
-        <section id="adminPanel" class="admin-panel" style="display:none;">
-            <h2>👑 Панель администратора</h2>
-            <div>
-                <input type="text" id="blockUserEmail" placeholder="Email пользователя">
-                <button id="blockUserBtn" class="neon-button">Заблокировать пользователя</button>
-            </div>
-            <div>
-                <input type="text" id="blockAppName" placeholder="Название контента">
-                <button id="blockAppBtn" class="neon-button">Заблокировать контент</button>
-            </div>
-        </section>
-    </main>
+    <!-- Панель администратора -->
+    <section id="adminPanel" class="admin-panel" style="display:none;">
+      <h2 class="neon-title">👑 Панель администратора</h2>
+      <div class="admin-tools">
+        <input type="text" id="blockUserEmail" placeholder="Email пользователя">
+        <button id="blockUserBtn" class="neon-button">Заблокировать пользователя</button>
+        <input type="text" id="blockAppName" placeholder="Название приложения">
+        <button id="blockAppBtn" class="neon-button">Заблокировать приложение</button>
+      </div>
+    </section>
+  </main>
 
-    <script>
-        const API_URL = "https://dark-market-backend.onrender.com";
+  <footer>
+    <p>&copy; 2025 Dark Market Ultra</p>
+  </footer>
 
-        // === Подгрузка профиля ===
-        async function loadProfile() {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                alert("Сначала войдите!");
-                window.location.href = "index.html";
-                return;
-            }
+  <script>
+    // Превью аватара
+    document.getElementById('avatarUpload').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => document.getElementById('avatarPreview').src = ev.target.result;
+        reader.readAsDataURL(file);
+      }
+    });
 
-            const res = await fetch(API_URL + "/profile", {
-                headers: { Authorization: "Bearer " + token }
-            });
+    // Обработка формы аватара
+    document.getElementById('avatarForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const progressBar = document.getElementById('avatarProgress');
+      progressBar.style.display = 'block';
 
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById("username").innerHTML =
-                    data.username + (data.role === "admin" ? " 👑" : "");
-                document.getElementById("email").textContent = data.email;
-                document.getElementById("subscription").textContent = data.subscription;
-                document.getElementById("role").textContent = data.role;
-                document.getElementById("about").textContent = data.about || "Не заполнено";
-                if (data.photo) {
-                    document.getElementById("profilePhoto").src = API_URL + data.photo;
-                }
-                if (data.role === "admin") {
-                    document.getElementById("adminPanel").style.display = "block";
-                }
-            } else {
-                alert("Ошибка: " + data.error);
-            }
-        }
-
-        // === Загрузка фото профиля ===
-        async function uploadPhoto() {
-            const token = localStorage.getItem("token");
-            const input = document.getElementById("photoInput");
-            if (!input.files.length) return alert("Выберите фото!");
-
-            const formData = new FormData();
-            formData.append("photo", input.files[0]);
-
-            const res = await fetch(API_URL + "/upload-photo", {
-                method: "POST",
-                headers: { Authorization: "Bearer " + token },
-                body: formData
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                document.getElementById("profilePhoto").src = API_URL + data.photo;
-                alert("Фото обновлено!");
-            } else {
-                alert("Ошибка: " + data.error);
-            }
-        }
-
-        // === Загрузка файлов с прогрессом ===
-        async function uploadFile() {
-            const token = localStorage.getItem("token");
-            const section = document.getElementById("sectionSelect").value;
-            const title = document.getElementById("fileTitle").value;
-            const price = document.getElementById("filePrice").value || 0;
-            const input = document.getElementById("fileInput");
-
-            if (!input.files.length) return alert("Выберите файл!");
-
-            const formData = new FormData();
-            formData.append("file", input.files[0]);
-            formData.append("title", title);
-            formData.append("price", price);
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", API_URL + `/upload-${section}`, true);
-            xhr.setRequestHeader("Authorization", "Bearer " + token);
-
-            xhr.upload.onprogress = (event) => {
-                if (event.lengthComputable) {
-                    const percent = (event.loaded / event.total) * 100;
-                    document.getElementById("uploadProgress").value = percent;
-                }
-            };
-
-            xhr.onload = () => {
-                if (xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        document.getElementById("uploadStatus").textContent = "Файл успешно загружен!";
-                        document.getElementById("uploadProgress").value = 0;
-                    } else {
-                        document.getElementById("uploadStatus").textContent = "Ошибка: " + response.error;
-                    }
-                } else {
-                    document.getElementById("uploadStatus").textContent = "Ошибка загрузки!";
-                }
-            };
-
-            xhr.send(formData);
-        }
-
-        // === Админские функции ===
-        document.getElementById("blockUserBtn")?.addEventListener("click", async () => {
-            const email = document.getElementById("blockUserEmail").value;
-            if (!email) return alert("Введите email!");
-            const res = await fetch(API_URL + "/admin/block-user", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
-                body: JSON.stringify({ email })
-            });
-            const data = await res.json();
-            alert(data.message);
+      try {
+        const response = await fetch('/upload-avatar', {
+          method: 'POST',
+          body: formData
         });
+        if (response.ok) {
+          alert('Аватар успешно загружен!');
+          e.target.reset();
+          progressBar.value = 0;
+        } else {
+          alert('Ошибка при загрузке аватара.');
+        }
+      } catch (err) {
+        alert('Сервер недоступен.');
+      }
+    });
 
-        document.getElementById("blockAppBtn")?.addEventListener("click", async () => {
-            const appName = document.getElementById("blockAppName").value;
-            if (!appName) return alert("Введите название!");
-            const res = await fetch(API_URL + "/admin/block-app", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: "Bearer " + localStorage.getItem("token") },
-                body: JSON.stringify({ appName })
-            });
-            const data = await res.json();
-            alert(data.message);
+    // Обработка формы файлов
+    document.getElementById('uploadForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const progressBar = document.getElementById('fileProgress');
+      progressBar.style.display = 'block';
+
+      try {
+        const response = await fetch('/upload-file', {
+          method: 'POST',
+          body: formData
         });
-
-        loadProfile();
-    </script>
+        if (response.ok) {
+          alert('Файл успешно загружен!');
+          e.target.reset();
+          progressBar.value = 0;
+        } else {
+          alert('Ошибка при загрузке файла.');
+        }
+      } catch (err) {
+        alert('Сервер недоступен.');
+      }
+    });
+  </script>
 </body>
 </html>
