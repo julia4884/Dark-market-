@@ -13,12 +13,17 @@
             text-align: center;
             padding: 20px;
         }
-        h1 {
-            margin-bottom: 20px;
+        nav a {
+            margin: 0 10px;
+            color: #eee;
+            text-decoration: none;
+        }
+        nav a:hover {
+            color: crimson;
         }
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
@@ -58,7 +63,7 @@
             border-radius: 10px;
             display: none;
         }
-        input, textarea {
+        input {
             margin: 5px 0;
             padding: 8px;
             border-radius: 6px;
@@ -73,23 +78,21 @@
     <header>
         <h1>Картинки — Dark Market Ultra</h1>
         <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-  <a href="images.html">Картинки</a>
-  <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
+            <a href="index.html">Главная</a>
+            <a href="home.html">Личный кабинет</a>
+            <a href="games.html">Игры</a>
+            <a href="movies.html">Фильмы</a>
+            <a href="music.html">Музыка</a>
+            <a href="images.html">Картинки</a>
+            <a href="books.html">Книги</a>
+            <a href="apps.html">Программы</a>
+            <a href="tools.html">Приложения</a>
         </nav>
         <p>Превью бесплатны. Полный размер доступен после покупки 💎</p>
     </header>
 
     <main>
-        <div class="gallery" id="gallery">
-            <!-- Здесь будут загруженные картинки -->
-        </div>
+        <div class="gallery" id="gallery"></div>
 
         <!-- Панель разработчика -->
         <section id="dev-panel">
@@ -109,15 +112,14 @@
     <script>
     document.addEventListener("DOMContentLoaded", async () => {
         const token = localStorage.getItem("token");
+        const gallery = document.getElementById("gallery");
 
         // Загружаем список картинок
         try {
             const res = await fetch(`${API_URL}/images/list`);
             const data = await res.json();
 
-            const gallery = document.getElementById("gallery");
             gallery.innerHTML = "";
-
             if (data.success && data.images.length > 0) {
                 data.images.forEach(img => {
                     const div = document.createElement("div");
@@ -135,9 +137,10 @@
             }
         } catch (err) {
             console.error("Ошибка загрузки картинок", err);
+            gallery.innerHTML = "<p>Ошибка загрузки картинок.</p>";
         }
 
-        // Проверяем роль (если разработчик — показываем панель)
+        // Проверка роли для панели разработчика
         if (token) {
             try {
                 const res = await fetch(`${API_URL}/profile`, {
@@ -178,14 +181,29 @@
         });
     });
 
-    // Покупка картинки (заглушка, позже подключим PayPal)
+    // Покупка картинки
     async function buyImage(id) {
         const token = localStorage.getItem("token");
         if (!token) return alert("Войдите для покупки!");
-        alert("Покупка через PayPal будет подключена позже.");
+
+        const res = await fetch(`${API_URL}/buy-image`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token
+            },
+            body: JSON.stringify({ imageId: id })
+        });
+        const result = await res.json();
+
+        if (result.success) {
+            alert(result.message);
+        } else {
+            alert("Ошибка: " + result.error);
+        }
     }
 
-    // 🚫 Антискриншот: затемнение при PrintScreen
+    // 🚫 Антискриншот
     document.addEventListener("keydown", (e) => {
         if (e.key === "PrintScreen") {
             document.body.style.transition = "all 0.2s ease-in-out";
@@ -201,11 +219,10 @@
         }
     });
 
-    // 🚫 Запрет правой кнопки мыши
     document.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         alert("Копирование запрещено!");
     });
     </script>
 </body>
-              </html>
+</html>
