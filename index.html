@@ -7,62 +7,56 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Подключение общего хедера -->
-  <div id="header-placeholder"></div>
+  <!-- Навигация -->
+  <nav>
+    <a href="index.html" class="active">Главная</a>
+    <a href="home.html">Личный кабинет</a>
+    <a href="games.html">Игры</a>
+    <a href="movies.html">Фильмы</a>
+    <a href="music.html">Музыка</a>
+    <a href="images.html">Картинки</a>
+    <a href="books.html">Книги</a>
+    <a href="apps.html">Программы</a>
+    <a href="tools.html">Приложения</a>
+    <a href="donate.html">Поддержать проект</a>
+  </nav>
 
-  <main class="home-main">
-    <h1 class="neon-title">Добро пожаловать в <span>Dark Market Ultra</span></h1>
-    <p class="intro-text">
-      Здесь ты найдёшь игры, фильмы, музыку, книги и многое другое.  
-      Вступи в семью и получи доступ к эксклюзивному контенту!
-    </p>
+  <main>
+    <!-- Лого -->
+    <header class="hero">
+      <h1 class="neon-logo">Dark Market Ultra</h1>
+      <p class="subtitle">Место, где твои файлы обретают свободу</p>
+    </header>
 
-    <!-- Галерея разделов -->
+    <!-- Разделы -->
     <section class="sections">
-      <div class="section-card">
-        <h2>🎮 Игры</h2>
-        <p>Новые и редкие игры.</p>
-        <a href="games.html" class="neon-button">Перейти</a>
+      <h2 class="neon-title">Выбери раздел</h2>
+      <div class="cards-grid">
+        <a href="games.html" class="card neon-button">🎮 Игры</a>
+        <a href="movies.html" class="card neon-button">🎬 Фильмы</a>
+        <a href="music.html" class="card neon-button">🎵 Музыка</a>
+        <a href="images.html" class="card neon-button">🖼 Картинки</a>
+        <a href="books.html" class="card neon-button">📚 Книги</a>
+        <a href="apps.html" class="card neon-button">💻 Программы</a>
+        <a href="tools.html" class="card neon-button">📱 Приложения</a>
       </div>
+    </section>
 
-      <div class="section-card">
-        <h2>🎬 Фильмы</h2>
-        <p>Смотри без ограничений.</p>
-        <a href="movies.html" class="neon-button">Перейти</a>
-      </div>
-
-      <div class="section-card">
-        <h2>🎵 Музыка</h2>
-        <p>Любимые треки всегда с тобой.</p>
-        <a href="music.html" class="neon-button">Перейти</a>
-      </div>
-
-      <div class="section-card">
-        <h2>📚 Книги</h2>
-        <p>Читай где угодно.</p>
-        <a href="books.html" class="neon-button">Перейти</a>
-      </div>
-
-      <div class="section-card">
-        <h2>🖼 Картинки</h2>
-        <p>Уникальные изображения.</p>
-        <a href="images.html" class="neon-button">Перейти</a>
-      </div>
-
-      <div class="section-card">
-        <h2>⚙️ Программы</h2>
-        <p>Инструменты и приложения.</p>
-        <a href="apps.html" class="neon-button">Перейти</a>
-      </div>
-
-      <div class="section-card">
-        <h2>💎 Поддержка</h2>
-        <p>Стань частью семьи.</p>
-        <a href="donate.html" class="neon-button">Поддержать</a>
-      </div>
+    <!-- О проекте -->
+    <section class="about">
+      <h2 class="neon-title">О Dark Market Ultra</h2>
+      <p>
+        Добро пожаловать в <strong>Dark Market Ultra</strong> — место, где каждый может делиться играми,
+        фильмами, музыкой, книгами и приложениями.  
+        Для разработчиков у нас есть возможность выкладывать свои работы и зарабатывать.  
+        Поддержи проект — и стань частью нашей семьи.
+      </p>
+      <a href="donate.html" class="neon-button">💎 Стать частью семьи</a>
     </section>
   </main>
 
-  <script src="header.js"></script>
+  <footer>
+    <p>&copy; 2025 Dark Market Ultra. Все права защищены.</p>
+  </footer>
 </body>
 </html>
