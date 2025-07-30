@@ -1,4 +1,4 @@
-/* Общие стили */
+/* === Общие стили === */
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -6,30 +6,31 @@ body {
   color: #e0e0e0;
   overflow-x: hidden;
   min-height: 100vh;
+  position: relative;
 }
 
-/* Дымка */
+/* Эффект мягкой дымки */
 body::before {
   content: "";
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: url('https://i.ibb.co/W5kzV5Q/smoke.png') repeat;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
   opacity: 0.15;
   z-index: -1;
-  animation: drift 30s infinite linear;
+  animation: drift 20s infinite linear alternate;
 }
 
 @keyframes drift {
-  from { background-position: 0 0; }
-  to { background-position: 1000px 1000px; }
+  from { transform: translateX(0) translateY(0); }
+  to { transform: translateX(40px) translateY(40px); }
 }
 
-/* Навигация */
+/* === Навигация === */
 nav {
   display: flex;
   justify-content: center;
-  background: rgba(20, 0, 40, 0.8);
+  background: rgba(20, 0, 40, 0.85);
   padding: 15px;
   border-bottom: 2px solid #6d28d9;
 }
@@ -40,19 +41,19 @@ nav a {
   color: #c084fc;
   font-weight: bold;
   transition: all 0.3s ease;
-  border: 1px solid transparent;
+  border: 2px solid transparent;
   padding: 8px 14px;
   border-radius: 8px;
 }
 
 nav a:hover,
 nav a.active {
-  border: 1px solid #8b5cf6;
+  border: 2px solid #8b5cf6;
   color: #fff;
   box-shadow: 0 0 12px #a78bfa, 0 0 20px #6d28d9;
 }
 
-/* Логотип */
+/* === Логотип === */
 .neon-logo {
   text-align: center;
   font-size: 2.8rem;
@@ -71,7 +72,7 @@ nav a.active {
   margin-bottom: 40px;
 }
 
-/* Заголовки разделов */
+/* === Заголовки разделов === */
 .neon-title {
   text-align: center;
   font-size: 2rem;
@@ -80,7 +81,7 @@ nav a.active {
   margin: 40px 0 20px;
 }
 
-/* Сетка карточек */
+/* === Сетка карточек === */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -90,7 +91,7 @@ nav a.active {
   margin: 0 auto;
 }
 
-/* Карточки и кнопки */
+/* === Карточки и кнопки === */
 .card, .neon-button {
   display: flex;
   align-items: center;
@@ -113,7 +114,7 @@ nav a.active {
   transform: translateY(-5px);
 }
 
-/* Галерея */
+/* === Галерея === */
 .gallery-section {
   max-width: 1200px;
   margin: 40px auto;
@@ -171,6 +172,7 @@ footer {
   border-top: 2px solid #6d28d9;
   color: #c084fc;
 }
+
 /* === Адаптив под мобильные устройства === */
 @media (max-width: 768px) {
   body {
@@ -191,7 +193,6 @@ footer {
   }
 
   nav {
-    display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
@@ -207,21 +208,13 @@ footer {
     padding: 10px;
   }
 
-  #gallery {
-    display: grid;
-    grid-template-columns: 1fr; /* одна колонка */
-    gap: 15px;
+  .gallery {
+    grid-template-columns: 1fr;
   }
 
   .card {
     width: 100%;
     box-sizing: border-box;
-  }
-
-  .card img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
   }
 
   h1, h2, h3 {
@@ -243,4 +236,4 @@ footer {
   h1, h2, h3 {
     font-size: 16px;
   }
-      }
+  }
