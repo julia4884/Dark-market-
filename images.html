@@ -1,136 +1,33 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Картинки — Dark Market Ultra</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Картинки — Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header>
+    <div class="logo">☾ Dark Market Ultra ✦</div>
     <nav>
-        <a href="index.html">Главная</a>
-        <a href="home.html">Личный кабинет</a>
-        <a href="games.html">Игры</a>
-        <a href="movies.html">Фильмы</a>
-        <a href="music.html">Музыка</a>
-        <a href="images.html" class="active">Картинки</a>
-        <a href="books.html">Книги</a>
-        <a href="apps.html">Программы</a>
-        <a href="tools.html">Приложения</a>
+      <a href="index.html">Главная</a>
+      <a href="home.html">Личный кабинет</a>
+      <a href="games.html">Игры</a>
+      <a href="movies.html">Фильмы</a>
+      <a href="music.html">Музыка</a>
+      <a href="books.html">Книги</a>
+      <a href="apps.html">Программы</a>
+      <a href="tools.html">Приложения</a>
+      <a href="donate.html">Донат</a>
+      <a href="images.html" class="active">Картинки</a>
     </nav>
+  </header>
 
-    <main>
-  <h1 id="page-title"></h1>
+  <main>
+    <h1 id="page-title">Галерея картинок</h1>
+    <section id="gallery" class="gallery"></section>
+  </main>
 
-  <!-- Форма загрузки (видна только разработчикам) -->
-  <div id="upload-section" style="display:none; margin: 15px 0;">
-    <input type="file" id="file-input">
-    <button id="upload-btn">Загрузить</button>
-    <progress id="upload-progress" max="100" value="0" style="display:none;"></progress>
-  </div>
-
-  <!-- Галерея -->
-  <div id="gallery" class="gallery"></div>
-</main>
-
-<script src="script.js"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // 1. Определяем категорию из имени файла (например, books.html → books)
-    const category = window.location.pathname
-      .split("/")
-      .pop()
-      .replace(".html", "") || "books";
-
-    // 2. Заголовок страницы
-    document.getElementById("page-title").textContent =
-      category.charAt(0).toUpperCase() + category.slice(1);
-
-    // 3. Загружаем галерею
-    loadGallery(category);
-
-    // 4. Проверяем роль пользователя
-    const role = localStorage.getItem("role");
-    if (role === "developer" || role === "admin") {
-      document.getElementById("upload-section").style.display = "block";
-
-      // Вешаем событие загрузки
-      document.getElementById("upload-btn").onclick = () => {
-        const file = document.getElementById("file-input").files[0];
-        if (file) uploadFile(file, category);
-      };
-    }
-  });
-</script>
-        <div id="gallery" class="gallery"></div>
-    </main>
-
-    <script>
-        const API_URL = "https://dark-market-backend.onrender.com";
-
-        async function loadImages() {
-            const res = await fetch(API_URL + "/images/list");
-            const data = await res.json();
-
-            if (data.success) {
-                const gallery = document.getElementById("gallery");
-                gallery.innerHTML = "";
-
-                data.items.forEach(item => {
-                    const card = document.createElement("div");
-                    card.className = "card";
-
-                    const img = document.createElement("img");
-                    img.src = API_URL + "/images/" + item.filename;
-                    img.alt = item.title;
-
-                    const title = document.createElement("h3");
-                    title.textContent = item.title;
-
-                    const price = document.createElement("p");
-                    price.textContent = item.price > 0 ? `Цена: €${item.price}` : "Бесплатно";
-
-                    const button = document.createElement("button");
-                    if (item.price > 0) {
-                        button.textContent = "Купить";
-                        button.onclick = () => buyItem("images", item.id);
-                    } else {
-                        button.textContent = "Скачать";
-                        button.onclick = () => downloadItem("images", item.filename);
-                    }
-
-                    card.appendChild(img);
-                    card.appendChild(title);
-                    card.appendChild(price);
-                    card.appendChild(button);
-                    gallery.appendChild(card);
-                });
-            }
-        }
-
-        async function buyItem(section, itemId) {
-            const token = localStorage.getItem("token");
-            if (!token) return alert("Сначала войдите!");
-
-            const res = await fetch(API_URL + `/buy-${section}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-                body: JSON.stringify({ itemId })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert("Файл куплен!");
-                loadImages();
-            } else {
-                alert("Ошибка: " + data.error);
-            }
-        }
-
-        function downloadItem(section, filename) {
-            window.open(API_URL + `/${section}/` + filename, "_blank");
-        }
-
-        loadImages();
-    </script>
+  <script src="script.js"></script>
 </body>
-</html>
+    </html>
