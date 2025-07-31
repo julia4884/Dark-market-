@@ -1,122 +1,147 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  
-  if (token) {
-    showProfile();
-  }
+// === Авторизация и токены ===
+const API_URL = window.location.origin;
 
-  // === Авторизация ===
-  document.getElementById("login-btn").onclick = async () => {
-    const email = document.getElementById("login-email").value;
-    const password = document.getElementById("login-password").value;
-    const res = await fetch("/login", {
+async function login() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  try {
+    const res = await fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      showProfile();
-    } else {
-      alert(data.error || "Ошибка входа");
-    }
-  };
 
-  // === Регистрация ===
-  document.getElementById("register-btn").onclick = async () => {
-    const username = document.getElementById("register-username").value;
-    const email = document.getElementById("register-email").value;
-    const password = document.getElementById("register-password").value;
-    const res = await fetch("/register", {
+    if (res.ok) {
+      localStorage.setItem("token", data.token);
+      alert("✅ Вход выполнен");
+      window.location.href = "admin.html"; // переход в личный кабинет
+    } else {
+      alert("❌ " + data.error);
+    }
+  } catch (err) {
+    console.error("Ошибка входа:", err);
+    alert("⚠ Ошибка соединения");
+  }
+}
+
+async function register() {
+  const username = document.getElementById("register-username").value;
+  const email = document.getElementById("register-email").value;
+  const password = document.getElementById("register-password").value;
+
+  try {
+    const res = await fetch(`${API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),
     });
     const data = await res.json();
-    if (data.success) {
-      alert("Регистрация успешна!");
+
+    if (res.ok) {
+      alert("✅ Регистрация успешна! Теперь войдите.");
     } else {
-      alert(data.error || "Ошибка регистрации");
+      alert("❌ " + data.error);
     }
-  };
+  } catch (err) {
+    console.error("Ошибка регистрации:", err);
+    alert("⚠ Ошибка соединения");
+  }
+}
 
-  // === Выход ===
-  document.getElementById("logout-btn").onclick = () => {
-    localStorage.clear();
-    location.reload();
-  };
+document.getElementById("login-btn")?.addEventListener("click", login);
+document.getElementById("register-btn")?.addEventListener("click", register);
 
-  // === Показ профиля ===
-  async function showProfile() {
-    const res = await fetch("/profile", {
-      headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+// === Личный кабинет ===
+async function loadProfile() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  try {
+    const res = await fetch(`${API_URL}/profile`, {
+      headers: { Authorization: "Bearer " + token },
     });
     const data = await res.json();
-    if (data.username) {
+
+    if (res.ok) {
+      document.getElementById("profile-info").innerHTML = `
+        <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
+        <img src="${data.avatar}" alt="Аватар" style="width:80px;border-radius:50%;">
+        <p>${data.about || "Нет описания"}</p>
+      `;
       document.getElementById("auth-section").style.display = "none";
       document.getElementById("logout-section").style.display = "block";
-      document.getElementById("profile-info").innerHTML = `
-        <p><img src="/${data.avatar}" alt="avatar" width="60"> 
-        ${data.username} ${data.role === "admin" ? "👑" : ""}</p>
-        <p>${data.about || "О себе пока пусто"}</p>`;
+    } else {
+      localStorage.removeItem("token");
     }
+  } catch (err) {
+    console.error("Ошибка профиля:", err);
   }
+}
 
-  // === Летучая мышь ===
-  const bat = document.getElementById("bat");
-  const batMsg = document.getElementById("bat-message");
-  const messages = [
-    "Я лечу над тобой!",
-    "Темнота всегда рядом...",
-    "Не забывай про донат 😉",
-    "🦇 Я твой ночной страж!",
-    "Береги свет, человек..."
-  ];
+document.getElementById("logout-btn")?.addEventListener("click", () => {
+  localStorage.removeItem("token");
+  location.reload();
+});
 
-  function moveBat() {
-    bat.style.top = Math.random() * 80 + "%";
-    bat.style.left = Math.random() * 80 + "%";
-  }
-  setInterval(moveBat, 4000);
+loadProfile();
 
+// === Летучая мышь ===
+const bat = document.getElementById("flying-bat");
+const batMessage = document.getElementById("bat-message");
+
+const batPhrases = [
+  "🦇 Привет! Хочешь узнать секрет?",
+  "🦇 Смотри под крыло...",
+  "🦇 Шшш... я храню тайны сайта!",
+  "🦇 Ночью тут особенно красиво...",
+  "🦇 Нажми ещё раз — и я улечу!",
+];
+
+if (bat) {
   bat.addEventListener("click", () => {
-    const msg = messages[Math.floor(Math.random() * messages.length)];
-    batMsg.textContent = msg;
-    batMsg.style.display = "block";
-    setTimeout(() => batMsg.style.display = "none", 3000);
+    const phrase = batPhrases[Math.floor(Math.random() * batPhrases.length)];
+    batMessage.textContent = phrase;
+    batMessage.style.display = "block";
+    setTimeout(() => {
+      batMessage.style.display = "none";
+    }, 3000);
   });
+}
 
-  // === Кошка ===
-  const catWidget = document.getElementById("cat-widget");
-  const contactForm = document.getElementById("contact-form-container");
-  const closeContact = document.getElementById("close-contact");
+// === Кошка ===
+const catWidget = document.getElementById("cat-widget");
+const contactFormContainer = document.getElementById("contact-form-container");
+const contactForm = document.getElementById("contact-form");
 
-  catWidget.addEventListener("click", () => {
-    contactForm.classList.toggle("hidden");
-  });
-  closeContact.addEventListener("click", () => {
-    contactForm.classList.add("hidden");
-  });
+catWidget?.addEventListener("click", () => {
+  contactFormContainer.style.display =
+    contactFormContainer.style.display === "block" ? "none" : "block";
+});
 
-  document.getElementById("contact-form").onsubmit = async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("contact-email").value;
-    const message = document.getElementById("contact-message").value;
+contactForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("contact-email").value;
+  const message = document.getElementById("contact-message").value;
 
-    const res = await fetch("/contact", {
+  try {
+    const res = await fetch(`${API_URL}/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, message }),
     });
     const data = await res.json();
-    if (data.success) {
-      alert("Сообщение отправлено!");
-      contactForm.classList.add("hidden");
+
+    if (res.ok) {
+      alert("✅ Сообщение отправлено!");
+      contactForm.reset();
+      contactFormContainer.style.display = "none";
     } else {
-      alert("Ошибка: " + (data.error || "Не удалось отправить"));
+      alert("❌ " + data.error);
     }
-  };
+  } catch (err) {
+    console.error("Ошибка отправки:", err);
+    alert("⚠ Ошибка соединения");
+  }
 });
