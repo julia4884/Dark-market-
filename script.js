@@ -107,3 +107,84 @@ document.addEventListener("DOMContentLoaded", spawnBat);
     }
   }
 });
+// === Летающая мышь 🦇 ===
+document.addEventListener("DOMContentLoaded", () => {
+  const bat = document.createElement("div");
+  bat.className = "flying-bat";
+  document.body.appendChild(bat);
+
+  const messages = [
+    "Привет, смертный!",
+    "Хочешь секрет? 🦇",
+    "Мяу... ой, я же мышь!",
+    "Темнота любит тебя...",
+    "Лови момент, пока я тут!"
+  ];
+
+  function moveBat() {
+    const x = Math.random() * (window.innerWidth - 100);
+    const y = Math.random() * (window.innerHeight - 100);
+    bat.style.left = `${x}px`;
+    bat.style.top = `${y}px`;
+  }
+
+  function showMessage(text) {
+    const bubble = document.createElement("div");
+    bubble.className = "bat-message";
+    bubble.textContent = text;
+    document.body.appendChild(bubble);
+
+    bubble.style.left = `${bat.offsetLeft}px`;
+    bubble.style.top = `${bat.offsetTop - 30}px`;
+
+    setTimeout(() => bubble.remove(), 3000);
+  }
+
+  bat.addEventListener("click", () => {
+    const msg = messages[Math.floor(Math.random() * messages.length)];
+    showMessage(msg);
+  });
+
+  setInterval(moveBat, 4000);
+  moveBat();
+});
+
+// === Кошка-виджет 🐱 ===
+document.addEventListener("DOMContentLoaded", () => {
+  const cat = document.createElement("div");
+  cat.id = "cat-widget";
+  cat.textContent = "🐱";
+  document.body.appendChild(cat);
+
+  const formContainer = document.createElement("div");
+  formContainer.id = "contact-form-container";
+  formContainer.innerHTML = `
+    <form id="contact-form">
+      <h3>Напиши администратору</h3>
+      <input type="email" id="contact-email" placeholder="Твой email" required>
+      <textarea id="contact-message" placeholder="Сообщение..." required></textarea>
+      <button type="submit">Отправить</button>
+    </form>
+  `;
+  document.body.appendChild(formContainer);
+
+  cat.addEventListener("click", () => {
+    formContainer.style.display =
+      formContainer.style.display === "block" ? "none" : "block";
+  });
+
+  document.getElementById("contact-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("contact-email").value;
+    const message = document.getElementById("contact-message").value;
+
+    const res = await fetch("/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, message }),
+    });
+
+    const data = await res.json();
+    alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
+  });
+});
