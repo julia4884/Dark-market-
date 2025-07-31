@@ -9,10 +9,7 @@ function getToken() {
 
 async function verifyToken() {
   const token = getToken();
-  if (!token) {
-    logout();
-    return false;
-  }
+  if (!token) return false;
 
   try {
     const res = await fetch(`${API_URL}/verify-token`, {
@@ -25,12 +22,9 @@ async function verifyToken() {
 
     if (!res.ok) throw new Error("Invalid token");
     const data = await res.json();
-    if (!data.valid) throw new Error("Token expired");
-
-    return true;
+    return data.valid;
   } catch (err) {
-    console.error("Token check failed:", err.message);
-    logout();
+    console.warn("Token check failed:", err.message);
     return false;
   }
 }
@@ -44,7 +38,10 @@ function logout() {
 // ==================== PROFILE ====================
 
 async function loadProfile() {
-  if (!(await verifyToken())) return;
+  if (!(await verifyToken())) {
+    console.log("Гость: профиль скрыт");
+    return;
+  }
 
   const token = getToken();
   try {
@@ -63,7 +60,6 @@ async function loadProfile() {
       document.getElementById("profile-avatar").src = user.avatar;
     }
 
-    // показываем админку
     if (user.role === "admin") {
       const adminPanel = document.getElementById("admin-panel");
       if (adminPanel) adminPanel.style.display = "block";
@@ -72,13 +68,15 @@ async function loadProfile() {
     }
   } catch (err) {
     console.error("Ошибка загрузки профиля:", err);
-    logout();
   }
 }
 
-// === Обновление аватара с прогрессом ===
+// === Обновление аватара ===
 async function uploadAvatar(file) {
-  if (!(await verifyToken())) return;
+  if (!(await verifyToken())) {
+    alert("Необходимо войти!");
+    return;
+  }
 
   const token = getToken();
   const formData = new FormData();
@@ -87,37 +85,35 @@ async function uploadAvatar(file) {
   const progressBar = document.getElementById("avatar-progress");
   if (progressBar) progressBar.style.display = "block";
 
-  try {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${API_URL}/upload-avatar`, true);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", `${API_URL}/upload-avatar`, true);
+  xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable && progressBar) {
-        progressBar.value = Math.round((event.loaded / event.total) * 100);
-      }
-    };
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable && progressBar) {
+      progressBar.value = Math.round((event.loaded / event.total) * 100);
+    }
+  };
 
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        alert("Аватар обновлён!");
-        loadProfile();
-      } else {
-        alert("Ошибка загрузки: " + xhr.statusText);
-      }
-      if (progressBar) progressBar.style.display = "none";
-    };
-
-    xhr.send(formData);
-  } catch (err) {
-    alert("Ошибка: " + err.message);
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      alert("Аватар обновлён!");
+      loadProfile();
+    } else {
+      alert("Ошибка загрузки: " + xhr.statusText);
+    }
     if (progressBar) progressBar.style.display = "none";
-  }
+  };
+
+  xhr.send(formData);
 }
 
-// === Обновление информации "о себе" ===
+// === Обновление "о себе" ===
 async function updateAbout(text) {
-  if (!(await verifyToken())) return;
+  if (!(await verifyToken())) {
+    alert("Необходимо войти!");
+    return;
+  }
 
   const token = getToken();
   try {
@@ -140,7 +136,10 @@ async function updateAbout(text) {
 // ==================== FILE UPLOAD ====================
 
 async function uploadFile(file, category) {
-  if (!(await verifyToken())) return;
+  if (!(await verifyToken())) {
+    alert("Только разработчики могут загружать файлы!");
+    return;
+  }
 
   const token = getToken();
   const formData = new FormData();
@@ -150,44 +149,37 @@ async function uploadFile(file, category) {
   const progressBar = document.getElementById("upload-progress");
   if (progressBar) progressBar.style.display = "block";
 
-  try {
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `${API_URL}/upload`, true);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", `${API_URL}/upload`, true);
+  xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable && progressBar) {
-        progressBar.value = Math.round((event.loaded / event.total) * 100);
-      }
-    };
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable && progressBar) {
+      progressBar.value = Math.round((event.loaded / event.total) * 100);
+    }
+  };
 
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        alert("Файл загружен!");
-        loadGallery(category);
-      } else {
-        alert("Ошибка загрузки: " + xhr.statusText);
-      }
-      if (progressBar) progressBar.style.display = "none";
-    };
-
-    xhr.send(formData);
-  } catch (err) {
-    alert("Ошибка: " + err.message);
+  xhr.onload = () => {
+    if (xhr.status === 200) {
+      alert("Файл загружен!");
+      loadGallery(category);
+    } else {
+      alert("Ошибка загрузки: " + xhr.statusText);
+    }
     if (progressBar) progressBar.style.display = "none";
-  }
+  };
+
+  xhr.send(formData);
 }
 
 // ==================== GALLERY ====================
 
 async function loadGallery(category) {
-  if (!(await verifyToken())) return;
-
-  const token = getToken();
   try {
-    const res = await fetch(`${API_URL}/files?category=${category}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const token = getToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${API_URL}/files?category=${category}`, { headers });
+
     if (!res.ok) throw new Error("Ошибка загрузки галереи");
 
     const files = await res.json();
@@ -215,83 +207,40 @@ async function loadGallery(category) {
   }
 }
 
-// ==================== ADMIN ====================
-
-async function blockUser(userId) {
-  if (!(await verifyToken())) return;
-
-  const token = getToken();
-  try {
-    const res = await fetch(`${API_URL}/block-user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ userId }),
-    });
-    if (!res.ok) throw new Error("Ошибка блокировки");
-
-    alert("Пользователь заблокирован!");
-  } catch (err) {
-    alert("Ошибка: " + err.message);
-  }
-}
-
-async function blockApp(appId) {
-  if (!(await verifyToken())) return;
-
-  const token = getToken();
-  try {
-    const res = await fetch(`${API_URL}/block-app`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ appId }),
-    });
-    if (!res.ok) throw new Error("Ошибка блокировки");
-
-    alert("Приложение заблокировано!");
-  } catch (err) {
-    alert("Ошибка: " + err.message);
-  }
-}
-
 // ==================== INIT ====================
 
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!(await verifyToken())) return;
-
-  await loadProfile();
-
-  const category = window.location.pathname
-    .split("/")
-    .pop()
-    .replace(".html", "") || "home";
+  const loggedIn = await verifyToken();
 
   if (document.getElementById("gallery")) {
+    const category = window.location.pathname
+      .split("/")
+      .pop()
+      .replace(".html", "") || "home";
     loadGallery(category);
   }
 
-  const logoutBtn = document.getElementById("logout-btn");
-  if (logoutBtn) logoutBtn.onclick = logout;
+  if (loggedIn) {
+    loadProfile();
 
-  const avatarInput = document.getElementById("avatar-input");
-  const avatarBtn = document.getElementById("avatar-upload-btn");
-  if (avatarBtn && avatarInput) {
-    avatarBtn.onclick = () => {
-      const file = avatarInput.files[0];
-      if (file) uploadAvatar(file);
-    };
-  }
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) logoutBtn.onclick = logout;
 
-  const aboutSaveBtn = document.getElementById("about-save-btn");
-  if (aboutSaveBtn) {
-    aboutSaveBtn.onclick = () => {
-      const aboutText = document.getElementById("profile-about").value;
-      updateAbout(aboutText);
-    };
+    const avatarInput = document.getElementById("avatar-input");
+    const avatarBtn = document.getElementById("avatar-upload-btn");
+    if (avatarBtn && avatarInput) {
+      avatarBtn.onclick = () => {
+        const file = avatarInput.files[0];
+        if (file) uploadAvatar(file);
+      };
+    }
+
+    const aboutSaveBtn = document.getElementById("about-save-btn");
+    if (aboutSaveBtn) {
+      aboutSaveBtn.onclick = () => {
+        const aboutText = document.getElementById("profile-about").value;
+        updateAbout(aboutText);
+      };
+    }
   }
 });
