@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ-панель 👑</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">🌌 Dark Market Ultra <span class="crown">👑</span></div>
+    <nav>
+      <a href="index.html">Главная</a>
+      <a href="home.html">Каталог</a>
+      <a href="#" onclick="logout()">Выйти</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>👑 Панель администратора</h1>
+    <p>Добро пожаловать в панель управления!</p>
+
+    <section>
+      <h2>🔒 Блокировка пользователей</h2>
+      <input type="text" id="ban-username" placeholder="Имя пользователя">
+      <button onclick="banUser()">Заблокировать</button>
+    </section>
+
+    <section>
+      <h2>📦 Блокировка приложений</h2>
+      <input type="number" id="ban-app" placeholder="ID приложения">
+      <button onclick="banApp()">Заблокировать</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // Проверка роли при входе
+    async function checkAdmin() {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Сначала войдите в аккаунт!");
+        window.location.href = "index.html";
+        return;
+      }
+      try {
+        const res = await fetch("/profile", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const user = await res.json();
+        if (!user || user.role !== "admin") {
+          alert("Нет доступа в админ-панель!");
+          window.location.href = "index.html";
+        }
+      } catch (err) {
+        console.error("Ошибка проверки роли:", err);
+        window.location.href = "index.html";
+      }
+    }
+
+    checkAdmin();
+
+    async function banUser() {
+      const username = document.getElementById("ban-username").value;
+      const token = localStorage.getItem("token");
+      const res = await fetch("/ban-user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token,
+        },
+        body: JSON.stringify({ username }),
+      });
+      const data = await res.json();
+      alert(data.success ? "✅ Пользователь забанен" : "❌ " + data.error);
+    }
+
+    async function banApp() {
+      const appId = document.getElementById("ban-app").value;
+      const token = localStorage.getItem("token");
+      const res = await fetch("/ban-app", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token,
+        },
+        body: JSON.stringify({ appId }),
+      });
+      const data = await res.json();
+      alert(data.success ? "✅ Приложение забанено" : "❌ " + data.error);
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
