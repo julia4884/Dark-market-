@@ -23,21 +23,21 @@
   </header>
 
   <main>
-    <!-- Авторизация -->
     <section id="auth-section">
       <h2>Вход</h2>
       <input type="email" id="login-email" placeholder="Email">
       <input type="password" id="login-password" placeholder="Пароль">
       <button id="login-btn">Войти</button>
+      <div id="login-status" class="status"></div>
 
       <h2>Регистрация</h2>
       <input type="text" id="register-username" placeholder="Имя пользователя">
       <input type="email" id="register-email" placeholder="Email">
       <input type="password" id="register-password" placeholder="Пароль">
       <button id="register-btn">Зарегистрироваться</button>
+      <div id="register-status" class="status"></div>
     </section>
 
-    <!-- Личный кабинет -->
     <section id="logout-section" style="display:none;">
       <h2>Личный кабинет</h2>
       <div id="profile-info"></div>
@@ -62,5 +62,10 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof updateUI === "function") updateUI();
+    });
+  </script>
 </body>
 </html>
