@@ -54,16 +54,21 @@ async function loadProfile() {
     if (!res.ok) throw new Error("Не удалось загрузить профиль");
 
     const user = await res.json();
+
     document.getElementById("profile-username").textContent = user.username;
     document.getElementById("profile-role").textContent = user.role;
     document.getElementById("profile-about").value = user.about || "";
+
     if (user.avatar) {
       document.getElementById("profile-avatar").src = user.avatar;
     }
 
+    // показываем админку
     if (user.role === "admin") {
-      document.getElementById("admin-panel").style.display = "block";
-      document.getElementById("crown").style.display = "inline";
+      const adminPanel = document.getElementById("admin-panel");
+      if (adminPanel) adminPanel.style.display = "block";
+      const crown = document.getElementById("crown");
+      if (crown) crown.style.display = "inline";
     }
   } catch (err) {
     console.error("Ошибка загрузки профиля:", err);
@@ -80,7 +85,7 @@ async function uploadAvatar(file) {
   formData.append("avatar", file);
 
   const progressBar = document.getElementById("avatar-progress");
-  progressBar.style.display = "block";
+  if (progressBar) progressBar.style.display = "block";
 
   try {
     const xhr = new XMLHttpRequest();
@@ -88,9 +93,8 @@ async function uploadAvatar(file) {
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100);
-        progressBar.value = percent;
+      if (event.lengthComputable && progressBar) {
+        progressBar.value = Math.round((event.loaded / event.total) * 100);
       }
     };
 
@@ -101,13 +105,13 @@ async function uploadAvatar(file) {
       } else {
         alert("Ошибка загрузки: " + xhr.statusText);
       }
-      progressBar.style.display = "none";
+      if (progressBar) progressBar.style.display = "none";
     };
 
     xhr.send(formData);
   } catch (err) {
     alert("Ошибка: " + err.message);
-    progressBar.style.display = "none";
+    if (progressBar) progressBar.style.display = "none";
   }
 }
 
@@ -144,7 +148,7 @@ async function uploadFile(file, category) {
   formData.append("category", category);
 
   const progressBar = document.getElementById("upload-progress");
-  progressBar.style.display = "block";
+  if (progressBar) progressBar.style.display = "block";
 
   try {
     const xhr = new XMLHttpRequest();
@@ -152,9 +156,8 @@ async function uploadFile(file, category) {
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100);
-        progressBar.value = percent;
+      if (event.lengthComputable && progressBar) {
+        progressBar.value = Math.round((event.loaded / event.total) * 100);
       }
     };
 
@@ -165,13 +168,13 @@ async function uploadFile(file, category) {
       } else {
         alert("Ошибка загрузки: " + xhr.statusText);
       }
-      progressBar.style.display = "none";
+      if (progressBar) progressBar.style.display = "none";
     };
 
     xhr.send(formData);
   } catch (err) {
     alert("Ошибка: " + err.message);
-    progressBar.style.display = "none";
+    if (progressBar) progressBar.style.display = "none";
   }
 }
 
@@ -268,7 +271,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     .pop()
     .replace(".html", "") || "home";
 
-  loadGallery(category);
+  if (document.getElementById("gallery")) {
+    loadGallery(category);
+  }
 
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) logoutBtn.onclick = logout;
