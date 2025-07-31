@@ -36,7 +36,9 @@
     </div>
   </main>
 
+  <!-- Летучая мышь -->
   <div id="bat"></div>
+  <!-- Кошка -->
   <div id="cat" title="Нажми на меня!"></div>
   <div id="cat-dialog" class="hidden">
     <p>Есть вопросы, предложения или жалобы?<br>Напиши администратору!</p>
@@ -47,94 +49,7 @@
     <button id="close-dialog">Закрыть</button>
   </div>
 
-  <script>
-    const backendUrl = "https://dark-market-backend.onrender.com";
-    const token = localStorage.getItem("token");
-    if (!token) window.location.href = "index.html";
-
-    async function loadProfile() {
-      const res = await fetch(`${backendUrl}/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (res.ok) {
-        document.getElementById("email").textContent = data.email;
-        document.getElementById("subscription").textContent = data.subscription || "Нет";
-        if (data.role === "admin") {
-          document.getElementById("role-badge").textContent = "👑";
-          document.getElementById("admin-tools").style.display = "block";
-        }
-        if (data.avatar) document.getElementById("avatar").src = data.avatar;
-        if (data.about) document.getElementById("about").value = data.about;
-      } else {
-        alert("Ошибка профиля. Войдите снова.");
-        localStorage.clear();
-        window.location.href = "index.html";
-      }
-    }
-
-    document.getElementById("upload-avatar-btn").onclick = async () => {
-      const file = document.getElementById("avatar-input").files[0];
-      if (!file) return;
-      const formData = new FormData();
-      formData.append("avatar", file);
-
-      const progressBar = document.getElementById("upload-progress");
-      progressBar.style.display = "block";
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${backendUrl}/upload-avatar`);
-      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          progressBar.value = (e.loaded / e.total) * 100;
-        }
-      };
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          alert("Аватар обновлён!");
-          loadProfile();
-        } else {
-          alert("Ошибка загрузки аватара");
-        }
-      };
-      xhr.send(formData);
-    };
-
-    document.getElementById("save-about-btn").onclick = async () => {
-      const about = document.getElementById("about").value;
-      const res = await fetch(`${backendUrl}/update-about`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ about })
-      });
-      if (res.ok) alert("Описание сохранено!");
-    };
-
-    document.getElementById("logout-btn").onclick = () => {
-      localStorage.clear();
-      window.location.href = "index.html";
-    };
-
-    // Кошка
-    const cat = document.getElementById("cat");
-    const dialog = document.getElementById("cat-dialog");
-    const closeBtn = document.getElementById("close-dialog");
-
-    cat.onclick = () => dialog.classList.remove("hidden");
-    closeBtn.onclick = () => dialog.classList.add("hidden");
-
-    document.getElementById("contact-form").onsubmit = (e) => {
-      e.preventDefault();
-      alert("Сообщение отправлено администратору!");
-      dialog.classList.add("hidden");
-    };
-
-    loadProfile();
-  </script>
+  <!-- Подключаем единый скрипт -->
   <script src="script.js"></script>
 </body>
 </html>
