@@ -1,40 +1,52 @@
 // === Авторизация ===
-const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+let token = localStorage.getItem("token");
+let role = localStorage.getItem("role");
 
 function updateUI() {
   const authSection = document.getElementById("auth-section");
   const logoutSection = document.getElementById("logout-section");
 
   if (token) {
-    authSection.style.display = "none";
-    logoutSection.style.display = "block";
+    if (authSection) authSection.style.display = "none";
+    if (logoutSection) logoutSection.style.display = "block";
 
     fetch("/profile", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
       .then((data) => {
+        if (!data || data.error) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("role");
+          if (authSection) authSection.style.display = "block";
+          if (logoutSection) logoutSection.style.display = "none";
+          return;
+        }
         const profileInfo = document.getElementById("profile-info");
-        profileInfo.innerHTML = `
-          <div>
-            <img src="${data.avatar}" alt="avatar" class="avatar">
-            <p><strong>${data.username}</strong> ${
-              data.role === "admin" ? "👑" : ""
-            }</p>
-            <p>${data.about || "Нет описания"}</p>
-          </div>
-        `;
-      });
+        if (profileInfo) {
+          profileInfo.innerHTML = `
+            <div>
+              <img src="${data.avatar}" alt="avatar" class="avatar">
+              <p><strong>${data.username}</strong> ${
+            data.role === "admin" ? "👑" : ""
+          }</p>
+              <p>${data.about || "Нет описания"}</p>
+            </div>
+          `;
+        }
+      })
+      .catch((err) => console.error("Ошибка профиля:", err));
   } else {
-    authSection.style.display = "block";
-    logoutSection.style.display = "none";
+    if (authSection) authSection.style.display = "block";
+    if (logoutSection) logoutSection.style.display = "none";
   }
 }
 
 document.getElementById("login-btn")?.addEventListener("click", () => {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value.trim();
+
+  if (!email || !password) return alert("Заполните все поля!");
 
   fetch("/login", {
     method: "POST",
@@ -46,18 +58,23 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
+        token = data.token;
+        role = data.role;
         updateUI();
         if (data.role === "admin") window.location.href = "admin.html";
       } else {
         alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
       }
-    });
+    })
+    .catch(() => alert("Сервер недоступен"));
 });
 
 document.getElementById("register-btn")?.addEventListener("click", () => {
-  const username = document.getElementById("register-username").value;
-  const email = document.getElementById("register-email").value;
-  const password = document.getElementById("register-password").value;
+  const username = document.getElementById("register-username").value.trim();
+  const email = document.getElementById("register-email").value.trim();
+  const password = document.getElementById("register-password").value.trim();
+
+  if (!username || !email || !password) return alert("Заполните все поля!");
 
   fetch("/register", {
     method: "POST",
@@ -71,12 +88,15 @@ document.getElementById("register-btn")?.addEventListener("click", () => {
       } else {
         alert("Ошибка регистрации: " + (data.error || "Попробуйте снова"));
       }
-    });
+    })
+    .catch(() => alert("Сервер недоступен"));
 });
 
 document.getElementById("logout-btn")?.addEventListener("click", () => {
   localStorage.removeItem("token");
   localStorage.removeItem("role");
+  token = null;
+  role = null;
   updateUI();
 });
 
@@ -95,20 +115,23 @@ const batMessages = [
 ];
 
 function moveBat() {
-  const x = Math.random() * (window.innerWidth - 50);
-  const y = Math.random() * (window.innerHeight - 50);
-  bat.style.transform = `translate(${x}px, ${y}px)`;
+  if (!bat) return;
+  const x = Math.random() * (window.innerWidth - 60);
+  const y = Math.random() * (window.innerHeight - 60);
+  bat.style.left = `${x}px`;
+  bat.style.top = `${y}px`;
 }
 setInterval(moveBat, 4000);
 
-bat.addEventListener("click", () => {
+bat?.addEventListener("click", () => {
+  if (!batMessage) return;
   const msg = batMessages[Math.floor(Math.random() * batMessages.length)];
   batMessage.textContent = msg;
   batMessage.style.left = bat.style.left;
-  batMessage.style.top = bat.style.top;
+  batMessage.style.top = `calc(${bat.style.top} - 40px)`;
   batMessage.style.opacity = 1;
 
-  // Писк через Web Audio API (без файлов)
+  // Писк через Web Audio API
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -120,7 +143,7 @@ bat.addEventListener("click", () => {
   setTimeout(() => {
     osc.stop();
     batMessage.style.opacity = 0;
-  }, 600);
+  }, 800);
 });
 
 // === Кошка 🐱 ===
@@ -128,15 +151,17 @@ const catWidget = document.getElementById("cat-widget");
 const contactFormContainer = document.getElementById("contact-form-container");
 const contactForm = document.getElementById("contact-form");
 
-catWidget.addEventListener("click", () => {
-  contactFormContainer.style.display =
-    contactFormContainer.style.display === "none" ? "block" : "none";
+catWidget?.addEventListener("click", () => {
+  if (!contactFormContainer) return;
+  contactFormContainer.classList.toggle("visible");
 });
 
 contactForm?.addEventListener("submit", (e) => {
   e.preventDefault();
-  const email = document.getElementById("user-email").value;
-  const message = document.getElementById("user-message").value;
+  const email = document.getElementById("contact-email").value.trim();
+  const message = document.getElementById("contact-message").value.trim();
+
+  if (!email || !message) return alert("Заполните все поля!");
 
   fetch("/contact", {
     method: "POST",
@@ -146,9 +171,10 @@ contactForm?.addEventListener("submit", (e) => {
     .then((res) => res.json())
     .then((data) => {
       alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
-      if (data.success) contactFormContainer.style.display = "none";
-    });
+      if (data.success) contactFormContainer.classList.remove("visible");
+    })
+    .catch(() => alert("Сервер недоступен"));
 });
 
-// === Инициализация ===
+// === Запуск ===
 document.addEventListener("DOMContentLoaded", updateUI);
