@@ -29,7 +29,7 @@
     <section id="auth-guard" style="display:none;">
       <h2>Ваш профиль</h2>
       <div id="profile">
-        <img id="profile-avatar" src="default-avatar.png" alt="Аватар" width="120">
+        <img id="profile-avatar" src="uploads/avatars/default-avatar.png" alt="Аватар" width="120">
         <p><strong>Ник:</strong> <span id="profile-username"></span> <span id="crown"></span></p>
         <p><strong>Роль:</strong> <span id="profile-role"></span></p>
         <p><strong>О себе:</strong> <span id="profile-about"></span></p>
@@ -41,7 +41,7 @@
 
         <h3>Изменить информацию о себе</h3>
         <textarea id="about-text" placeholder="Напишите о себе..."></textarea>
-        <button onclick="updateAbout(document.getElementById('about-text').value)">Сохранить</button>
+        <button id="about-save-btn">Сохранить</button>
       </div>
 
       <hr>
@@ -72,11 +72,11 @@
         <h3>Блокировка пользователей</h3>
         <input type="text" id="block-user-id" placeholder="ID пользователя">
         <input type="text" id="block-reason" placeholder="Причина блокировки">
-        <button onclick="blockUser(document.getElementById('block-user-id').value, document.getElementById('block-reason').value)">Заблокировать пользователя</button>
+        <button id="block-user-btn">Заблокировать пользователя</button>
 
         <h3>Блокировка приложений</h3>
         <input type="text" id="block-file-id" placeholder="ID файла">
-        <button onclick="blockApp(document.getElementById('block-file-id').value)">Заблокировать приложение</button>
+        <button id="block-app-btn">Заблокировать приложение</button>
       </div>
     </section>
 
@@ -96,15 +96,22 @@
         document.getElementById("logout-link").style.display = "inline";
         loadProfile();
 
+        // Коронка только админам
         if (localStorage.getItem("role") === "admin") {
           document.getElementById("admin-panel").style.display = "block";
           document.getElementById("crown").innerHTML = "👑";
         }
 
-        // обработка загрузки аватара
+        // Загрузка аватара
         document.getElementById("avatar-upload-btn").onclick = () => {
           const file = document.getElementById("avatar-input").files[0];
           if (file) uploadAvatar(file);
+        };
+
+        // Сохранение "О себе"
+        document.getElementById("about-save-btn").onclick = () => {
+          const about = document.getElementById("about-text").value;
+          updateAbout(about);
         };
       } else {
         document.getElementById("auth-guard").style.display = "none";
