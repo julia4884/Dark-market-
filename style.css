@@ -213,7 +213,9 @@ nav a:hover {
   border: 2px solid #5eead4;
   box-shadow: 0 0 15px #22d3ee;
   margin-bottom: 10px;
-  /* === Подсветка картинок и кнопок в галерее === */
+}
+
+/* === Подсветка картинок и кнопок в галерее === */
 .gallery .card img {
   border: 2px solid transparent;
   box-shadow: 0 0 10px rgba(94, 234, 212, 0.4);
