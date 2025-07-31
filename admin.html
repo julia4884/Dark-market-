@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const role = localStorage.getItem("role");
+  if (role !== "admin") {
+    alert("Доступ запрещён!");
+    window.location.href = "index.html"; // возвращаем на главную
+  }
+});
+  </script>
   <header class="site-header">
     <h1 class="site-title">☾ Dark Market Ultra ✦ — Админка 👑</h1>
     <nav>
