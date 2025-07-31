@@ -3,80 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Книги — Dark Market Ultra</title>
+  <title>Книги | Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Место для подгрузки header -->
-  <div id="header-placeholder"></div>
+  <header>
+    <div class="logo">☾ Dark Market Ultra ✦</div>
+    <nav>
+      <a href="index.html">Главная</a>
+      <a href="books.html" class="active">Книги</a>
+      <a href="games.html">Игры</a>
+      <a href="movies.html">Фильмы</a>
+      <a href="apps.html">Приложения</a>
+      <a href="music.html">Музыка</a>
+      <a href="tools.html">Инструменты</a>
+      <a href="donate.html">Донат</a>
+      <a href="admin.html">Личный кабинет</a>
+    </nav>
+  </header>
 
   <main>
-  <h1>Книги</h1>
+    <h1 class="site-title">📚 Коллекция книг</h1>
+    <div class="gallery">
+      <div class="card">
+        <img src="images/book1.jpg" alt="Book 1">
+        <h3>Тёмная магия</h3>
+        <p>Захватывающее путешествие в мир тайных знаний.</p>
+        <button>Скачать</button>
+      </div>
+      <div class="card">
+        <img src="images/book2.jpg" alt="Book 2">
+        <h3>Секреты древних</h3>
+        <p>Истории, скрытые во мраке веков.</p>
+        <button>Скачать</button>
+      </div>
+      <div class="card">
+        <img src="images/book3.jpg" alt="Book 3">
+        <h3>Гримуар теней</h3>
+        <p>Книга для истинных искателей силы.</p>
+        <button>Скачать</button>
+      </div>
+    </div>
+  </main>
 
-  <!-- Форма загрузки (видна только разработчикам) -->
-  <div id="upload-section" style="display:none; margin: 15px 0;">
-    <input type="file" id="file-input">
-    <button onclick="uploadFile(document.getElementById('file-input').files[0], 'books')">
-      Загрузить
-    </button>
-    <progress id="upload-progress" max="100" value="0" style="display:none;"></progress>
+  <!-- Летучая мышь -->
+  <div id="flying-bat">🦇</div>
+  <div id="bat-message"></div>
+
+  <!-- Кошка -->
+  <div id="cat-widget">🐱</div>
+  <div id="contact-form-container" class="hidden">
+    <form id="contact-form">
+      <h3>Напиши админу</h3>
+      <input type="email" id="contact-email" placeholder="Ваш Email" required>
+      <textarea id="contact-message" placeholder="Ваше сообщение..." required></textarea>
+      <button type="submit">Отправить</button>
+      <button type="button" id="close-contact">Закрыть</button>
+    </form>
   </div>
 
-  <!-- Галерея -->
-  <div id="gallery" class="gallery"></div>
-</main>
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    loadGallery("books");
-
-    // Показываем форму только разработчикам
-    const role = localStorage.getItem("role");
-    if (role === "developer" || role === "admin") {
-      document.getElementById("upload-section").style.display = "block";
-    }
-  });
-</script>
-
-  <script src="header.js"></script>
-  <script>
-    const API_URL = "https://dark-market-backend.onrender.com";
-
-    async function loadBooks() {
-      const res = await fetch(API_URL + "/books/list");
-      const data = await res.json();
-
-      if (data.success) {
-        const gallery = document.getElementById("gallery");
-        gallery.innerHTML = "";
-
-        data.items.forEach(item => {
-          const card = document.createElement("div");
-          card.className = "card";
-
-          const title = document.createElement("h3");
-          title.textContent = item.title;
-
-          const img = document.createElement("img");
-          img.src = API_URL + "/uploads/" + item.image;
-          img.alt = item.title;
-
-          const button = document.createElement("button");
-          if (item.price === 0) {
-            button.textContent = "Скачать бесплатно";
-          } else {
-            button.textContent = "Купить за " + item.price + "₽";
-          }
-
-          card.appendChild(title);
-          card.appendChild(img);
-          card.appendChild(button);
-          gallery.appendChild(card);
-        });
-      }
-    }
-
-    loadBooks();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
