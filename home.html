@@ -3,53 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Личный кабинет — Dark Market</title>
+  <title>Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo">✦ Dark Market ✦</div>
+    <div class="logo">⛧ Dark Market Ultra</div>
     <nav>
-      <a href="index.html">Главная</a>
-      <a href="home.html">Личный кабинет</a>
+      <a href="home.html">Главная</a>
+      <a href="apps.html">Приложения</a>
+      <a href="games.html">Игры</a>
+      <a href="movies.html">Фильмы</a>
+      <a href="music.html">Музыка</a>
+      <a href="books.html">Книги</a>
+      <a href="donate.html">Поддержка</a>
     </nav>
   </header>
 
   <main>
-    <h1>Ваш профиль</h1>
-    <div id="profile">
-      <img id="avatar" src="uploads/avatars/default.png" alt="Аватар">
-      <p><span id="email"></span> <span id="role-badge"></span></p>
-      <p>Статус подписки: <span id="subscription">—</span></p>
-      <input type="file" id="avatar-input">
-      <button id="upload-avatar-btn">Загрузить аватар</button>
-      <progress id="upload-progress" max="100" value="0" style="display:none;"></progress>
-      <textarea id="about" placeholder="О себе..."></textarea>
-      <button id="save-about-btn">Сохранить</button>
-      <button id="logout-btn">Выйти</button>
+    <h1 id="page-title">Главная</h1>
+
+    <!-- Галерея -->
+    <div id="gallery" class="gallery"></div>
+
+    <!-- Контактная кошка -->
+    <div id="cat-widget">
+      🐱
+      <div id="cat-dialog">Есть вопросы, предложения или жалобы? Нажми на меня!</div>
     </div>
 
-    <div id="admin-tools" style="display:none;">
-      <h2>Инструменты админа</h2>
-      <button>Управление пользователями</button>
-      <button>Настройки системы</button>
+    <!-- Форма связи -->
+    <div id="contact-form-container" style="display:none;">
+      <form id="contact-form">
+        <h3>Написать администратору</h3>
+        <textarea placeholder="Ваше сообщение..." required></textarea>
+        <button type="submit">Отправить</button>
+      </form>
     </div>
   </main>
 
-  <!-- Летучая мышь -->
-  <div id="bat"></div>
-  <!-- Кошка -->
-  <div id="cat" title="Нажми на меня!"></div>
-  <div id="cat-dialog" class="hidden">
-    <p>Есть вопросы, предложения или жалобы?<br>Напиши администратору!</p>
-    <form id="contact-form">
-      <textarea placeholder="Ваше сообщение..." required></textarea>
-      <button type="submit">Отправить</button>
-    </form>
-    <button id="close-dialog">Закрыть</button>
-  </div>
-
-  <!-- Подключаем единый скрипт -->
   <script src="script.js"></script>
 </body>
 </html>
