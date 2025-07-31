@@ -3,90 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход — Dark Market</title>
+  <title>Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo">✦ Dark Market ✦</div>
+    <div class="logo">☾ Dark Market Ultra</div>
     <nav>
       <a href="index.html">Главная</a>
       <a href="home.html">Личный кабинет</a>
+      <a href="games.html">Игры</a>
+      <a href="movies.html">Фильмы</a>
+      <a href="music.html">Музыка</a>
+      <a href="images.html">Картинки</a>
+      <a href="books.html">Книги</a>
+      <a href="apps.html">Программы</a>
+      <a href="tools.html">Приложения</a>
+      <a href="donate.html">Поддержка</a>
     </nav>
   </header>
 
   <main>
-    <h1>Добро пожаловать!</h1>
+    <h1>Добро пожаловать в Dark Market Ultra</h1>
+    <p>Здесь вы найдёте всё — от игр и фильмов до книг и приложений.</p>
 
+    <!-- Блок авторизации -->
     <div id="auth-section">
       <h2>Вход</h2>
-      <input type="email" id="login-email" placeholder="Email">
-      <input type="password" id="login-password" placeholder="Пароль">
-      <button id="login-btn">Войти</button>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button type="submit">Войти</button>
+      </form>
 
       <h2>Регистрация</h2>
-      <input type="email" id="reg-email" placeholder="Email">
-      <input type="password" id="reg-password" placeholder="Пароль">
-      <button id="register-btn">Зарегистрироваться</button>
+      <form id="register-form">
+        <input type="text" id="register-username" placeholder="Имя" required>
+        <input type="email" id="register-email" placeholder="Email" required>
+        <input type="password" id="register-password" placeholder="Пароль" required>
+        <button type="submit">Зарегистрироваться</button>
+      </form>
+    </div>
+
+    <!-- Кнопка выхода -->
+    <div id="logout-section" style="display:none;">
+      <p id="welcome-message"></p>
+      <button id="logout-btn">Выйти</button>
     </div>
   </main>
 
-  <div id="bat"></div>
-  <div id="cat" title="Нажми на меня!"></div>
-  <div id="cat-dialog" class="hidden">
-    <p>Есть вопросы, предложения или жалобы?<br>Напиши администратору!</p>
-    <form id="contact-form">
-      <textarea placeholder="Ваше сообщение..." required></textarea>
+  <!-- Летающая мышь -->
+  <div id="bat">🦇</div>
+
+  <!-- Кошка для связи -->
+  <div id="cat-helper">🐱</div>
+  <div id="contact-form" style="display:none;">
+    <h3>Связь с админом</h3>
+    <form id="contact-admin-form">
+      <textarea id="contact-message" placeholder="Ваше сообщение..." required></textarea>
       <button type="submit">Отправить</button>
     </form>
-    <button id="close-dialog">Закрыть</button>
+    <button id="close-contact">Закрыть</button>
   </div>
 
-  <script>
-    const backendUrl = "https://dark-market-backend.onrender.com";
-
-    document.getElementById("login-btn").onclick = async () => {
-      const email = document.getElementById("login-email").value;
-      const password = document.getElementById("login-password").value;
-      const res = await fetch(`${backendUrl}/login`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        window.location.href = "home.html";
-      } else alert(data.error);
-    };
-
-    document.getElementById("register-btn").onclick = async () => {
-      const email = document.getElementById("reg-email").value;
-      const password = document.getElementById("reg-password").value;
-      const res = await fetch(`${backendUrl}/register`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      alert(data.message || data.error);
-    };
-
-    // Кошка и форма
-    const cat = document.getElementById("cat");
-    const dialog = document.getElementById("cat-dialog");
-    const closeBtn = document.getElementById("close-dialog");
-
-    cat.onclick = () => dialog.classList.remove("hidden");
-    closeBtn.onclick = () => dialog.classList.add("hidden");
-
-    document.getElementById("contact-form").onsubmit = (e) => {
-      e.preventDefault();
-      alert("Сообщение отправлено администратору!");
-      dialog.classList.add("hidden");
-    };
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
