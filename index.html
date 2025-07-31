@@ -1,71 +1,76 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dark Market Ultra</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Шапка -->
   <header>
-    <div class="logo">☾ Dark Market Ultra</div>
+    <div class="logo">☾ Dark Market Ultra ✦</div>
     <nav>
-      <a href="index.html">Главная</a>
-      <a href="home.html">Личный кабинет</a>
-      <a href="games.html">Игры</a>
+      <a href="home.html">Главная</a>
+      <a href="apps.html">Приложения</a>
       <a href="movies.html">Фильмы</a>
       <a href="music.html">Музыка</a>
-      <a href="images.html">Картинки</a>
+      <a href="games.html">Игры</a>
       <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
+      <a href="tools.html">Инструменты</a>
       <a href="donate.html">Поддержка</a>
     </nav>
   </header>
 
+  <!-- Основное содержимое -->
   <main>
     <h1>Добро пожаловать в Dark Market Ultra</h1>
-    <p>Здесь вы найдёте всё — от игр и фильмов до книг и приложений.</p>
+    <p>Исследуй, загружай, делись. Только для избранных.</p>
 
-    <!-- Блок авторизации -->
-    <div id="auth-section">
+    <!-- Секция авторизации -->
+    <section id="auth-section">
       <h2>Вход</h2>
       <form id="login-form">
-        <input type="email" id="login-email" placeholder="Email" required>
-        <input type="password" id="login-password" placeholder="Пароль" required>
+        <input type="email" id="login-email" placeholder="Email" required />
+        <input type="password" id="login-password" placeholder="Пароль" required />
         <button type="submit">Войти</button>
       </form>
+      <p>Нет аккаунта? <a href="#" id="show-register">Зарегистрируйся</a></p>
 
-      <h2>Регистрация</h2>
-      <form id="register-form">
-        <input type="text" id="register-username" placeholder="Имя" required>
-        <input type="email" id="register-email" placeholder="Email" required>
-        <input type="password" id="register-password" placeholder="Пароль" required>
-        <button type="submit">Зарегистрироваться</button>
-      </form>
-    </div>
+      <div id="register-container" style="display: none;">
+        <h2>Регистрация</h2>
+        <form id="register-form">
+          <input type="text" id="register-username" placeholder="Имя пользователя" required />
+          <input type="email" id="register-email" placeholder="Email" required />
+          <input type="password" id="register-password" placeholder="Пароль" required />
+          <button type="submit">Зарегистрироваться</button>
+        </form>
+      </div>
+    </section>
 
-    <!-- Кнопка выхода -->
-    <div id="logout-section" style="display:none;">
-      <p id="welcome-message"></p>
+    <!-- Секция выхода -->
+    <section id="logout-section" style="display:none;">
+      <h2>Добро пожаловать, <span id="user-name"></span>!</h2>
       <button id="logout-btn">Выйти</button>
-    </div>
+    </section>
   </main>
 
   <!-- Летающая мышь -->
   <div id="bat">🦇</div>
 
-  <!-- Кошка для связи -->
+  <!-- Кошка помощник -->
   <div id="cat-helper">🐱</div>
-  <div id="contact-form" style="display:none;">
-    <h3>Связь с админом</h3>
-    <form id="contact-admin-form">
-      <textarea id="contact-message" placeholder="Ваше сообщение..." required></textarea>
+  <div id="cat-message-box" style="display:none;">
+    <h3>Есть вопросы?</h3>
+    <form id="contact-form">
+      <input type="email" id="contact-email" placeholder="Ваш email" required />
+      <textarea id="contact-message" placeholder="Ваше сообщение" required></textarea>
       <button type="submit">Отправить</button>
     </form>
-    <button id="close-contact">Закрыть</button>
+    <button id="close-cat-form">Закрыть</button>
   </div>
 
+  <!-- Скрипты -->
   <script src="script.js"></script>
 </body>
 </html>
