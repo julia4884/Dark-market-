@@ -51,7 +51,7 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
 
   if (!email || !password) return alert("Заполните все поля!");
 
-  // === Проверка на личный админ-аккаунт ===
+  // === Прямой вход для админа ===
   if (email === "juliaangelss26@gmail.com" && password === "dark4884") {
     localStorage.setItem("token", "admin-token");
     localStorage.setItem("role", "admin");
@@ -62,7 +62,7 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
     return;
   }
 
-  // === Обычный вход через сервер ===
+  // === Вход через сервер ===
   fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -147,19 +147,9 @@ bat?.addEventListener("click", () => {
   batMessage.style.display = "block";
   batMessage.style.opacity = 1;
 
-  // Писк через Web Audio API
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.type = "square";
-  osc.frequency.value = 900;
-  osc.start();
   setTimeout(() => {
-    osc.stop();
     batMessage.style.opacity = 0;
-  }, 700);
+  }, 2000);
 });
 
 // === Кошка 🐱 ===
