@@ -1,161 +1,140 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Личный кабинет</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет — Dark Market</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <div class="logo">Dark Market Ultra</div>
+    <div class="logo">✦ Dark Market ✦</div>
     <nav>
       <a href="index.html">Главная</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-      <a href="images.html">Картинки</a>
-      <a href="books.html">Книги</a>
-      <a href="apps.html">Программы</a>
-      <a href="tools.html">Приложения</a>
-      <a href="donate.html">Донат</a>
       <a href="home.html">Личный кабинет</a>
     </nav>
   </header>
 
   <main>
-    <h1>Личный кабинет</h1>
-    <div id="profile-section">
-      <div id="avatar-block">
-        <img id="avatar-img" src="default-avatar.png" alt="Аватар" width="120" height="120" />
-        <input type="file" id="avatar-upload" />
-        <button id="upload-avatar-btn">Загрузить аватар</button>
-        <progress id="avatar-progress" max="100" value="0" style="display:none;"></progress>
-      </div>
-
-      <h2>
-        Добро пожаловать, 
-        <span id="username"></span> 
-        <span id="role-badge"></span>
-      </h2>
-      <p>Статус: <span id="status"></span></p>
-      <p>Подписка: <span id="subscription"></span></p>
-      
-      <label for="about">О себе:</label>
-      <textarea id="about" rows="4" cols="40"></textarea>
-      <button id="save-about">Сохранить</button>
+    <h1>Ваш профиль</h1>
+    <div id="profile">
+      <img id="avatar" src="uploads/avatars/default.png" alt="Аватар">
+      <p><span id="email"></span> <span id="role-badge"></span></p>
+      <p>Статус подписки: <span id="subscription">—</span></p>
+      <input type="file" id="avatar-input">
+      <button id="upload-avatar-btn">Загрузить аватар</button>
+      <progress id="upload-progress" max="100" value="0" style="display:none;"></progress>
+      <textarea id="about" placeholder="О себе..."></textarea>
+      <button id="save-about-btn">Сохранить</button>
+      <button id="logout-btn">Выйти</button>
     </div>
 
-    <div id="admin-section" style="display:none;">
-      <h3>Инструменты администратора</h3>
-      <input type="text" id="ban-user-email" placeholder="Email пользователя">
-      <button id="ban-user-btn">Заблокировать пользователя</button>
-      <br><br>
-      <input type="text" id="ban-app-id" placeholder="ID приложения">
-      <button id="ban-app-btn">Заблокировать приложение</button>
+    <div id="admin-tools" style="display:none;">
+      <h2>Инструменты админа</h2>
+      <button>Управление пользователями</button>
+      <button>Настройки системы</button>
     </div>
   </main>
 
-  <script src="script.js"></script>
+  <div id="bat"></div>
+  <div id="cat" title="Нажми на меня!"></div>
+  <div id="cat-dialog" class="hidden">
+    <p>Есть вопросы, предложения или жалобы?<br>Напиши администратору!</p>
+    <form id="contact-form">
+      <textarea placeholder="Ваше сообщение..." required></textarea>
+      <button type="submit">Отправить</button>
+    </form>
+    <button id="close-dialog">Закрыть</button>
+  </div>
+
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const token = localStorage.getItem("token");
+    const backendUrl = "https://dark-market-backend.onrender.com";
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
 
-      if (!token) {
-        alert("Сначала войдите в аккаунт");
-        window.location.href = "index.html";
-        return;
-      }
-
-      try {
-        const res = await fetch("/profile", {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        const data = await res.json();
-
-        if (!res.ok || data.error) {
-          alert("Ошибка профиля или вы забанены");
-          localStorage.clear();
-          window.location.href = "index.html";
-          return;
-        }
-
-        // Заполняем данные
-        document.getElementById("username").textContent = data.username;
-
-        if (data.role === "admin") {
-          document.getElementById("role-badge").innerHTML = " 👑";
-          document.getElementById("role-badge").classList.add("admin-badge");
-          document.getElementById("admin-section").style.display = "block";
-        }
-
-        document.getElementById("status").textContent = data.role;
+    async function loadProfile() {
+      const res = await fetch(`${backendUrl}/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById("email").textContent = data.email;
         document.getElementById("subscription").textContent = data.subscription || "Нет";
-
-        // Подтягиваем аватар
-        if (data.avatarUrl) {
-          document.getElementById("avatar-img").src = data.avatarUrl;
+        if (data.role === "admin") {
+          document.getElementById("role-badge").textContent = "👑";
+          document.getElementById("admin-tools").style.display = "block";
         }
-
-        // Поле "О себе"
-        document.getElementById("about").value = data.about || "";
-
-        // Сохранение "О себе"
-        document.getElementById("save-about").onclick = async () => {
-          const aboutText = document.getElementById("about").value;
-          const resp = await fetch("/update-about", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ about: aboutText })
-          });
-          if (resp.ok) {
-            alert("Информация сохранена");
-          } else {
-            alert("Ошибка сохранения");
-          }
-        };
-
-        // Загрузка аватара
-        document.getElementById("upload-avatar-btn").onclick = async () => {
-          const file = document.getElementById("avatar-upload").files[0];
-          if (!file) return alert("Выберите файл");
-
-          const formData = new FormData();
-          formData.append("avatar", file);
-
-          const progress = document.getElementById("avatar-progress");
-          progress.style.display = "block";
-
-          const xhr = new XMLHttpRequest();
-          xhr.open("POST", "/upload-avatar");
-          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-          xhr.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              progress.value = (event.loaded / event.total) * 100;
-            }
-          };
-          xhr.onload = () => {
-            if (xhr.status === 200) {
-              alert("Аватар загружен");
-              const response = JSON.parse(xhr.responseText);
-              document.getElementById("avatar-img").src = response.avatarUrl;
-              progress.style.display = "none";
-            } else {
-              alert("Ошибка загрузки аватара");
-            }
-          };
-          xhr.send(formData);
-        };
-
-      } catch (err) {
-        console.error("Ошибка профиля:", err);
+        if (data.avatar) document.getElementById("avatar").src = data.avatar;
+        if (data.about) document.getElementById("about").value = data.about;
+      } else {
+        alert("Ошибка профиля. Войдите снова.");
         localStorage.clear();
         window.location.href = "index.html";
       }
-    });
+    }
+
+    document.getElementById("upload-avatar-btn").onclick = async () => {
+      const file = document.getElementById("avatar-input").files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const progressBar = document.getElementById("upload-progress");
+      progressBar.style.display = "block";
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${backendUrl}/upload-avatar`);
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          progressBar.value = (e.loaded / e.total) * 100;
+        }
+      };
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          alert("Аватар обновлён!");
+          loadProfile();
+        } else {
+          alert("Ошибка загрузки аватара");
+        }
+      };
+      xhr.send(formData);
+    };
+
+    document.getElementById("save-about-btn").onclick = async () => {
+      const about = document.getElementById("about").value;
+      const res = await fetch(`${backendUrl}/update-about`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ about })
+      });
+      if (res.ok) alert("Описание сохранено!");
+    };
+
+    document.getElementById("logout-btn").onclick = () => {
+      localStorage.clear();
+      window.location.href = "index.html";
+    };
+
+    // Кошка
+    const cat = document.getElementById("cat");
+    const dialog = document.getElementById("cat-dialog");
+    const closeBtn = document.getElementById("close-dialog");
+
+    cat.onclick = () => dialog.classList.remove("hidden");
+    closeBtn.onclick = () => dialog.classList.add("hidden");
+
+    document.getElementById("contact-form").onsubmit = (e) => {
+      e.preventDefault();
+      alert("Сообщение отправлено администратору!");
+      dialog.classList.add("hidden");
+    };
+
+    loadProfile();
   </script>
+  <script src="script.js"></script>
 </body>
 </html>
