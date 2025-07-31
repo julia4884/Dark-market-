@@ -20,7 +20,48 @@
     </nav>
 
     <main>
-        <h1>Картинки</h1>
+  <h1 id="page-title"></h1>
+
+  <!-- Форма загрузки (видна только разработчикам) -->
+  <div id="upload-section" style="display:none; margin: 15px 0;">
+    <input type="file" id="file-input">
+    <button id="upload-btn">Загрузить</button>
+    <progress id="upload-progress" max="100" value="0" style="display:none;"></progress>
+  </div>
+
+  <!-- Галерея -->
+  <div id="gallery" class="gallery"></div>
+</main>
+
+<script src="script.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Определяем категорию из имени файла (например, books.html → books)
+    const category = window.location.pathname
+      .split("/")
+      .pop()
+      .replace(".html", "") || "books";
+
+    // 2. Заголовок страницы
+    document.getElementById("page-title").textContent =
+      category.charAt(0).toUpperCase() + category.slice(1);
+
+    // 3. Загружаем галерею
+    loadGallery(category);
+
+    // 4. Проверяем роль пользователя
+    const role = localStorage.getItem("role");
+    if (role === "developer" || role === "admin") {
+      document.getElementById("upload-section").style.display = "block";
+
+      // Вешаем событие загрузки
+      document.getElementById("upload-btn").onclick = () => {
+        const file = document.getElementById("file-input").files[0];
+        if (file) uploadFile(file, category);
+      };
+    }
+  });
+</script>
         <div id="gallery" class="gallery"></div>
     </main>
 
