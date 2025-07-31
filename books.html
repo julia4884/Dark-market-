@@ -11,9 +11,32 @@
   <div id="header-placeholder"></div>
 
   <main>
-    <h1>Книги</h1>
-    <div id="gallery" class="gallery"></div>
-  </main>
+  <h1>Книги</h1>
+
+  <!-- Форма загрузки (видна только разработчикам) -->
+  <div id="upload-section" style="display:none; margin: 15px 0;">
+    <input type="file" id="file-input">
+    <button onclick="uploadFile(document.getElementById('file-input').files[0], 'books')">
+      Загрузить
+    </button>
+    <progress id="upload-progress" max="100" value="0" style="display:none;"></progress>
+  </div>
+
+  <!-- Галерея -->
+  <div id="gallery" class="gallery"></div>
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    loadGallery("books");
+
+    // Показываем форму только разработчикам
+    const role = localStorage.getItem("role");
+    if (role === "developer" || role === "admin") {
+      document.getElementById("upload-section").style.display = "block";
+    }
+  });
+</script>
 
   <script src="header.js"></script>
   <script>
