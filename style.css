@@ -179,3 +179,81 @@ button:hover, input[type="submit"]:hover {
         padding: 15px;
     }
   }
+/* === Летающая мышь === */
+.flying-bat {
+  position: fixed;
+  font-size: 40px;
+  cursor: pointer;
+  transition: left 2s ease, top 2s ease;
+  z-index: 9999;
+  user-select: none;
+}
+.bat-message {
+  position: fixed;
+  background: rgba(30, 0, 50, 0.9);
+  color: #5eead4;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 0 10px #22d3ee, 0 0 20px #0ea5e9;
+  animation: fadeOut 3s forwards;
+  z-index: 10000;
+}
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-15px); }
+}
+
+/* === Кошка-виджет === */
+#cat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 48px;
+  cursor: pointer;
+  z-index: 10000;
+  transition: transform 0.3s ease;
+}
+#cat-widget:hover {
+  transform: scale(1.1);
+}
+
+#contact-form-container {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: rgba(30, 0, 50, 0.95);
+  border: 2px solid #5eead4;
+  border-radius: 12px;
+  padding: 15px;
+  width: 280px;
+  box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
+  z-index: 10000;
+}
+#contact-form h3 {
+  margin-top: 0;
+  color: #5eead4;
+}
+#contact-form input,
+#contact-form textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  background: rgba(40, 0, 70, 0.9);
+  border: 2px solid #7c3aed;
+  color: #e0e0e0;
+  padding: 8px;
+  border-radius: 6px;
+}
+#contact-form button {
+  width: 100%;
+  background: #5eead4;
+  color: #1a0030;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+#contact-form button:hover {
+  background: #22d3ee;
+}
