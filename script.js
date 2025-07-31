@@ -20,15 +20,16 @@ function updateUI() {
           return;
         }
         const profileInfo = document.getElementById("profile-info");
-        if (profileInfo) {
-          profileInfo.innerHTML = `
-            <div>
-              <img src="${data.avatar || 'default-avatar.png'}" alt="avatar" class="avatar">
-              <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
-              <p>${data.about || "Нет описания"}</p>
-            </div>
-          `;
-        }
+if (profileInfo) {
+  profileInfo.innerHTML = `
+    <div>
+      <img src="${data.avatar}" alt="avatar" class="avatar">
+      <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
+      <p>${data.about || "Нет описания"}</p>
+      ${data.role === "admin" ? '<a href="admin.html" class="admin-btn">Перейти в админку</a>' : ""}
+    </div>
+  `;
+}
       })
       .catch(() => logout());
   } else {
