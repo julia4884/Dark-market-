@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    window.location.href = "index.html"; // редирект если нет токена
+    window.location.href = "index.html";
     return;
   }
 
@@ -19,13 +19,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("username").textContent = data.username;
     document.getElementById("role").textContent = data.role;
 
-    if (data.avatar) {
-      document.getElementById("avatar").src = data.avatar;
-    }
-
-    if (data.about) {
-      document.getElementById("about").value = data.about;
-    }
+    if (data.avatar) document.getElementById("avatar").src = data.avatar;
+    if (data.about) document.getElementById("about").value = data.about;
 
     // Админка
     if (data.role === "admin") {
@@ -60,7 +55,7 @@ document.getElementById("upload-avatar-btn")?.addEventListener("click", async ()
   }
 });
 
-// === Обновление поля "О себе" ===
+// === Обновление "О себе" ===
 document.getElementById("save-about-btn")?.addEventListener("click", async () => {
   const about = document.getElementById("about").value;
   const token = localStorage.getItem("token");
@@ -81,7 +76,7 @@ document.getElementById("save-about-btn")?.addEventListener("click", async () =>
   }
 });
 
-// === Бан пользователя (только админ) ===
+// === Бан пользователя (админ) ===
 async function banUser(username) {
   const token = localStorage.getItem("token");
   const res = await fetch("/ban-user", {
@@ -97,7 +92,7 @@ async function banUser(username) {
   else alert("Ошибка при блокировке");
 }
 
-// === Бан приложения (только админ) ===
+// === Бан приложения (админ) ===
 async function banApp(appName) {
   const token = localStorage.getItem("token");
   const res = await fetch("/ban-app", {
@@ -120,10 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
   bat.textContent = "🦇";
   document.body.appendChild(bat);
 
-  // Звук писка
-  const squeak = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEA..."); // вставлен короткий base64-звук писка
+  const squeak = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
 
-  // Сообщения летучей мыши
   const messages = [
     "Кто посмел нажать на меня?",
     "Тёмные силы всегда рядом...",
@@ -142,8 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   bat.addEventListener("click", () => {
     squeak.play();
-
-    // Показываем сообщение
     const msg = document.createElement("div");
     msg.textContent = messages[Math.floor(Math.random() * messages.length)];
     msg.style.position = "fixed";
@@ -157,10 +148,8 @@ document.addEventListener("DOMContentLoaded", () => {
     msg.style.boxShadow = "0 0 15px #0ea5e9";
     msg.style.fontSize = "14px";
     document.body.appendChild(msg);
-
     setTimeout(() => msg.remove(), 3000);
 
-    // Перелетает
     const newLeft = Math.random() * 80 + 10;
     const newTop = Math.random() * 60 + 10;
     bat.style.left = newLeft + "%";
@@ -182,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
   cat.style.cursor = "pointer";
   cat.style.transition = "transform 0.3s ease";
 
-  // Всплывающее сообщение
   const hint = document.createElement("div");
   hint.textContent = "Есть вопросы? Нажми на меня!";
   hint.style.position = "fixed";
@@ -196,70 +184,40 @@ document.addEventListener("DOMContentLoaded", () => {
   hint.style.boxShadow = "0 0 12px #22d3ee";
   document.body.appendChild(hint);
 
-  cat.addEventListener("mouseenter", () => {
-    cat.style.transform = "scale(1.2)";
-  });
-
-  cat.addEventListener("mouseleave", () => {
-    cat.style.transform = "scale(1)";
-  });
-
-  cat.addEventListener("click", () => {
-    const email = "juliaangelss26@gmail.com";
-    const subject = encodeURIComponent("Сообщение администратору");
-    const body = encodeURIComponent("Здравствуйте! Хотела бы обсудить...");
-    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-  });
-});
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Сайт загружен и готов к работе");
-
-  /* === Летучая мышь === */
-  const bat = document.createElement("div");
-  bat.className = "bat";
-  document.body.appendChild(bat);
-
-  // Писк мыши (реальный звук)
-  const squeak = new Audio("https://www.fesliyanstudios.com/play-mp3/387"); 
-
-  bat.addEventListener("click", () => {
-    squeak.play();
-    bat.style.transform = `translate(${Math.random() * 80}vw, ${Math.random() * 80}vh)`;
-  });
-
-  /* === Кошка === */
-  const cat = document.createElement("div");
-  cat.className = "cat";
-  cat.innerHTML = "🐱";
-  document.body.appendChild(cat);
-
   const messageBox = document.createElement("div");
   messageBox.id = "cat-message-box";
+  messageBox.style.display = "none";
   messageBox.innerHTML = `
-    <p>Есть вопросы или предложения?<br>
-    Нажми на меня!</p>
-    <form id="contact-form" style="display:none; margin-top:10px;">
+    <form id="contact-form">
       <input type="email" id="user-email" placeholder="Ваш email" required><br><br>
       <textarea id="user-message" placeholder="Ваше сообщение" required></textarea><br><br>
       <button type="submit">Отправить</button>
     </form>
   `;
+  messageBox.style.position = "fixed";
+  messageBox.style.right = "20px";
+  messageBox.style.bottom = "80px";
+  messageBox.style.background = "rgba(0,0,0,0.9)";
+  messageBox.style.padding = "15px";
+  messageBox.style.borderRadius = "10px";
+  messageBox.style.boxShadow = "0 0 20px #5eead4";
   document.body.appendChild(messageBox);
 
   cat.addEventListener("click", () => {
-    messageBox.style.display = "block";
-    const form = document.getElementById("contact-form");
-    form.style.display = "block";
+    messageBox.style.display =
+      messageBox.style.display === "none" ? "block" : "none";
+  });
 
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const email = document.getElementById("user-email").value;
-      const msg = document.getElementById("user-message").value;
+  document.getElementById("contact-form")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("user-email").value;
+    const msg = document.getElementById("user-message").value;
 
-      // Отправка письма (пока имитация)
-      alert(`Ваше сообщение отправлено администратору!\nEmail: ${email}\nТекст: ${msg}`);
-      form.reset();
-      messageBox.style.display = "none";
-    };
+    window.location.href = `mailto:juliaangelss26@gmail.com?subject=Сообщение&body=Email: ${encodeURIComponent(
+      email
+    )}%0A${encodeURIComponent(msg)}`;
+
+    messageBox.style.display = "none";
+    e.target.reset();
   });
 });
