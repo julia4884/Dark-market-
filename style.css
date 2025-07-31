@@ -213,4 +213,32 @@ nav a:hover {
   border: 2px solid #5eead4;
   box-shadow: 0 0 15px #22d3ee;
   margin-bottom: 10px;
+  /* === Подсветка картинок и кнопок в галерее === */
+.gallery .card img {
+  border: 2px solid transparent;
+  box-shadow: 0 0 10px rgba(94, 234, 212, 0.4);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.gallery .card img:hover {
+  border-color: #5eead4;
+  box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
+}
+
+/* Кнопки "Скачать" с подсветкой */
+.gallery .card button {
+  background: #5eead4;
+  color: #000;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(94, 234, 212, 0.5);
+  transition: box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.gallery .card button:hover {
+  background: #22d3ee;
+  box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
 }
