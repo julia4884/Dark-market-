@@ -16,42 +16,46 @@ function updateUI() {
       .then((res) => res.json())
       .then((data) => {
         if (!data || data.error) {
-          localStorage.removeItem("token");
-          localStorage.removeItem("role");
-          if (authSection) authSection.style.display = "block";
-          if (logoutSection) logoutSection.style.display = "none";
+          logout();
           return;
         }
         const profileInfo = document.getElementById("profile-info");
         if (profileInfo) {
           profileInfo.innerHTML = `
             <div>
-              <img src="${data.avatar}" alt="avatar" class="avatar">
+              <img src="${data.avatar || 'default-avatar.png'}" alt="avatar" class="avatar">
               <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
               <p>${data.about || "Нет описания"}</p>
             </div>
           `;
         }
       })
-      .catch(() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        if (authSection) authSection.style.display = "block";
-        if (logoutSection) logoutSection.style.display = "none";
-      });
+      .catch(() => logout());
   } else {
     if (authSection) authSection.style.display = "block";
     if (logoutSection) logoutSection.style.display = "none";
   }
 }
 
-document.getElementById("login-btn")?.addEventListener("click", () => {
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  token = null;
+  role = null;
+  const authSection = document.getElementById("auth-section");
+  const logoutSection = document.getElementById("logout-section");
+  if (authSection) authSection.style.display = "block";
+  if (logoutSection) logoutSection.style.display = "none";
+}
+
+// === Вход ===
+document.getElementById("login-btn")?.addEventListener("click", (e) => {
+  e.preventDefault();
   const email = document.getElementById("login-email").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
   if (!email || !password) return alert("Заполните все поля!");
 
-  // === Прямой вход для админа ===
   if (email === "juliaangelss26@gmail.com" && password === "dark4884") {
     localStorage.setItem("token", "admin-token");
     localStorage.setItem("role", "admin");
@@ -62,7 +66,6 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
     return;
   }
 
-  // === Вход через сервер ===
   fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -84,7 +87,9 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
     .catch(() => alert("Сервер недоступен"));
 });
 
-document.getElementById("register-btn")?.addEventListener("click", () => {
+// === Регистрация ===
+document.getElementById("register-btn")?.addEventListener("click", (e) => {
+  e.preventDefault();
   const username = document.getElementById("register-username").value.trim();
   const email = document.getElementById("register-email").value.trim();
   const password = document.getElementById("register-password").value.trim();
@@ -107,13 +112,8 @@ document.getElementById("register-btn")?.addEventListener("click", () => {
     .catch(() => alert("Сервер недоступен"));
 });
 
-document.getElementById("logout-btn")?.addEventListener("click", () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  token = null;
-  role = null;
-  updateUI();
-});
+// === Выход ===
+document.getElementById("logout-btn")?.addEventListener("click", () => logout());
 
 // === Летучая мышь 🦇 ===
 const bat = document.getElementById("flying-bat");
@@ -146,10 +146,7 @@ bat?.addEventListener("click", () => {
   batMessage.style.top = `calc(${bat.style.top} - 40px)`;
   batMessage.style.display = "block";
   batMessage.style.opacity = 1;
-
-  setTimeout(() => {
-    batMessage.style.opacity = 0;
-  }, 2000);
+  setTimeout(() => (batMessage.style.display = "none"), 2500);
 });
 
 // === Кошка 🐱 ===
