@@ -83,21 +83,6 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
     })
     .catch(() => alert("Сервер недоступен"));
 });
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        token = data.token;
-        role = data.role;
-        updateUI();
-        if (data.role === "admin") window.location.href = "admin.html";
-      } else {
-        alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
-      }
-    })
-    .catch(() => alert("Сервер недоступен"));
-});
 
 document.getElementById("register-btn")?.addEventListener("click", () => {
   const username = document.getElementById("register-username").value.trim();
