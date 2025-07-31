@@ -3,47 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Админ-панель — Dark Market Ultra</title>
+  <title>Админ-панель | Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
-    <h1 class="site-title">☾ Dark Market Ultra ✦ — Админ</h1>
+    <h1 class="site-title">☾ Dark Market Ultra ✦ — Админка 👑</h1>
     <nav>
       <a href="home.html">Главная</a>
-      <a href="apps.html">Приложения</a>
-      <a href="games.html">Игры</a>
-      <a href="movies.html">Фильмы</a>
-      <a href="music.html">Музыка</a>
-      <a href="books.html">Книги</a>
-      <a href="donate.html">Поддержка</a>
-      <a href="index.html" id="logout-btn">Выйти</a>
+      <a href="index.html">Выход</a>
     </nav>
   </header>
 
   <main>
-    <section id="admin-dashboard">
-      <h2>Личный кабинет 👑</h2>
-      <div class="profile">
-        <img id="admin-avatar" src="img/default-avatar.png" alt="Аватар" class="avatar">
-        <p><strong id="admin-username">Администратор</strong> 👑</p>
-        <p>Email: juliaangelss26@gmail.com</p>
-        <label>Загрузить аватар:</label>
-        <input type="file" id="avatar-upload" accept="image/*">
-      </div>
+    <section id="admin-panel">
+      <h2>Добро пожаловать в Админ-панель 👑</h2>
+      <div id="admin-info"></div>
 
-      <hr>
-
-      <h3>Загрузка файлов</h3>
-      <form id="file-upload-form" enctype="multipart/form-data">
-        <input type="file" id="file-upload" name="file" required>
+      <!-- Загрузка аватара -->
+      <h3>Загрузка аватара</h3>
+      <form id="avatar-form">
+        <input type="file" id="avatar-upload" accept="image/*" required>
         <button type="submit">Загрузить</button>
       </form>
 
-      <div id="uploaded-files">
-        <h4>Загруженные файлы:</h4>
-        <ul id="file-list"></ul>
-      </div>
+      <!-- Загрузка файлов -->
+      <h3>Загрузка файлов</h3>
+      <form id="file-form">
+        <input type="file" id="file-upload" required>
+        <button type="submit">Загрузить</button>
+      </form>
+
+      <!-- Список файлов -->
+      <h3>Ваши загруженные файлы</h3>
+      <ul id="file-list"></ul>
     </section>
   </main>
 
@@ -53,7 +46,7 @@
 
   <!-- Кошка -->
   <div id="cat-widget">🐱</div>
-  <div id="contact-form-container" class="hidden">
+  <div id="contact-form-container" style="display:none;">
     <form id="contact-form">
       <h3>Напиши админу</h3>
       <input type="email" id="contact-email" placeholder="Ваш Email" required>
@@ -64,5 +57,32 @@
   </div>
 
   <script src="script.js"></script>
-</body>
-</html>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Проверка входа
+      const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
+
+      if (!token || role !== "admin") {
+        alert("Доступ запрещён! Войдите как администратор.");
+        window.location.href = "index.html";
+      }
+
+      // Отображение информации
+      const adminInfo = document.getElementById("admin-info");
+      adminInfo.innerHTML = `
+        <p><strong>Ваш Email:</strong> juliaangelss26@gmail.com 👑</p>
+        <p>У вас полный доступ к панели управления.</p>
+      `;
+
+      // Форма загрузки аватара
+      document.getElementById("avatar-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        alert("Аватар успешно загружен (пока фейк-обработчик)!");
+      });
+
+      // Форма загрузки файлов
+      document.getElementById("file-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById("file-upload");
+        if (fileInput.files.length === 0) return alert("Выберите файл!");
