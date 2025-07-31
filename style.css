@@ -192,3 +192,79 @@ nav a:hover {
   background: #22d3ee;
   color: white;
 }
+/* === Летающая мышь === */
+.flying-bat {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  background: url('https://cdn-icons-png.flaticon.com/512/616/616408.png') no-repeat center/contain;
+  z-index: 1000;
+  cursor: pointer;
+  transition: left 1s ease, top 1s ease;
+}
+.bat-message {
+  position: absolute;
+  background: rgba(30,0,50,0.9);
+  color: #5eead4;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 0 10px #22d3ee;
+  animation: fadeout 3s forwards;
+}
+@keyframes fadeout {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* === Кошка-виджет === */
+#cat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 1001;
+  transition: transform 0.3s;
+}
+#cat-widget:hover {
+  transform: scale(1.2);
+}
+#contact-form-container {
+  display: none;
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background: rgba(30, 0, 50, 0.95);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #7c3aed;
+  z-index: 1002;
+}
+#contact-form h3 {
+  margin-top: 0;
+  color: #5eead4;
+}
+#contact-form input,
+#contact-form textarea {
+  width: 100%;
+  margin: 8px 0;
+  padding: 8px;
+  border: 2px solid #5eead4;
+  border-radius: 6px;
+  background: rgba(40,0,70,0.8);
+  color: #e0e0e0;
+}
+#contact-form button {
+  background: #5eead4;
+  color: #1a0030;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+#contact-form button:hover {
+  background: #22d3ee;
+}
