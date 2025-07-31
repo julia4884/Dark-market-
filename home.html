@@ -25,29 +25,37 @@
     <h1 id="page-title">Главная</h1>
 
     <!-- Галерея -->
-    <div id="gallery" class="gallery"></div>
-
-    <!-- Летучая мышь -->
-    <div id="flying-bat">🦇</div>
-    <div id="bat-message" class="bat-message"></div>
-
-    <!-- Контактная кошка -->
-    <div id="cat-widget">
-      🐱
-      <div id="cat-dialog">Есть вопросы, предложения или жалобы? Нажми на меня!</div>
+    <div id="gallery" class="gallery">
+      <div class="card">
+        <img src="img/sample1.jpg" alt="Пример 1">
+        <p>Файл 1</p>
+      </div>
+      <div class="card">
+        <img src="img/sample2.jpg" alt="Пример 2">
+        <p>Файл 2</p>
+      </div>
+      <div class="card">
+        <img src="img/sample3.jpg" alt="Пример 3">
+        <p>Файл 3</p>
+      </div>
     </div>
 
-    <!-- Форма связи -->
-    <div id="contact-form-container" style="display:none;">
+    <!-- Контактная кошка -->
+    <div id="cat-widget">🐱</div>
+    <div id="contact-form-container" class="hidden">
       <form id="contact-form">
-        <h3>Написать администратору</h3>
-        <input type="email" id="user-email" placeholder="Ваш email" required />
-        <textarea id="user-message" placeholder="Ваше сообщение..." required></textarea>
+        <h3>Напиши админу</h3>
+        <input type="email" id="contact-email" placeholder="Ваш Email" required>
+        <textarea id="contact-message" placeholder="Ваше сообщение..." required></textarea>
         <button type="submit">Отправить</button>
         <button type="button" id="close-contact">Закрыть</button>
       </form>
     </div>
   </main>
+
+  <!-- Летучая мышь -->
+  <div id="flying-bat">🦇</div>
+  <div id="bat-message"></div>
 
   <script src="script.js"></script>
 </body>
