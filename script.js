@@ -185,5 +185,27 @@ contactForm?.addEventListener("submit", (e) => {
     .catch(() => alert("Сервер недоступен"));
 });
 
+// === Галерея картинок ===
+const imagesGallery = [
+  { src: "images/pic1.jpg", title: "Тёмный лес", desc: "Мистическая тьма и свет луны." },
+  { src: "images/pic2.jpg", title: "Космос", desc: "Неоновая галактика 🌌" },
+  { src: "images/pic3.jpg", title: "Ведьма", desc: "Силуэты магии в ночи." },
+  { src: "images/pic4.jpg", title: "Замок", desc: "Древние руины на утёсе." }
+];
+
+function loadImagesGallery() {
+  const container = document.getElementById("images-gallery");
+  if (!container) return;
+  container.innerHTML = imagesGallery.map(img => `
+    <div class="card">
+      <img src="${img.src}" alt="${img.title}">
+      <h3>${img.title}</h3>
+      <p>${img.desc}</p>
+    </div>
+  `).join("");
+   }
 // === Запуск ===
-document.addEventListener("DOMContentLoaded", updateUI);
+document.addEventListener("DOMContentLoaded", () => {
+  updateUI();
+  loadImagesGallery(); // Запускаем загрузку картинок, если есть блок
+});
