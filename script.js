@@ -27,15 +27,18 @@ function updateUI() {
           profileInfo.innerHTML = `
             <div>
               <img src="${data.avatar}" alt="avatar" class="avatar">
-              <p><strong>${data.username}</strong> ${
-            data.role === "admin" ? "👑" : ""
-          }</p>
+              <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
               <p>${data.about || "Нет описания"}</p>
             </div>
           `;
         }
       })
-      .catch((err) => console.error("Ошибка профиля:", err));
+      .catch(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        if (authSection) authSection.style.display = "block";
+        if (logoutSection) logoutSection.style.display = "none";
+      });
   } else {
     if (authSection) authSection.style.display = "block";
     if (logoutSection) logoutSection.style.display = "none";
@@ -105,19 +108,19 @@ const bat = document.getElementById("flying-bat");
 const batMessage = document.getElementById("bat-message");
 
 const batMessages = [
-  "Добро пожаловать на тёмную сторону!",
-  "Не бойся, я не кусаю... сильно 🦇",
-  "Тсс... у меня для тебя секрет!",
-  "Эй, ты! Нужна помощь?",
-  "Время магии и тьмы!",
-  "Ты выглядишь подозрительно счастливым 😈",
+  "Добро пожаловать в тёмный мир!",
+  "Я тут просто пролетаю 🦇",
+  "Осторожно... я наблюдаю за тобой 👀",
+  "Ты сегодня отлично выглядишь!",
   "Не забудь проверить новые разделы!",
+  "Псс... там скидки в магазине!",
+  "Если боишься — жми на кошку 🐱",
 ];
 
 function moveBat() {
   if (!bat) return;
-  const x = Math.random() * (window.innerWidth - 60);
-  const y = Math.random() * (window.innerHeight - 60);
+  const x = Math.random() * (window.innerWidth - 80);
+  const y = Math.random() * (window.innerHeight - 80);
   bat.style.left = `${x}px`;
   bat.style.top = `${y}px`;
 }
@@ -129,6 +132,7 @@ bat?.addEventListener("click", () => {
   batMessage.textContent = msg;
   batMessage.style.left = bat.style.left;
   batMessage.style.top = `calc(${bat.style.top} - 40px)`;
+  batMessage.style.display = "block";
   batMessage.style.opacity = 1;
 
   // Писк через Web Audio API
@@ -138,22 +142,28 @@ bat?.addEventListener("click", () => {
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.type = "square";
-  osc.frequency.value = 800;
+  osc.frequency.value = 900;
   osc.start();
   setTimeout(() => {
     osc.stop();
     batMessage.style.opacity = 0;
-  }, 800);
+  }, 700);
 });
 
 // === Кошка 🐱 ===
 const catWidget = document.getElementById("cat-widget");
 const contactFormContainer = document.getElementById("contact-form-container");
 const contactForm = document.getElementById("contact-form");
+const closeContact = document.getElementById("close-contact");
 
 catWidget?.addEventListener("click", () => {
   if (!contactFormContainer) return;
-  contactFormContainer.classList.toggle("visible");
+  contactFormContainer.style.display =
+    contactFormContainer.style.display === "block" ? "none" : "block";
+});
+
+closeContact?.addEventListener("click", () => {
+  if (contactFormContainer) contactFormContainer.style.display = "none";
 });
 
 contactForm?.addEventListener("submit", (e) => {
@@ -171,7 +181,7 @@ contactForm?.addEventListener("submit", (e) => {
     .then((res) => res.json())
     .then((data) => {
       alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
-      if (data.success) contactFormContainer.classList.remove("visible");
+      if (data.success) contactFormContainer.style.display = "none";
     })
     .catch(() => alert("Сервер недоступен"));
 });
