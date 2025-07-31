@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Админка — Dark Market Ultra</title>
+  <title>Админ-панель — Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
-    <h1 class="site-title">☾ Dark Market Ultra ✦</h1>
+    <h1 class="site-title">☾ Dark Market Ultra ✦ — Админ</h1>
     <nav>
       <a href="home.html">Главная</a>
       <a href="apps.html">Приложения</a>
@@ -17,51 +17,39 @@
       <a href="music.html">Музыка</a>
       <a href="books.html">Книги</a>
       <a href="donate.html">Поддержка</a>
-      <a href="admin.html" class="active">Личный кабинет</a>
+      <a href="index.html" id="logout-btn">Выйти</a>
     </nav>
   </header>
 
   <main>
-    <section id="profile-section">
-      <h2>👑 Панель администратора</h2>
-      <div id="profile-info">
-        <img id="avatar-preview" src="uploads/avatars/default.png" alt="Аватар" class="avatar">
-        <p><strong>Имя:</strong> <span id="profile-username"></span> <span id="admin-crown">👑</span></p>
-        <p><strong>О себе:</strong> <span id="profile-about"></span></p>
+    <section id="admin-dashboard">
+      <h2>Личный кабинет 👑</h2>
+      <div class="profile">
+        <img id="admin-avatar" src="img/default-avatar.png" alt="Аватар" class="avatar">
+        <p><strong id="admin-username">Администратор</strong> 👑</p>
+        <p>Email: juliaangelss26@gmail.com</p>
+        <label>Загрузить аватар:</label>
+        <input type="file" id="avatar-upload" accept="image/*">
       </div>
 
-      <form id="about-form">
-        <label for="about">Изменить "О себе":</label>
-        <textarea id="about" placeholder="Напишите о себе..."></textarea>
-        <button type="submit">Сохранить</button>
-      </form>
+      <hr>
 
-      <form id="avatar-form" enctype="multipart/form-data">
-        <label for="avatar">Загрузить новый аватар:</label>
-        <input type="file" id="avatar" name="avatar" accept="image/*" required>
+      <h3>Загрузка файлов</h3>
+      <form id="file-upload-form" enctype="multipart/form-data">
+        <input type="file" id="file-upload" name="file" required>
         <button type="submit">Загрузить</button>
       </form>
 
-      <button id="logout-btn">Выйти</button>
-    </section>
-
-    <section id="admin-tools">
-      <h2>⚔ Инструменты администратора</h2>
-      <form id="ban-user-form">
-        <input type="text" id="ban-username" placeholder="Имя пользователя">
-        <button type="submit">Забанить</button>
-      </form>
-
-      <form id="ban-app-form">
-        <input type="number" id="ban-app-id" placeholder="ID приложения">
-        <button type="submit">Забанить приложение</button>
-      </form>
+      <div id="uploaded-files">
+        <h4>Загруженные файлы:</h4>
+        <ul id="file-list"></ul>
+      </div>
     </section>
   </main>
 
   <!-- Летучая мышь -->
-  <div class="flying-bat" id="bat">🦇</div>
-  <div id="bat-message" class="bat-message"></div>
+  <div id="flying-bat">🦇</div>
+  <div id="bat-message"></div>
 
   <!-- Кошка -->
   <div id="cat-widget">🐱</div>
