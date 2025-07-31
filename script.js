@@ -1,147 +1,154 @@
-// === Авторизация и токены ===
-const API_URL = window.location.origin;
+// === Авторизация ===
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
 
-async function login() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
+function updateUI() {
+  const authSection = document.getElementById("auth-section");
+  const logoutSection = document.getElementById("logout-section");
 
-  try {
-    const res = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
+  if (token) {
+    authSection.style.display = "none";
+    logoutSection.style.display = "block";
 
-    if (res.ok) {
-      localStorage.setItem("token", data.token);
-      alert("✅ Вход выполнен");
-      window.location.href = "admin.html"; // переход в личный кабинет
-    } else {
-      alert("❌ " + data.error);
-    }
-  } catch (err) {
-    console.error("Ошибка входа:", err);
-    alert("⚠ Ошибка соединения");
+    fetch("/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const profileInfo = document.getElementById("profile-info");
+        profileInfo.innerHTML = `
+          <div>
+            <img src="${data.avatar}" alt="avatar" class="avatar">
+            <p><strong>${data.username}</strong> ${
+              data.role === "admin" ? "👑" : ""
+            }</p>
+            <p>${data.about || "Нет описания"}</p>
+          </div>
+        `;
+      });
+  } else {
+    authSection.style.display = "block";
+    logoutSection.style.display = "none";
   }
 }
 
-async function register() {
+document.getElementById("login-btn")?.addEventListener("click", () => {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        updateUI();
+        if (data.role === "admin") window.location.href = "admin.html";
+      } else {
+        alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
+      }
+    });
+});
+
+document.getElementById("register-btn")?.addEventListener("click", () => {
   const username = document.getElementById("register-username").value;
   const email = document.getElementById("register-email").value;
   const password = document.getElementById("register-password").value;
 
-  try {
-    const res = await fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
+  fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        alert("Регистрация успешна! Войдите.");
+      } else {
+        alert("Ошибка регистрации: " + (data.error || "Попробуйте снова"));
+      }
     });
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("✅ Регистрация успешна! Теперь войдите.");
-    } else {
-      alert("❌ " + data.error);
-    }
-  } catch (err) {
-    console.error("Ошибка регистрации:", err);
-    alert("⚠ Ошибка соединения");
-  }
-}
-
-document.getElementById("login-btn")?.addEventListener("click", login);
-document.getElementById("register-btn")?.addEventListener("click", register);
-
-// === Личный кабинет ===
-async function loadProfile() {
-  const token = localStorage.getItem("token");
-  if (!token) return;
-
-  try {
-    const res = await fetch(`${API_URL}/profile`, {
-      headers: { Authorization: "Bearer " + token },
-    });
-    const data = await res.json();
-
-    if (res.ok) {
-      document.getElementById("profile-info").innerHTML = `
-        <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
-        <img src="${data.avatar}" alt="Аватар" style="width:80px;border-radius:50%;">
-        <p>${data.about || "Нет описания"}</p>
-      `;
-      document.getElementById("auth-section").style.display = "none";
-      document.getElementById("logout-section").style.display = "block";
-    } else {
-      localStorage.removeItem("token");
-    }
-  } catch (err) {
-    console.error("Ошибка профиля:", err);
-  }
-}
+});
 
 document.getElementById("logout-btn")?.addEventListener("click", () => {
   localStorage.removeItem("token");
-  location.reload();
+  localStorage.removeItem("role");
+  updateUI();
 });
 
-loadProfile();
-
-// === Летучая мышь ===
+// === Летучая мышь 🦇 ===
 const bat = document.getElementById("flying-bat");
 const batMessage = document.getElementById("bat-message");
 
-const batPhrases = [
-  "🦇 Привет! Хочешь узнать секрет?",
-  "🦇 Смотри под крыло...",
-  "🦇 Шшш... я храню тайны сайта!",
-  "🦇 Ночью тут особенно красиво...",
-  "🦇 Нажми ещё раз — и я улечу!",
+const batMessages = [
+  "Добро пожаловать на тёмную сторону!",
+  "Не бойся, я не кусаю... сильно 🦇",
+  "Тсс... у меня для тебя секрет!",
+  "Эй, ты! Нужна помощь?",
+  "Время магии и тьмы!",
+  "Ты выглядишь подозрительно счастливым 😈",
+  "Не забудь проверить новые разделы!",
 ];
 
-if (bat) {
-  bat.addEventListener("click", () => {
-    const phrase = batPhrases[Math.floor(Math.random() * batPhrases.length)];
-    batMessage.textContent = phrase;
-    batMessage.style.display = "block";
-    setTimeout(() => {
-      batMessage.style.display = "none";
-    }, 3000);
-  });
+function moveBat() {
+  const x = Math.random() * (window.innerWidth - 50);
+  const y = Math.random() * (window.innerHeight - 50);
+  bat.style.transform = `translate(${x}px, ${y}px)`;
 }
+setInterval(moveBat, 4000);
 
-// === Кошка ===
+bat.addEventListener("click", () => {
+  const msg = batMessages[Math.floor(Math.random() * batMessages.length)];
+  batMessage.textContent = msg;
+  batMessage.style.left = bat.style.left;
+  batMessage.style.top = bat.style.top;
+  batMessage.style.opacity = 1;
+
+  // Писк через Web Audio API (без файлов)
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = "square";
+  osc.frequency.value = 800;
+  osc.start();
+  setTimeout(() => {
+    osc.stop();
+    batMessage.style.opacity = 0;
+  }, 600);
+});
+
+// === Кошка 🐱 ===
 const catWidget = document.getElementById("cat-widget");
 const contactFormContainer = document.getElementById("contact-form-container");
 const contactForm = document.getElementById("contact-form");
 
-catWidget?.addEventListener("click", () => {
+catWidget.addEventListener("click", () => {
   contactFormContainer.style.display =
-    contactFormContainer.style.display === "block" ? "none" : "block";
+    contactFormContainer.style.display === "none" ? "block" : "none";
 });
 
-contactForm?.addEventListener("submit", async (e) => {
+contactForm?.addEventListener("submit", (e) => {
   e.preventDefault();
-  const email = document.getElementById("contact-email").value;
-  const message = document.getElementById("contact-message").value;
+  const email = document.getElementById("user-email").value;
+  const message = document.getElementById("user-message").value;
 
-  try {
-    const res = await fetch(`${API_URL}/contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, message }),
+  fetch("/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, message }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
+      if (data.success) contactFormContainer.style.display = "none";
     });
-    const data = await res.json();
-
-    if (res.ok) {
-      alert("✅ Сообщение отправлено!");
-      contactForm.reset();
-      contactFormContainer.style.display = "none";
-    } else {
-      alert("❌ " + data.error);
-    }
-  } catch (err) {
-    console.error("Ошибка отправки:", err);
-    alert("⚠ Ошибка соединения");
-  }
 });
+
+// === Инициализация ===
+document.addEventListener("DOMContentLoaded", updateUI);
