@@ -30,15 +30,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const gallery = document.getElementById("gallery");
   if (gallery) loadGallery(category);
 
-  // === Летучая мышь 🦇 ===
+// === Летучая мышь ===
+function spawnBat() {
   const bat = document.createElement("div");
-  bat.id = "flying-bat";
-  bat.textContent = "🦇";
+  bat.className = "flying-bat";
+  bat.innerHTML = "🦇";
   document.body.appendChild(bat);
 
   const messages = [
     "Я лечу за тобой!",
-    "Ты видел мою пещеру?",
+    "Ты видел мою тень?",
     "Секреты скрыты в тени...",
     "Хочешь подарок?",
     "Кликни меня — и будет сюрприз!",
@@ -48,37 +49,30 @@ document.addEventListener("DOMContentLoaded", () => {
   function moveBat() {
     const x = Math.random() * (window.innerWidth - 50);
     const y = Math.random() * (window.innerHeight - 50);
-    bat.style.transform = `translate(${x}px, ${y}px)`;
+    bat.style.position = "fixed";
+    bat.style.left = `${x}px`;
+    bat.style.top = `${y}px`;
+    bat.style.transition = "all 1.5s ease-in-out";
   }
 
-  // плавные перелёты
-  bat.style.position = "fixed";
-  bat.style.transition = "transform 1.5s ease-in-out";
   moveBat();
   setInterval(moveBat, 5000);
 
-  // писк + сообщение
   bat.addEventListener("click", () => {
-    // звук через Web Audio API
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "square";
-    osc.frequency.setValueAtTime(1200, ctx.currentTime);
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.15);
-
-    // текстовое сообщение
     const msg = document.createElement("div");
     msg.className = "bat-message";
-    msg.textContent =
-      messages[Math.floor(Math.random() * messages.length)];
+    msg.textContent = messages[Math.floor(Math.random() * messages.length)];
     document.body.appendChild(msg);
-    setTimeout(() => msg.remove(), 4000);
+
+    const rect = bat.getBoundingClientRect();
+    msg.style.left = rect.left + "px";
+    msg.style.top = rect.top - 30 + "px";
+
+    setTimeout(() => msg.remove(), 3000);
   });
+}
+
+document.addEventListener("DOMContentLoaded", spawnBat);
 
   // === Кошка 🐱 ===
   const catWidget = document.getElementById("cat-widget");
@@ -113,48 +107,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
-// === Летучая мышь ===
-function spawnBat() {
-  const bat = document.createElement("div");
-  bat.className = "flying-bat";
-  bat.innerHTML = "🦇";
-  document.body.appendChild(bat);
-
-  const messages = [
-    "Привет, смертный!",
-    "Ты уверен, что готов?",
-    "Кто идёт по тёмной стороне?",
-    "🦇 Я охраняю этот портал!",
-    "Не бойся, я просто летучая мышь.",
-    "Тьма ближе, чем кажется...",
-    "Хочешь секрет? 🔮"
-  ];
-
-  function moveBat() {
-    const x = Math.random() * (window.innerWidth - 50);
-    const y = Math.random() * (window.innerHeight - 50);
-    bat.style.left = `${x}px`;
-    bat.style.top = `${y}px`;
-  }
-
-  // Первичный полёт
-  moveBat();
-  setInterval(moveBat, 5000);
-
-  // Клик по мыши → всплывающее сообщение
-  bat.addEventListener("click", () => {
-    const msg = document.createElement("div");
-    msg.className = "bat-message";
-    msg.textContent = messages[Math.floor(Math.random() * messages.length)];
-    document.body.appendChild(msg);
-
-    // позиция сообщения рядом с мышью
-    const rect = bat.getBoundingClientRect();
-    msg.style.left = rect.left + "px";
-    msg.style.top = rect.top - 30 + "px";
-
-    setTimeout(() => msg.remove(), 3000); // исчезает через 3 сек
-  });
-}
-
-document.addEventListener("DOMContentLoaded", spawnBat);
