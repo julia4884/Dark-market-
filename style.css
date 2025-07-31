@@ -5,6 +5,8 @@ body {
   background: linear-gradient(135deg, #a78bfa, #5b21b6);
   color: #e0e0e0;
   overflow-x: hidden;
+  line-height: 1.6;
+  transition: background 0.5s ease;
 }
 
 /* Дымка */
@@ -19,11 +21,11 @@ body::before {
               radial-gradient(circle at 80% 30%, rgba(255,255,255,0.07), transparent 50%),
               radial-gradient(circle at 50% 80%, rgba(255,255,255,0.05), transparent 40%);
   z-index: -1;
-  animation: smoke 12s infinite alternate ease-in-out;
+  animation: smoke 14s infinite alternate ease-in-out;
 }
 @keyframes smoke {
   0% { transform: translateY(0) scale(1); }
-  100% { transform: translateY(-20px) scale(1.05); }
+  100% { transform: translateY(-25px) scale(1.08); }
 }
 
 /* Шапка */
@@ -31,17 +33,24 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(30, 0, 50, 0.8);
+  background: rgba(30, 0, 50, 0.85);
   padding: 15px 25px;
-  box-shadow: 0 0 20px #7c3aed;
+  box-shadow: 0 0 25px #7c3aed;
+  border-bottom: 2px solid #5eead4;
 }
 
 header .logo {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: bold;
   font-style: italic;
   color: #5eead4;
-  text-shadow: 0 0 10px #22d3ee, 0 0 20px #0ea5e9;
+  text-shadow: 0 0 12px #22d3ee, 0 0 24px #0ea5e9;
+  letter-spacing: 2px;
+  cursor: default;
+  transition: transform 0.4s ease;
+}
+header .logo:hover {
+  transform: scale(1.05);
 }
 
 /* Меню */
@@ -59,16 +68,21 @@ nav a {
 }
 nav a:hover {
   border: 2px solid #5eead4;
-  box-shadow: 0 0 10px #22d3ee, 0 0 20px #0ea5e9;
+  box-shadow: 0 0 12px #22d3ee, 0 0 24px #0ea5e9;
   color: #5eead4;
 }
 
-/* Главный контент */
+/* Контент */
 main {
   padding: 20px;
+  animation: fadeIn 1s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Карточки */
+/* Галерея */
 .gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -83,8 +97,8 @@ main {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 0 25px #22d3ee, 0 0 50px #0ea5e9;
 }
 .card img {
   max-width: 100%;
@@ -115,25 +129,26 @@ input[type="file"],
 input[type="text"], 
 input[type="email"], 
 input[type="password"] {
-  background: rgba(40, 0, 70, 0.8);
+  background: rgba(40, 0, 70, 0.85);
   border: 2px solid #8b5cf6;
   border-radius: 8px;
-  padding: 8px;
+  padding: 10px;
   color: #e0e0e0;
   outline: none;
+  width: 100%;
   transition: box-shadow 0.3s ease;
 }
 input[type="file"]:focus, 
 input[type="text"]:focus, 
 input[type="email"]:focus, 
 input[type="password"]:focus {
-  box-shadow: 0 0 12px #5eead4, 0 0 24px #22d3ee;
+  box-shadow: 0 0 14px #5eead4, 0 0 28px #22d3ee;
 }
 button {
   background: rgba(30, 0, 50, 0.9);
   border: 2px solid #5eead4;
   border-radius: 8px;
-  padding: 10px 18px;
+  padding: 10px 20px;
   color: #5eead4;
   font-weight: bold;
   cursor: pointer;
@@ -145,7 +160,26 @@ button:hover {
   box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
 }
 
-/* Адаптив под мобильные устройства */
+/* === Летучая мышь === */
+.bat {
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  width: 50px;
+  height: 50px;
+  background: url('https://cdn-icons-png.flaticon.com/512/616/616408.png') no-repeat center / contain;
+  z-index: 9999;
+  cursor: pointer;
+  transition: transform 0.5s ease;
+  animation: fly 6s infinite alternate ease-in-out;
+}
+@keyframes fly {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(40vw, 30vh) rotate(15deg); }
+  100% { transform: translate(-30vw, -20vh) rotate(-15deg); }
+}
+
+/* Адаптив */
 @media (max-width: 768px) {
   header {
     flex-direction: column;
@@ -155,8 +189,8 @@ button:hover {
   nav {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 12px;
   }
   nav a {
     font-size: 14px;
@@ -167,5 +201,91 @@ button:hover {
   }
   h1, h2, h3 {
     text-align: center;
+    font-size: 18px;
   }
+}
+
+@media (max-width: 480px) {
+  nav a {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  header .logo {
+    font-size: 22px;
+  }
+  h1, h2, h3 {
+    font-size: 16px;
+  }
+}
+/* === Кошечка-помощник === */
+.cat-helper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 70px;
+  height: 70px;
+  background: url('https://cdn-icons-png.flaticon.com/512/616/616408.png') no-repeat center / contain;
+  cursor: pointer;
+  z-index: 10000;
+  animation: floatCat 5s infinite ease-in-out;
+  transition: transform 0.3s ease;
+}
+.cat-helper:hover {
+  transform: scale(1.1);
+}
+
+@keyframes floatCat {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0); }
+}
+
+/* Окошко с сообщением */
+.cat-dialog {
+  display: none;
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 280px;
+  background: rgba(30, 0, 50, 0.95);
+  border: 2px solid #5eead4;
+  border-radius: 12px;
+  box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
+  padding: 15px;
+  z-index: 10001;
+  color: #e0e0e0;
+}
+
+.cat-dialog h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #5eead4;
+}
+
+.cat-dialog textarea {
+  width: 100%;
+  height: 80px;
+  border-radius: 8px;
+  background: rgba(40, 0, 70, 0.85);
+  border: 2px solid #7c3aed;
+  color: #fff;
+  padding: 8px;
+  resize: none;
+}
+
+.cat-dialog button {
+  margin-top: 10px;
+  width: 100%;
+  background: #5eead4;
+  color: #1a0030;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+.cat-dialog button:hover {
+  background: #22d3ee;
+  color: #fff;
 }
