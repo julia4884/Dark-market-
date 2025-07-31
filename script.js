@@ -211,3 +211,55 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   });
 });
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("Сайт загружен и готов к работе");
+
+  /* === Летучая мышь === */
+  const bat = document.createElement("div");
+  bat.className = "bat";
+  document.body.appendChild(bat);
+
+  // Писк мыши (реальный звук)
+  const squeak = new Audio("https://www.fesliyanstudios.com/play-mp3/387"); 
+
+  bat.addEventListener("click", () => {
+    squeak.play();
+    bat.style.transform = `translate(${Math.random() * 80}vw, ${Math.random() * 80}vh)`;
+  });
+
+  /* === Кошка === */
+  const cat = document.createElement("div");
+  cat.className = "cat";
+  cat.innerHTML = "🐱";
+  document.body.appendChild(cat);
+
+  const messageBox = document.createElement("div");
+  messageBox.id = "cat-message-box";
+  messageBox.innerHTML = `
+    <p>Есть вопросы или предложения?<br>
+    Нажми на меня!</p>
+    <form id="contact-form" style="display:none; margin-top:10px;">
+      <input type="email" id="user-email" placeholder="Ваш email" required><br><br>
+      <textarea id="user-message" placeholder="Ваше сообщение" required></textarea><br><br>
+      <button type="submit">Отправить</button>
+    </form>
+  `;
+  document.body.appendChild(messageBox);
+
+  cat.addEventListener("click", () => {
+    messageBox.style.display = "block";
+    const form = document.getElementById("contact-form");
+    form.style.display = "block";
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const email = document.getElementById("user-email").value;
+      const msg = document.getElementById("user-message").value;
+
+      // Отправка письма (пока имитация)
+      alert(`Ваше сообщение отправлено администратору!\nEmail: ${email}\nТекст: ${msg}`);
+      form.reset();
+      messageBox.style.display = "none";
+    };
+  });
+});
