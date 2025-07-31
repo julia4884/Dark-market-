@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Личный кабинет</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
@@ -18,33 +18,144 @@
       <a href="books.html">Книги</a>
       <a href="apps.html">Программы</a>
       <a href="tools.html">Приложения</a>
+      <a href="donate.html">Донат</a>
+      <a href="home.html">Личный кабинет</a>
     </nav>
   </header>
 
   <main>
-    <section id="profile">
-      <h1>Мой профиль</h1>
-      <div class="profile-card">
-        <img id="profile-avatar" src="uploads/avatars/default.png" alt="Аватар" class="avatar">
-        <input type="file" id="avatar-upload" accept="image/*">
+    <h1>Личный кабинет</h1>
+    <div id="profile-section">
+      <div id="avatar-block">
+        <img id="avatar-img" src="default-avatar.png" alt="Аватар" width="120" height="120" />
+        <input type="file" id="avatar-upload" />
         <button id="upload-avatar-btn">Загрузить аватар</button>
-        <h2 id="profile-username">Имя пользователя</h2>
-        <p><strong>Статус:</strong> <span id="profile-role"></span></p>
-        <p><strong>О себе:</strong> <span id="profile-about"></span></p>
-        <textarea id="about-input" placeholder="Напиши о себе..."></textarea>
-        <button id="save-about-btn">Сохранить "О себе"</button>
+        <progress id="avatar-progress" max="100" value="0" style="display:none;"></progress>
       </div>
-    </section>
 
-    <section id="admin-panel" style="display:none;">
-      <h2>Админ-панель 👑</h2>
-      <input type="text" id="ban-user-input" placeholder="Имя пользователя для блокировки">
+      <h2>
+        Добро пожаловать, 
+        <span id="username"></span> 
+        <span id="role-badge"></span>
+      </h2>
+      <p>Статус: <span id="status"></span></p>
+      <p>Подписка: <span id="subscription"></span></p>
+      
+      <label for="about">О себе:</label>
+      <textarea id="about" rows="4" cols="40"></textarea>
+      <button id="save-about">Сохранить</button>
+    </div>
+
+    <div id="admin-section" style="display:none;">
+      <h3>Инструменты администратора</h3>
+      <input type="text" id="ban-user-email" placeholder="Email пользователя">
       <button id="ban-user-btn">Заблокировать пользователя</button>
-      <input type="text" id="ban-app-input" placeholder="ID приложения для блокировки">
+      <br><br>
+      <input type="text" id="ban-app-id" placeholder="ID приложения">
       <button id="ban-app-btn">Заблокировать приложение</button>
-    </section>
+    </div>
   </main>
 
   <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Сначала войдите в аккаунт");
+        window.location.href = "index.html";
+        return;
+      }
+
+      try {
+        const res = await fetch("/profile", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          alert("Ошибка профиля или вы забанены");
+          localStorage.clear();
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Заполняем данные
+        document.getElementById("username").textContent = data.username;
+
+        if (data.role === "admin") {
+          document.getElementById("role-badge").innerHTML = " 👑";
+          document.getElementById("role-badge").classList.add("admin-badge");
+          document.getElementById("admin-section").style.display = "block";
+        }
+
+        document.getElementById("status").textContent = data.role;
+        document.getElementById("subscription").textContent = data.subscription || "Нет";
+
+        // Подтягиваем аватар
+        if (data.avatarUrl) {
+          document.getElementById("avatar-img").src = data.avatarUrl;
+        }
+
+        // Поле "О себе"
+        document.getElementById("about").value = data.about || "";
+
+        // Сохранение "О себе"
+        document.getElementById("save-about").onclick = async () => {
+          const aboutText = document.getElementById("about").value;
+          const resp = await fetch("/update-about", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ about: aboutText })
+          });
+          if (resp.ok) {
+            alert("Информация сохранена");
+          } else {
+            alert("Ошибка сохранения");
+          }
+        };
+
+        // Загрузка аватара
+        document.getElementById("upload-avatar-btn").onclick = async () => {
+          const file = document.getElementById("avatar-upload").files[0];
+          if (!file) return alert("Выберите файл");
+
+          const formData = new FormData();
+          formData.append("avatar", file);
+
+          const progress = document.getElementById("avatar-progress");
+          progress.style.display = "block";
+
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST", "/upload-avatar");
+          xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              progress.value = (event.loaded / event.total) * 100;
+            }
+          };
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              alert("Аватар загружен");
+              const response = JSON.parse(xhr.responseText);
+              document.getElementById("avatar-img").src = response.avatarUrl;
+              progress.style.display = "none";
+            } else {
+              alert("Ошибка загрузки аватара");
+            }
+          };
+          xhr.send(formData);
+        };
+
+      } catch (err) {
+        console.error("Ошибка профиля:", err);
+        localStorage.clear();
+        window.location.href = "index.html";
+      }
+    });
+  </script>
 </body>
 </html>
