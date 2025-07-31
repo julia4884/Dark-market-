@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Личный кабинет — Dark Market Ultra</title>
+  <title>Личный кабинет</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
 </head>
 <body>
   <header>
-    <h1 class="logo">Dark Market Ultra</h1>
+    <div class="logo">Dark Market Ultra</div>
     <nav>
       <a href="index.html">Главная</a>
       <a href="games.html">Игры</a>
@@ -19,112 +18,33 @@
       <a href="books.html">Книги</a>
       <a href="apps.html">Программы</a>
       <a href="tools.html">Приложения</a>
-      <a href="donate.html">Поддержка</a>
-      <a href="login.html" id="login-link">Войти</a>
-      <a href="#" id="logout-link" style="display:none;" onclick="logout()">Выйти</a>
     </nav>
   </header>
 
   <main>
-    <section id="auth-guard" style="display:none;">
-      <h2>Ваш профиль</h2>
-      <div id="profile">
-        <img id="profile-avatar" src="uploads/avatars/default-avatar.png" alt="Аватар" width="120">
-        <p><strong>Ник:</strong> <span id="profile-username"></span> <span id="crown"></span></p>
-        <p><strong>Роль:</strong> <span id="profile-role"></span></p>
+    <section id="profile">
+      <h1>Мой профиль</h1>
+      <div class="profile-card">
+        <img id="profile-avatar" src="uploads/avatars/default.png" alt="Аватар" class="avatar">
+        <input type="file" id="avatar-upload" accept="image/*">
+        <button id="upload-avatar-btn">Загрузить аватар</button>
+        <h2 id="profile-username">Имя пользователя</h2>
+        <p><strong>Статус:</strong> <span id="profile-role"></span></p>
         <p><strong>О себе:</strong> <span id="profile-about"></span></p>
-        
-        <h3>Обновить аватар</h3>
-        <input type="file" id="avatar-input">
-        <button id="avatar-upload-btn">Загрузить</button>
-        <progress id="avatar-progress" max="100" value="0" style="display:none; width:100%;"></progress>
-
-        <h3>Изменить информацию о себе</h3>
-        <textarea id="about-text" placeholder="Напишите о себе..."></textarea>
-        <button id="about-save-btn">Сохранить</button>
-      </div>
-
-      <hr>
-
-      <h2>Загрузка файлов</h2>
-      <input type="file" id="file-input">
-      <select id="section-select">
-        <option value="games">Игры</option>
-        <option value="movies">Фильмы</option>
-        <option value="music">Музыка</option>
-        <option value="images">Картинки</option>
-        <option value="books">Книги</option>
-        <option value="apps">Программы</option>
-        <option value="tools">Приложения</option>
-      </select>
-      <button id="upload-btn">Загрузить</button>
-      <progress id="upload-progress" value="0" max="100" style="display:none; width: 100%;"></progress>
-
-      <hr>
-
-      <h2>Мои файлы</h2>
-      <div id="gallery" class="gallery"></div>
-
-      <hr>
-
-      <div id="admin-panel" style="display:none;">
-        <h2>Админ-панель</h2>
-        <h3>Блокировка пользователей</h3>
-        <input type="text" id="block-user-id" placeholder="ID пользователя">
-        <input type="text" id="block-reason" placeholder="Причина блокировки">
-        <button id="block-user-btn">Заблокировать пользователя</button>
-
-        <h3>Блокировка приложений</h3>
-        <input type="text" id="block-file-id" placeholder="ID файла">
-        <button id="block-app-btn">Заблокировать приложение</button>
+        <textarea id="about-input" placeholder="Напиши о себе..."></textarea>
+        <button id="save-about-btn">Сохранить "О себе"</button>
       </div>
     </section>
 
-    <section id="unauth-guard">
-      <h2>Вы не авторизованы</h2>
-      <p>Пожалуйста, <a href="login.html">войдите</a> в систему, чтобы получить доступ к личному кабинету.</p>
+    <section id="admin-panel" style="display:none;">
+      <h2>Админ-панель 👑</h2>
+      <input type="text" id="ban-user-input" placeholder="Имя пользователя для блокировки">
+      <button id="ban-user-btn">Заблокировать пользователя</button>
+      <input type="text" id="ban-app-input" placeholder="ID приложения для блокировки">
+      <button id="ban-app-btn">Заблокировать приложение</button>
     </section>
   </main>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        document.getElementById("auth-guard").style.display = "block";
-        document.getElementById("unauth-guard").style.display = "none";
-        document.getElementById("login-link").style.display = "none";
-        document.getElementById("logout-link").style.display = "inline";
-        loadProfile();
-
-        // Коронка только админам
-        if (localStorage.getItem("role") === "admin") {
-          document.getElementById("admin-panel").style.display = "block";
-          document.getElementById("crown").innerHTML = "👑";
-        }
-
-        // Загрузка аватара
-        document.getElementById("avatar-upload-btn").onclick = () => {
-          const file = document.getElementById("avatar-input").files[0];
-          if (file) uploadAvatar(file);
-        };
-
-        // Сохранение "О себе"
-        document.getElementById("about-save-btn").onclick = () => {
-          const about = document.getElementById("about-text").value;
-          updateAbout(about);
-        };
-      } else {
-        document.getElementById("auth-guard").style.display = "none";
-        document.getElementById("unauth-guard").style.display = "block";
-      }
-    });
-
-    function logout() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("username");
-      window.location.href = "index.html";
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
