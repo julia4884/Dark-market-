@@ -3,34 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Поддержать проект — Dark Market Ultra</title>
+  <title>Поддержать проект</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Подключение общего хедера -->
-  <div id="header-placeholder"></div>
+  <header>
+    <div class="logo">⛧ Dark Market Ultra</div>
+    <nav>
+      <a href="home.html">Главная</a>
+      <a href="apps.html">Приложения</a>
+      <a href="games.html">Игры</a>
+      <a href="movies.html">Фильмы</a>
+      <a href="music.html">Музыка</a>
+      <a href="books.html">Книги</a>
+      <a href="donate.html">Поддержка</a>
+    </nav>
+  </header>
 
   <main>
-    <h1>Поддержи Dark Market Ultra</h1>
-    <p class="donate-text">
-      Dark Market Ultra — это не просто сайт. Это территория свободы!
-      Поддержи проект, чтобы получить вечный доступ к загрузке собственного контента и статусу разработчика!
-    </p>
-
-    <div class="donate-card">
-      <h2>Стань частью семьи</h2>
-      <p>Разовый донат: <strong>10€</strong></p>
-
-      <button id="donateButton" class="neon-button">Поддержать через PayPal</button>
-    </div>
+    <h1>Поддержать проект</h1>
+    <p>Вы можете поддержать нас через PayPal. Нажмите кнопку ниже:</p>
+    <button id="donateButton">Пожертвовать $10</button>
   </main>
 
-  <script src="header.js"></script>
-  <script>
-    document.getElementById("donateButton").addEventListener("click", () => {
-      alert("В реальной версии здесь откроется окно PayPal. Пока это тестовая заглушка.");
-      // позже здесь будет переход к PayPal API
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
