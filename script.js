@@ -73,13 +73,23 @@ document.getElementById("login-btn")?.addEventListener("click", (e) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        token = data.token;
-        role = data.role;
-        updateUI();
-        if (data.role === "admin") window.location.href = "admin.html";
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.role);
+    token = data.token;
+    role = data.role;
+    updateUI();
+
+    if (data.role === "admin") {
+      alert("Добро пожаловать, Администратор 👑");
+      window.location.href = "admin.html";
+    } else {
+      alert("Вход выполнен успешно!");
+    }
+  } else {
+    alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
+  }
+})
       } else {
         alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
       }
