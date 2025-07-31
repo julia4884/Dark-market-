@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Заглушка, если в style.css нет hidden */
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
   <header>
@@ -18,24 +22,25 @@
       <a href="music.html">Музыка</a>
       <a href="tools.html">Инструменты</a>
       <a href="donate.html">Донат</a>
+      <a href="admin.html">Личный кабинет</a>
     </nav>
   </header>
 
   <main>
     <section id="auth-section">
       <h2>Вход</h2>
-      <input type="email" id="login-email" placeholder="Email">
-      <input type="password" id="login-password" placeholder="Пароль">
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-password" placeholder="Пароль" required>
       <button id="login-btn">Войти</button>
 
       <h2>Регистрация</h2>
-      <input type="text" id="register-username" placeholder="Имя пользователя">
-      <input type="email" id="register-email" placeholder="Email">
-      <input type="password" id="register-password" placeholder="Пароль">
+      <input type="text" id="register-username" placeholder="Имя пользователя" required>
+      <input type="email" id="register-email" placeholder="Email" required>
+      <input type="password" id="register-password" placeholder="Пароль" required>
       <button id="register-btn">Зарегистрироваться</button>
     </section>
 
-    <section id="logout-section" style="display:none;">
+    <section id="logout-section" class="hidden">
       <h2>Личный кабинет</h2>
       <div id="profile-info"></div>
       <button id="logout-btn">Выйти</button>
@@ -59,5 +64,47 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // === Минимальная логика для кошки ===
+    const cat = document.getElementById("cat-widget");
+    const formContainer = document.getElementById("contact-form-container");
+    const closeBtn = document.getElementById("close-contact");
+
+    cat.addEventListener("click", () => {
+      formContainer.classList.toggle("hidden");
+    });
+    closeBtn.addEventListener("click", () => {
+      formContainer.classList.add("hidden");
+    });
+
+    // === Летучая мышь ===
+    const bat = document.getElementById("flying-bat");
+    const batMsg = document.getElementById("bat-message");
+    const batMessages = [
+      "Привет, путник!",
+      "Следи за мной 👀",
+      "Темнота хранит секреты...",
+      "Здесь всегда найдётся что-то интересное!",
+      "🦇 Я лечу!"
+    ];
+
+    function moveBat() {
+      const x = Math.random() * (window.innerWidth - 50);
+      const y = Math.random() * (window.innerHeight - 50);
+      bat.style.left = `${x}px`;
+      bat.style.top = `${y}px`;
+    }
+
+    setInterval(moveBat, 4000);
+
+    bat.addEventListener("click", () => {
+      const msg = batMessages[Math.floor(Math.random() * batMessages.length)];
+      batMsg.textContent = msg;
+      batMsg.style.left = bat.style.left;
+      batMsg.style.top = (parseInt(bat.style.top) + 40) + "px";
+      batMsg.classList.add("show");
+      setTimeout(() => batMsg.classList.remove("show"), 3000);
+    });
+  </script>
 </body>
 </html>
