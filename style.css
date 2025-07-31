@@ -79,3 +79,116 @@ nav a:hover {
   cursor: pointer;
   box-shadow: 0 0 15px #00f0ff;
 }
+/* === Аватар и корона админа === */
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-container img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid #5eead4;
+}
+
+.admin-crown {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  font-size: 24px;
+  color: gold;
+  text-shadow: 0 0 5px #fff, 0 0 10px gold;
+}
+
+/* === Летающая летучая мышь === */
+#flying-bat {
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  font-size: 30px;
+  z-index: 2000;
+  cursor: pointer;
+  transition: transform 0.5s ease;
+  animation: flapWings 1s infinite alternate;
+}
+
+@keyframes flapWings {
+  from { transform: scale(1) rotate(0deg); }
+  to { transform: scale(1.1) rotate(10deg); }
+}
+
+/* Сообщения мыши */
+#bat-message {
+  position: fixed;
+  bottom: 80px;
+  left: 20px;
+  background: rgba(30,0,50,0.9);
+  color: #5eead4;
+  padding: 8px 14px;
+  border-radius: 8px;
+  box-shadow: 0 0 12px #22d3ee;
+  display: none;
+  z-index: 2100;
+}
+
+/* === Кошка-виджет === */
+#cat-widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  font-size: 40px;
+  cursor: pointer;
+  z-index: 2000;
+  animation: pulseCat 2s infinite;
+}
+
+@keyframes pulseCat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Форма кошки */
+#contact-form-container {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: rgba(30,0,50,0.95);
+  border: 2px solid #5eead4;
+  border-radius: 10px;
+  padding: 15px;
+  display: none;
+  z-index: 2100;
+  width: 260px;
+  box-shadow: 0 0 15px #22d3ee;
+}
+
+#contact-form textarea {
+  width: 100%;
+  height: 80px;
+  border-radius: 6px;
+  padding: 8px;
+  border: 1px solid #7c3aed;
+  background: rgba(40,0,70,0.8);
+  color: #e0e0e0;
+  margin-bottom: 10px;
+  resize: none;
+}
+
+#contact-form button {
+  width: 100%;
+  background: #5eead4;
+  color: #1a0030;
+  font-weight: bold;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+#contact-form button:hover {
+  background: #22d3ee;
+  color: white;
+}
