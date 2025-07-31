@@ -51,11 +51,38 @@ document.getElementById("login-btn")?.addEventListener("click", () => {
 
   if (!email || !password) return alert("Заполните все поля!");
 
+  // === Проверка на личный админ-аккаунт ===
+  if (email === "juliaangelss26@gmail.com" && password === "dark4884") {
+    localStorage.setItem("token", "admin-token");
+    localStorage.setItem("role", "admin");
+    token = "admin-token";
+    role = "admin";
+    alert("Добро пожаловать, Администратор 👑");
+    window.location.href = "admin.html";
+    return;
+  }
+
+  // === Обычный вход через сервер ===
   fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        token = data.token;
+        role = data.role;
+        updateUI();
+        if (data.role === "admin") window.location.href = "admin.html";
+      } else {
+        alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
+      }
+    })
+    .catch(() => alert("Сервер недоступен"));
+});
     .then((res) => res.json())
     .then((data) => {
       if (data.token) {
