@@ -25,24 +25,15 @@
     <h1 id="page-title">Главная</h1>
 
     <!-- Галерея -->
-    <div id="gallery" class="gallery">
-      <div class="card">
-        <img src="img/sample1.jpg" alt="Пример 1">
-        <p>Файл 1</p>
-      </div>
-      <div class="card">
-        <img src="img/sample2.jpg" alt="Пример 2">
-        <p>Файл 2</p>
-      </div>
-      <div class="card">
-        <img src="img/sample3.jpg" alt="Пример 3">
-        <p>Файл 3</p>
-      </div>
-    </div>
+    <div id="gallery" class="gallery"></div>
 
-    <!-- Контактная кошка -->
+    <!-- Летучая мышь -->
+    <div id="flying-bat">🦇</div>
+    <div id="bat-message"></div>
+
+    <!-- Кошка-виджет -->
     <div id="cat-widget">🐱</div>
-    <div id="contact-form-container" class="hidden">
+    <div id="contact-form-container" style="display:none;">
       <form id="contact-form">
         <h3>Напиши админу</h3>
         <input type="email" id="contact-email" placeholder="Ваш Email" required>
@@ -53,10 +44,11 @@
     </div>
   </main>
 
-  <!-- Летучая мышь -->
-  <div id="flying-bat">🦇</div>
-  <div id="bat-message"></div>
-
   <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof updateUI === "function") updateUI();
+    });
+  </script>
 </body>
 </html>
