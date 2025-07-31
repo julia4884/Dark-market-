@@ -113,3 +113,48 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
+// === Летучая мышь ===
+function spawnBat() {
+  const bat = document.createElement("div");
+  bat.className = "flying-bat";
+  bat.innerHTML = "🦇";
+  document.body.appendChild(bat);
+
+  const messages = [
+    "Привет, смертный!",
+    "Ты уверен, что готов?",
+    "Кто идёт по тёмной стороне?",
+    "🦇 Я охраняю этот портал!",
+    "Не бойся, я просто летучая мышь.",
+    "Тьма ближе, чем кажется...",
+    "Хочешь секрет? 🔮"
+  ];
+
+  function moveBat() {
+    const x = Math.random() * (window.innerWidth - 50);
+    const y = Math.random() * (window.innerHeight - 50);
+    bat.style.left = `${x}px`;
+    bat.style.top = `${y}px`;
+  }
+
+  // Первичный полёт
+  moveBat();
+  setInterval(moveBat, 5000);
+
+  // Клик по мыши → всплывающее сообщение
+  bat.addEventListener("click", () => {
+    const msg = document.createElement("div");
+    msg.className = "bat-message";
+    msg.textContent = messages[Math.floor(Math.random() * messages.length)];
+    document.body.appendChild(msg);
+
+    // позиция сообщения рядом с мышью
+    const rect = bat.getBoundingClientRect();
+    msg.style.left = rect.left + "px";
+    msg.style.top = rect.top - 30 + "px";
+
+    setTimeout(() => msg.remove(), 3000); // исчезает через 3 сек
+  });
+}
+
+document.addEventListener("DOMContentLoaded", spawnBat);
