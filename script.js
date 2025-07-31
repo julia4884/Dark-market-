@@ -1,128 +1,115 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // === Проверка токена и загрузка профиля ===
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
+  // === Загрузка профиля ===
   if (token) {
-    fetch("/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(res => res.json())
-      .then(user => {
-        if (user.error) {
-          console.error(user.error);
-          return;
-        }
+    fetch("/profile", { headers: { Authorization: "Bearer " + token } })
+      .then((res) => res.json())
+      .then((user) => {
+        if (user.username) {
+          const profileEl = document.getElementById("user-profile");
+          if (profileEl) {
+            profileEl.innerHTML = `
+              <img src="/${user.avatar}" alt="avatar" class="avatar">
+              <span>${user.username}</span>
+              ${role === "admin" ? '<span class="admin-crown">👑</span>' : ""}
+            `;
+          }
 
-        // Отображение аватара
-        const header = document.querySelector("header");
-        const avatar = document.createElement("img");
-        avatar.src = user.avatar || "uploads/avatars/default.png";
-        avatar.alt = "Аватар";
-        avatar.className = "avatar";
-        header.appendChild(avatar);
-
-        // Коронка у админа
-        if (user.role === "admin") {
-          const crown = document.createElement("span");
-          crown.textContent = "👑";
-          crown.className = "admin-crown";
-          header.appendChild(crown);
+          // Запоминаем email для кошки
+          localStorage.setItem("userEmail", user.email || "");
         }
       })
-      .catch(err => console.error("Ошибка профиля:", err));
+      .catch(() => console.warn("Не удалось загрузить профиль"));
   }
 
   // === Галерея ===
-  const category = window.location.pathname.split("/").pop().replace(".html", "") || "home";
-  const title = document.getElementById("page-title");
-  if (title) {
-    title.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-  }
-  loadGallery(category);
+  const category =
+    window.location.pathname.split("/").pop().replace(".html", "") || "books";
+  const gallery = document.getElementById("gallery");
+  if (gallery) loadGallery(category);
 
-  // === Мышь ===
+  // === Летучая мышь 🦇 ===
   const bat = document.createElement("div");
   bat.id = "flying-bat";
   bat.textContent = "🦇";
   document.body.appendChild(bat);
 
   const messages = [
-    "Я хранитель тьмы 👀",
-    "Ты не один здесь...",
-    "Тишина такая... слишком тихо",
-    "Шевелись быстрее, смертный!",
-    "Где твоя коронка? 👑",
-    "Мяу? Нет, я летучая мышь 🦇"
+    "Я лечу за тобой!",
+    "Ты видел мою пещеру?",
+    "Секреты скрыты в тени...",
+    "Хочешь подарок?",
+    "Кликни меня — и будет сюрприз!",
+    "Кто не боится тьмы, тот мой друг.",
   ];
 
   function moveBat() {
     const x = Math.random() * (window.innerWidth - 50);
     const y = Math.random() * (window.innerHeight - 50);
-    bat.style.left = `${x}px`;
-    bat.style.top = `${y}px`;
+    bat.style.transform = `translate(${x}px, ${y}px)`;
   }
+
+  // плавные перелёты
+  bat.style.position = "fixed";
+  bat.style.transition = "transform 1.5s ease-in-out";
+  moveBat();
   setInterval(moveBat, 5000);
 
+  // писк + сообщение
   bat.addEventListener("click", () => {
-    const message = messages[Math.floor(Math.random() * messages.length)];
-    alert(message);
-
-    // Писк через Web Audio API
+    // звук через Web Audio API
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.type = "square";
-    osc.frequency.setValueAtTime(1500, ctx.currentTime);
-    osc.connect(ctx.destination);
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
     osc.start();
-    setTimeout(() => osc.stop(), 150);
+    osc.stop(ctx.currentTime + 0.15);
+
+    // текстовое сообщение
+    const msg = document.createElement("div");
+    msg.className = "bat-message";
+    msg.textContent =
+      messages[Math.floor(Math.random() * messages.length)];
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 4000);
   });
 
-  // === Кошка ===
+  // === Кошка 🐱 ===
   const catWidget = document.getElementById("cat-widget");
-  const catDialog = document.getElementById("cat-dialog");
-  const contactFormContainer = document.getElementById("contact-form-container");
-  const contactForm = document.getElementById("contact-form");
-
-  if (catWidget) {
+  const formContainer = document.getElementById("contact-form-container");
+  if (catWidget && formContainer) {
     catWidget.addEventListener("click", () => {
-      contactFormContainer.style.display =
-        contactFormContainer.style.display === "none" ? "block" : "none";
+      formContainer.style.display =
+        formContainer.style.display === "none" ? "block" : "none";
     });
-  }
 
-  if (contactForm) {
-    contactForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const textarea = contactForm.querySelector("textarea");
-      const message = textarea.value;
+    const contactForm = document.getElementById("contact-form");
+    if (contactForm) {
+      contactForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const textarea = contactForm.querySelector("textarea");
+        const userEmail = localStorage.getItem("userEmail") || "user@site.com";
 
-      try {
-        const response = await fetch("/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: "user@site.com", message }),
-        });
+        try {
+          const res = await fetch("/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: userEmail, message: textarea.value }),
+          });
 
-        const data = await response.json();
-        if (data.success) {
-          alert("Сообщение отправлено!");
-          textarea.value = "";
-          contactFormContainer.style.display = "none";
-        } else {
-          alert(data.error || "Ошибка при отправке");
+          const data = await res.json();
+          alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
+          if (data.success) textarea.value = "";
+        } catch {
+          alert("Не удалось отправить сообщение");
         }
-      } catch (err) {
-        console.error("Ошибка:", err);
-        alert("Не удалось отправить сообщение");
-      }
-    });
+      });
+    }
   }
 });
-
-// === Загрузка галереи ===
-function loadGallery(category) {
-  const gallery = document.getElementById("gallery");
-  if (!gallery) return;
-  gallery.innerHTML = `<div class="card"><p>Здесь будут материалы категории: ${category}</p></div>`;
-}
