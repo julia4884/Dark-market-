@@ -1,172 +1,169 @@
-// === Загрузка галереи ===
-async function loadGallery(category) {
-  try {
-    const res = await fetch(`/uploads/${category}`);
-    if (!res.ok) throw new Error("Ошибка загрузки галереи");
-    const files = await res.json();
+// === Авторизация ===
+async function register(username, email, password) {
+  const res = await fetch("/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, email, password }),
+  });
+  return await res.json();
+}
 
-    const gallery = document.getElementById("gallery");
-    if (!gallery) return;
-    gallery.innerHTML = "";
+async function login(email, password) {
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json();
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.role);
+  }
+  return data;
+}
 
-    files.forEach((file) => {
-      const card = document.createElement("div");
-      card.className = "card";
+async function loadProfile() {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-      const img = document.createElement("img");
-      img.src = `/uploads/${category}/${file}`;
-      img.alt = file;
-
-      card.appendChild(img);
-      gallery.appendChild(card);
-    });
-  } catch (err) {
-    console.error("Ошибка галереи:", err);
+  const res = await fetch("/profile", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.ok) {
+    const user = await res.json();
+    renderProfile(user);
   }
 }
 
-// === Загрузка файла ===
+function renderProfile(user) {
+  const profile = document.getElementById("profile");
+  if (!profile) return;
+
+  profile.innerHTML = `
+    <div class="user-card">
+      <img src="${user.avatar || 'uploads/avatars/default.png'}" alt="avatar" class="avatar">
+      <h3>
+        ${user.username}
+        ${user.role === "admin" ? "👑" : ""}
+      </h3>
+      <p>${user.about || "Нет информации"}</p>
+    </div>
+  `;
+}
+
+// === Загрузка файлов ===
 async function uploadFile(file, category) {
+  const token = localStorage.getItem("token");
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("category", category);
 
-  const progress = document.getElementById("upload-progress");
-  if (progress) progress.style.display = "block";
+  const res = await fetch(`/upload/${category}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData,
+  });
 
-  try {
-    const res = await fetch(`/upload/${category}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: formData,
-    });
-
-    if (!res.ok) throw new Error("Ошибка загрузки файла");
-    await res.json();
-
-    if (progress) progress.value = 100;
-    alert("Файл загружен!");
-    loadGallery(category);
-  } catch (err) {
-    console.error(err);
-    alert("Ошибка при загрузке файла");
-  } finally {
-    if (progress) setTimeout(() => (progress.style.display = "none"), 1000);
-  }
+  return await res.json();
 }
 
-// === DOM Ready ===
-document.addEventListener("DOMContentLoaded", () => {
-  // Определяем категорию
-  const category = window.location.pathname
-    .split("/")
-    .pop()
-    .replace(".html", "") || "home";
+// === Летающая мышь ===
+const mouse = document.createElement("div");
+mouse.id = "flying-mouse";
+mouse.textContent = "🐭";
+mouse.style.position = "fixed";
+mouse.style.fontSize = "28px";
+mouse.style.cursor = "pointer";
+mouse.style.transition = "transform 0.8s ease";
+document.body.appendChild(mouse);
 
-  const titleEl = document.getElementById("page-title");
-  if (titleEl) {
-    titleEl.textContent = category.charAt(0).toUpperCase() + category.slice(1);
-  }
+function moveMouseRandomly() {
+  const x = Math.random() * (window.innerWidth - 50);
+  const y = Math.random() * (window.innerHeight - 50);
+  mouse.style.transform = `translate(${x}px, ${y}px)`;
+}
+setInterval(moveMouseRandomly, 4000);
 
-  // Загружаем галерею
-  loadGallery(category);
+// Сообщения от мыши
+const mouseMessages = [
+  "Привет, я твой проводник 🐭",
+  "Не забудь проверить профиль!",
+  "А ты знал, что тут есть секреты?",
+  "Пи-пи! Я люблю сыр 🧀",
+  "Отправь сообщение администратору через кошку 🐱",
+  "Кликни на меня, и я убегу!"
+];
 
-  // Проверяем роль
-  const role = localStorage.getItem("role");
-  if (role === "developer" || role === "admin") {
-    const uploadSection = document.getElementById("upload-section");
-    if (uploadSection) uploadSection.style.display = "block";
+function showMouseMessage(text) {
+  const msg = document.createElement("div");
+  msg.className = "mouse-message";
+  msg.textContent = text;
+  document.body.appendChild(msg);
 
-    const uploadBtn = document.getElementById("upload-btn");
-    if (uploadBtn) {
-      uploadBtn.onclick = () => {
-        const file = document.getElementById("file-input").files[0];
-        if (file) uploadFile(file, category);
-      };
-    }
-  }
+  setTimeout(() => msg.remove(), 3000);
+}
 
-  // === Контактная кошка ===
-  const cat = document.getElementById("cat-widget");
-  const dialog = document.getElementById("cat-dialog");
-  const contactFormContainer = document.getElementById("contact-form-container");
+// Писк при клике
+mouse.addEventListener("click", () => {
+  // Web Audio API
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = ctx.createOscillator();
+  const gainNode = ctx.createGain();
 
-  if (cat) {
-    const messages = [
-      "Привет! 👋",
-      "Есть вопросы? Пиши!",
-      "Не стесняйся нажать!",
-      "Я передам твоё сообщение админу 🐾",
-      "Нужна помощь? Жми!"
-    ];
+  oscillator.type = "square";
+  oscillator.frequency.setValueAtTime(2000, ctx.currentTime);
+  gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
 
-    cat.addEventListener("click", () => {
-      const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-      dialog.textContent = randomMsg;
-      contactFormContainer.style.display =
-        contactFormContainer.style.display === "block" ? "none" : "block";
-    });
-  }
+  oscillator.connect(gainNode);
+  gainNode.connect(ctx.destination);
 
-  // === Форма связи ===
-  const contactForm = document.getElementById("contact-form");
-  if (contactForm) {
-    contactForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const message = contactForm.querySelector("textarea").value.trim();
+  oscillator.start();
+  oscillator.stop(ctx.currentTime + 0.15);
 
-      if (!message) {
-        alert("Введите сообщение!");
-        return;
-      }
+  // Сообщение
+  const randomMsg = mouseMessages[Math.floor(Math.random() * mouseMessages.length)];
+  showMouseMessage(randomMsg);
 
-      try {
-        const res = await fetch("/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: localStorage.getItem("email") || "user@example.com",
-            message,
-          }),
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          alert("Сообщение отправлено!");
-          contactForm.reset();
-          contactFormContainer.style.display = "none";
-        } else {
-          alert("Ошибка: " + (data.error || "Не удалось отправить"));
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Ошибка соединения с сервером.");
-      }
-    });
-  }
-
-  // === PayPal Донат ===
-  const donateBtn = document.getElementById("donateButton");
-  if (donateBtn) {
-    donateBtn.addEventListener("click", async () => {
-      try {
-        const res = await fetch("/create-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount: "10.00" }),
-        });
-        const data = await res.json();
-
-        if (data.id) {
-          window.location.href = `https://www.sandbox.paypal.com/checkoutnow?token=${data.id}`;
-        } else {
-          alert("Ошибка при создании заказа.");
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Ошибка соединения с PayPal.");
-      }
-    });
-  }
+  moveMouseRandomly();
 });
+
+// === Кошка для обратной связи ===
+const cat = document.createElement("div");
+cat.id = "contact-cat";
+cat.textContent = "🐱";
+cat.style.position = "fixed";
+cat.style.bottom = "20px";
+cat.style.right = "20px";
+cat.style.fontSize = "34px";
+cat.style.cursor = "pointer";
+document.body.appendChild(cat);
+
+cat.addEventListener("click", () => {
+  const form = document.createElement("div");
+  form.className = "contact-form";
+  form.innerHTML = `
+    <h3>Свяжись с администратором</h3>
+    <input type="email" id="contact-email" placeholder="Ваш Email">
+    <textarea id="contact-message" placeholder="Ваше сообщение"></textarea>
+    <button id="send-contact">Отправить</button>
+  `;
+  document.body.appendChild(form);
+
+  document.getElementById("send-contact").onclick = async () => {
+    const email = document.getElementById("contact-email").value;
+    const message = document.getElementById("contact-message").value;
+
+    const res = await fetch("/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, message }),
+    });
+
+    const data = await res.json();
+    alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
+    form.remove();
+  };
+});
+
+// === Автозагрузка профиля при входе ===
+document.addEventListener("DOMContentLoaded", loadProfile);
