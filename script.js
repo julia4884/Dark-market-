@@ -1,11 +1,12 @@
+// ==================== CONFIG ====================
+const API_URL = "https://dark-market-backend.onrender.com";
+
 // ==================== AUTH & TOKEN ====================
 
-// Получение токена из localStorage
 function getToken() {
   return localStorage.getItem("token");
 }
 
-// Проверка токена
 async function verifyToken() {
   const token = getToken();
   if (!token) {
@@ -14,7 +15,7 @@ async function verifyToken() {
   }
 
   try {
-    const res = await fetch("/verify-token", {
+    const res = await fetch(`${API_URL}/verify-token`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +35,6 @@ async function verifyToken() {
   }
 }
 
-// Выход из аккаунта
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("role");
@@ -48,7 +48,7 @@ async function loadProfile() {
 
   const token = getToken();
   try {
-    const res = await fetch("/profile", {
+    const res = await fetch(`${API_URL}/profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error("Не удалось загрузить профиль");
@@ -71,7 +71,7 @@ async function loadProfile() {
   }
 }
 
-// Обновление аватара
+// === Обновление аватара с прогрессом ===
 async function uploadAvatar(file) {
   if (!(await verifyToken())) return;
 
@@ -79,28 +79,45 @@ async function uploadAvatar(file) {
   const formData = new FormData();
   formData.append("avatar", file);
 
-  try {
-    const res = await fetch("/upload-avatar", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-    if (!res.ok) throw new Error("Ошибка загрузки аватара");
+  const progressBar = document.getElementById("avatar-progress");
+  progressBar.style.display = "block";
 
-    alert("Аватар обновлён!");
-    loadProfile();
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/upload-avatar`, true);
+    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        progressBar.value = percent;
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        alert("Аватар обновлён!");
+        loadProfile();
+      } else {
+        alert("Ошибка загрузки: " + xhr.statusText);
+      }
+      progressBar.style.display = "none";
+    };
+
+    xhr.send(formData);
   } catch (err) {
     alert("Ошибка: " + err.message);
+    progressBar.style.display = "none";
   }
 }
 
-// Обновление информации "о себе"
+// === Обновление информации "о себе" ===
 async function updateAbout(text) {
   if (!(await verifyToken())) return;
 
   const token = getToken();
   try {
-    const res = await fetch("/update-about", {
+    const res = await fetch(`${API_URL}/update-about`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -131,7 +148,7 @@ async function uploadFile(file, category) {
 
   try {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", "/upload", true);
+    xhr.open("POST", `${API_URL}/upload`, true);
     xhr.setRequestHeader("Authorization", `Bearer ${token}`);
 
     xhr.upload.onprogress = (event) => {
@@ -165,7 +182,7 @@ async function loadGallery(category) {
 
   const token = getToken();
   try {
-    const res = await fetch(`/files?category=${category}`, {
+    const res = await fetch(`${API_URL}/files?category=${category}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error("Ошибка загрузки галереи");
@@ -202,7 +219,7 @@ async function blockUser(userId) {
 
   const token = getToken();
   try {
-    const res = await fetch("/block-user", {
+    const res = await fetch(`${API_URL}/block-user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -223,7 +240,7 @@ async function blockApp(appId) {
 
   const token = getToken();
   try {
-    const res = await fetch("/block-app", {
+    const res = await fetch(`${API_URL}/block-app`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -253,7 +270,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loadGallery(category);
 
-  // Кнопка выхода
   const logoutBtn = document.getElementById("logout-btn");
   if (logoutBtn) logoutBtn.onclick = logout;
+
+  const avatarInput = document.getElementById("avatar-input");
+  const avatarBtn = document.getElementById("avatar-upload-btn");
+  if (avatarBtn && avatarInput) {
+    avatarBtn.onclick = () => {
+      const file = avatarInput.files[0];
+      if (file) uploadAvatar(file);
+    };
+  }
+
+  const aboutSaveBtn = document.getElementById("about-save-btn");
+  if (aboutSaveBtn) {
+    aboutSaveBtn.onclick = () => {
+      const aboutText = document.getElementById("profile-about").value;
+      updateAbout(aboutText);
+    };
+  }
 });
