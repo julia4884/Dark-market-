@@ -36,7 +36,8 @@
         
         <h3>Обновить аватар</h3>
         <input type="file" id="avatar-input">
-        <button onclick="uploadAvatar(document.getElementById('avatar-input').files[0])">Загрузить</button>
+        <button id="avatar-upload-btn">Загрузить</button>
+        <progress id="avatar-progress" max="100" value="0" style="display:none; width:100%;"></progress>
 
         <h3>Изменить информацию о себе</h3>
         <textarea id="about-text" placeholder="Напишите о себе..."></textarea>
@@ -56,8 +57,7 @@
         <option value="apps">Программы</option>
         <option value="tools">Приложения</option>
       </select>
-      <button onclick="uploadFile(document.getElementById('file-input').files[0], document.getElementById('section-select').value)">Загрузить</button>
-      
+      <button id="upload-btn">Загрузить</button>
       <progress id="upload-progress" value="0" max="100" style="display:none; width: 100%;"></progress>
 
       <hr>
@@ -95,10 +95,17 @@
         document.getElementById("login-link").style.display = "none";
         document.getElementById("logout-link").style.display = "inline";
         loadProfile();
+
         if (localStorage.getItem("role") === "admin") {
           document.getElementById("admin-panel").style.display = "block";
           document.getElementById("crown").innerHTML = "👑";
         }
+
+        // обработка загрузки аватара
+        document.getElementById("avatar-upload-btn").onclick = () => {
+          const file = document.getElementById("avatar-input").files[0];
+          if (file) uploadAvatar(file);
+        };
       } else {
         document.getElementById("auth-guard").style.display = "none";
         document.getElementById("unauth-guard").style.display = "block";
