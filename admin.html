@@ -67,6 +67,94 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <script src="script.js"></script>
   <script>
+    <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (!token || role !== "admin") {
+    alert("Доступ запрещён! Войдите как администратор.");
+    window.location.href = "index.html";
+  }
+
+  // Отображение информации
+  const adminInfo = document.getElementById("admin-info");
+  adminInfo.innerHTML = `
+    <p><strong>Ваш Email:</strong> juliaangelss26@gmail.com 👑</p>
+    <p>У вас полный доступ к панели управления.</p>
+  `;
+
+  // === Загрузка аватара ===
+  document.getElementById("avatar-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const avatarInput = document.getElementById("avatar-upload");
+    if (!avatarInput.files.length) return alert("Выберите картинку!");
+
+    const formData = new FormData();
+    formData.append("avatar", avatarInput.files[0]);
+
+    try {
+      const res = await fetch("/upload-avatar", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Аватар обновлён!");
+        location.reload();
+      } else {
+        alert("Ошибка: " + (data.error || "не удалось загрузить"));
+      }
+    } catch {
+      alert("Сервер недоступен");
+    }
+  });
+
+  // === Загрузка файла ===
+  document.getElementById("file-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById("file-upload");
+    if (!fileInput.files.length) return alert("Выберите файл!");
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    try {
+      const res = await fetch("/upload-file", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Файл загружен!");
+        loadFiles(); // обновляем список
+      } else {
+        alert("Ошибка: " + (data.error || "не удалось загрузить"));
+      }
+    } catch {
+      alert("Сервер недоступен");
+    }
+  });
+
+  // === Загрузка списка файлов ===
+  async function loadFiles() {
+    try {
+      const res = await fetch("/list-files", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const files = await res.json();
+      const list = document.getElementById("file-list");
+      list.innerHTML = files.map(f => `<li><a href="${f.url}" target="_blank">${f.name}</a></li>`).join("");
+    } catch {
+      console.log("Не удалось загрузить список файлов");
+    }
+  }
+
+  loadFiles();
+});
+</script>
     document.addEventListener("DOMContentLoaded", () => {
       // Проверка входа
       const token = localStorage.getItem("token");
