@@ -7,8 +7,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="site-header">
-  <h1 class="site-title">✦ Dark Market Ultra ✦</h1>
+  <header class="site-header">
+    <h1 class="site-title">✦ Dark Market Ultra ✦</h1>
     <nav>
       <a href="home.html">Главная</a>
       <a href="apps.html">Приложения</a>
@@ -17,7 +17,7 @@
       <a href="music.html">Музыка</a>
       <a href="books.html">Книги</a>
       <a href="donate.html">Поддержка</a>
-        <a href="admin.html">Личный кабинет</a>
+      <a href="admin.html">Личный кабинет</a>
     </nav>
   </header>
 
@@ -26,6 +26,10 @@
 
     <!-- Галерея -->
     <div id="gallery" class="gallery"></div>
+
+    <!-- Летучая мышь -->
+    <div id="flying-bat">🦇</div>
+    <div id="bat-message"></div>
 
     <!-- Контактная кошка -->
     <div id="cat-widget">
@@ -37,27 +41,14 @@
     <div id="contact-form-container" style="display:none;">
       <form id="contact-form">
         <h3>Написать администратору</h3>
-        <textarea placeholder="Ваше сообщение..." required></textarea>
+        <textarea id="user-message" placeholder="Ваше сообщение..." required></textarea>
+        <input type="email" id="user-email" placeholder="Ваш email" required />
         <button type="submit">Отправить</button>
       </form>
     </div>
   </main>
 
+  <!-- Подключение скриптов -->
   <script src="script.js"></script>
-  <!-- Летучая мышь -->
-<div id="flying-bat">🦇</div>
-<div id="bat-message"></div>
-
-<!-- Кошка-виджет -->
-<div id="cat-widget">🐱</div>
-<div id="contact-form-container">
-  <form id="contact-form">
-    <textarea id="user-message" placeholder="Напишите сообщение..." required></textarea>
-    <input type="email" id="user-email" placeholder="Ваш email" required />
-    <button type="submit">Отправить</button>
-  </form>
-</div>
-
-<script src="script.js"></script>
 </body>
 </html>
