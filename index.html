@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="language-switcher" style="position:fixed; top:10px; right:10px;">
+    <button onclick="switchLanguage('ru')">RU</button>
+    <button onclick="switchLanguage('en')">EN</button>
+  </div>
   <header>
     <div class="logo">☾ Dark Market Ultra ✦</div>
     <nav>
@@ -44,6 +48,18 @@
       <div id="profile-info"></div>
       <button id="logout-btn">Выйти</button>
     </section>
+    <section id="gallery" class="gallery">
+  <h2>📂 Галерея файлов</h2>
+  <div id="file-list" class="file-list">
+    <p>Загрузка...</p>
+  </div>
+    </section>
+
+<section id="stats-section" class="stats">
+  <h2>📊 Статистика</h2>
+  <p>Посещений: <span id="visit-count">0</span></p>
+  <p>Загруженных файлов: <span id="upload-count">0</span></p>
+</section>
 
     <!-- Чат -->
     <section id="chat-section">
