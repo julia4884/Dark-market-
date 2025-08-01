@@ -135,7 +135,7 @@ const batMessages = [
   "Ты сегодня отлично выглядишь!",
   "Не забудь проверить новые разделы!",
   "Псс... там скидки в магазине!",
-  "Если боишься — жми на кошку 🐱",
+  "Если боишься — жми на кошку 🐈‍⬛",
 ];
 
 function moveBat() {
@@ -158,7 +158,7 @@ bat?.addEventListener("click", () => {
   setTimeout(() => (batMessage.style.display = "none"), 2500);
 });
 
-// === Кошка 🐱 ===
+// === Кошка 🐈‍⬛ ===
 const catWidget = document.getElementById("cat-widget");
 const contactFormContainer = document.getElementById("contact-form-container");
 const contactForm = document.getElementById("contact-form");
