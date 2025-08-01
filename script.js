@@ -502,4 +502,21 @@ async function updateStats() {
 document.addEventListener("DOMContentLoaded", () => {
   updateStats();
   setInterval(updateStats, 60000); // обновляем каждую минуту
+  // === Логика для кнопки-совушки и панели стикеров ===
+const stickerToggle = document.getElementById('sticker-toggle');
+const stickerPanel = document.getElementById('sticker-panel');
+const chatOverlay = document.getElementById('chat-overlay');
+
+if (stickerToggle && stickerPanel && chatOverlay) {
+  stickerToggle.addEventListener('click', () => {
+    stickerPanel.classList.toggle('active');
+    chatOverlay.classList.toggle('active');
+  });
+
+  // Закрытие панели при клике по затемнению
+  chatOverlay.addEventListener('click', () => {
+    stickerPanel.classList.remove('active');
+    chatOverlay.classList.remove('active');
+  });
+}
 });
