@@ -10,16 +10,17 @@
   <header class="site-header">
     <h1 class="site-title">☾ Dark Market Ultra ✦</h1>
     <nav>
-  <a href="index.html">Главная</a>
-  <a href="books.html">Книги</a>
-  <a href="games.html">Игры</a>
-  <a href="movies.html">Фильмы</a>
-  <a href="apps.html" class="active">Приложения</a>
-  <a href="music.html">Музыка</a>
-  <a href="tools.html">Инструменты</a>
-  <a href="images.html">Картинки</a>
-  <a href="donate.html">Донат</a>
-  <a href="admin.html">Личный кабинет</a>
+      <a href="index.html" class="active">Главная</a>
+      <a href="books.html">Книги</a>
+      <a href="games.html">Игры</a>
+      <a href="movies.html">Фильмы</a>
+      <a href="apps.html">Приложения</a>
+      <a href="music.html">Музыка</a>
+      <a href="tools.html">Инструменты</a>
+      <a href="images.html">Картинки</a>
+      <a href="donate.html">Донат</a>
+      <!-- Ссылка на кабинет определяется динамически -->
+      <a href="#" id="cabinet-link">Личный кабинет</a>
     </nav>
   </header>
 
@@ -27,7 +28,7 @@
     <h1 id="page-title">Главная</h1>
 
     <!-- Галерея -->
-    <div id="gallery" class="gallery"></div>
+    <div id="images-gallery" class="gallery"></div>
 
     <!-- Летучая мышь -->
     <div id="flying-bat">🦇</div>
@@ -50,6 +51,20 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       if (typeof updateUI === "function") updateUI();
+
+      // Динамически выбираем кабинет
+      const cabinetLink = document.getElementById("cabinet-link");
+      const role = localStorage.getItem("role");
+
+      if (role === "admin") {
+        cabinetLink.href = "admin.html";
+      } else if (role === "developer") {
+        cabinetLink.href = "developer.html";
+      } else if (localStorage.getItem("token")) {
+        cabinetLink.href = "cabinet.html";
+      } else {
+        cabinetLink.href = "index.html";
+      }
     });
   </script>
 </body>
