@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет | Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title">☾ Dark Market Ultra ✦ — Личный кабинет</h1>
+    <nav>
+      <a href="home.html">Главная</a>
+      <a href="index.html" id="logout-btn">Выход</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="cabinet-panel">
+      <h2 id="cabinet-title">Разработчик💎</h2>
+      <div id="cabinet-info"></div>
+
+      <!-- Загрузка файлов доступна только разработчику -->
+      <div id="developer-section" style="display:none;">
+        <h3>Загрузка файлов 💎</h3>
+        <form id="file-form">
+          <input type="file" id="file-upload" required>
+          <button type="submit">Загрузить</button>
+        </form>
+        <h3>Ваши файлы</h3>
+        <ul id="file-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Сначала войдите!");
+        window.location.href = "index.html";
+        return;
+      }
+
+      // Загружаем профиль
+      const res = await fetch("/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const user = await res.json();
+
+      if (!user || user.error) {
+        alert("Ошибка доступа!");
+        window.location.href = "index.html";
+        return;
+      }
+
+      const cabinetInfo = document.getElementById("cabinet-info");
+      cabinetInfo.innerHTML = `
+        <p><strong>${user.username}</strong> ${user.role === "admin" ? "👑" : ""}</p>
+        <img src="${user.avatar}" alt="avatar" class="avatar">
+        <p>${user.about || "Нет описания"}</p>
+      `;
+
+      // Проверка разработчика
+      try {
+        const vipRes = await fetch("/check-vip", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const vip = await vipRes.json();
+
+        if (vip.vip && vip.amount >= 10) {
+          document.getElementById("cabinet-title").textContent = "Ваш кабинет 💎 Разработчик";
+          document.getElementById("developer-section").style.display = "block";
+
+          // Загрузка файлов
+          document.getElementById("file-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById("file-upload");
+            if (!fileInput.files.length) return alert("Выберите файл!");
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const uploadRes = await fetch("/upload-file", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+              body: formData
+            });
+
+            const data = await uploadRes.json();
+            if (data.success) {
+              alert("Файл загружен!");
+              loadFiles();
+            } else {
+              alert("Ошибка загрузки!");
+            }
+          });
+
+          async function loadFiles() {
+            const list = document.getElementById("file-list");
+            const filesRes = await fetch("/admin/files", {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const files = await filesRes.json();
+            list.innerHTML = files
+              .map(f => `<li><a href="${f.path}" target="_blank">${f.name}</a></li>`)
+              .join("");
+          }
+          loadFiles();
+        }
+      } catch (e) {
+        console.error("Ошибка проверки VIP:", e);
+      }
+    });
+  </script>
+</body>
+</html>
