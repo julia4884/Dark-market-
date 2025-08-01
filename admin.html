@@ -46,26 +46,21 @@ document.addEventListener("DOMContentLoaded", () => {
       <!-- Список файлов -->
       <h3>Ваши загруженные файлы</h3>
       <ul id="file-list"></ul>
-      <!-- Панель сообщений кошки и мыши -->
-<div id="messages-panel">
-  <div class="tabs">
-    <button class="tab-btn active" data-type="cat">🐱 Кошка</button>
-    <button class="tab-btn" data-type="bat">🦇 Мышь</button>
-  </div>
-  
-  <div class="messages-window" id="messages-window"></div>
-  
-  <form id="chat-form">
-    <input type="text" id="chat-input" placeholder="Введите сообщение..." required>
-    <button type="submit">Отправить</button>
-  </form>
-</div>
-  </select>
-  <input type="text" id="message-content" placeholder="Текст сообщения..." required>
-  <button type="submit">Добавить сообщение</button>
-</form>
 
-<ul id="messages-list"></ul>
+      <!-- Панель сообщений кошки и мыши -->
+      <div id="messages-panel">
+        <div class="tabs">
+          <button class="tab-btn active" data-type="cat">🐱 Кошка</button>
+          <button class="tab-btn" data-type="bat">🦇 Мышь</button>
+        </div>
+        
+        <div class="messages-window" id="messages-window"></div>
+        
+        <form id="chat-form">
+          <input type="text" id="chat-input" placeholder="Введите сообщение..." required>
+          <button type="submit">Отправить</button>
+        </form>
+      </div>
     </section>
   </main>
 
@@ -75,194 +70,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   <!-- Кошка -->
   <div id="cat-widget">🐱</div>
-  <div id="contact-form-container" style="display:none;">
-    <form id="contact-form">
-      <h3>Напиши админу</h3>
-      <input type="email" id="contact-email" placeholder="Ваш Email" required>
-      <textarea id="contact-message" placeholder="Ваше сообщение..." required></textarea>
-      <button type="submit">Отправить</button>
-      <button type="button" id="close-contact">Закрыть</button>
-    </form>
-  </div>
-
-  <script src="script.js"></script>
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-
-  if (!token || role !== "admin") {
-    alert("Доступ запрещён! Войдите как администратор.");
-    window.location.href = "index.html";
-    return;
-  }
-
-  const messagesList = document.getElementById("messages-list");
-  const messageForm = document.getElementById("message-form");
-
-  // Загружаем список сообщений
-  function loadMessages() {
-    fetch("/admin/messages", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        messagesList.innerHTML = "";
-        data.forEach((msg) => {
-          const li = document.createElement("li");
-          li.textContent = `${msg.type === "cat" ? "🐱" : "🦇"} ${msg.content}`;
-          messagesList.appendChild(li);
-        });
-      })
-      .catch((err) => console.error("Ошибка загрузки сообщений:", err));
-  }
-
-  // Обработка формы добавления сообщения
-  messageForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const type = document.getElementById("message-type").value;
-    const content = document.getElementById("message-content").value.trim();
-
-    if (!content) return alert("Введите текст сообщения!");
-
-    fetch("/admin/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ type, content }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          alert("Сообщение добавлено!");
-          document.getElementById("message-content").value = "";
-          loadMessages();
-        } else {
-          alert("Ошибка: " + (data.error || "Попробуйте снова"));
-        }
-      })
-      .catch(() => alert("Сервер недоступен"));
-  });
-
-  loadMessages();
-});
-  </script>
-  <script>
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-
-  if (!token || role !== "admin") {
-    alert("Доступ запрещён! Войдите как администратор.");
-    window.location.href = "index.html";
-  }
-
-  // Отображение информации
-  const adminInfo = document.getElementById("admin-info");
-  adminInfo.innerHTML = `
-    <p><strong>Ваш Email:</strong> juliaangelss26@gmail.com 👑</p>
-    <p>У вас полный доступ к панели управления.</p>
-  `;
-
-  // === Загрузка аватара ===
-  document.getElementById("avatar-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const avatarInput = document.getElementById("avatar-upload");
-    if (!avatarInput.files.length) return alert("Выберите картинку!");
-
-    const formData = new FormData();
-    formData.append("avatar", avatarInput.files[0]);
-
-    try {
-      const res = await fetch("/upload-avatar", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Аватар обновлён!");
-        location.reload();
-      } else {
-        alert("Ошибка: " + (data.error || "не удалось загрузить"));
-      }
-    } catch {
-      alert("Сервер недоступен");
-    }
-  });
-
-  // === Загрузка файла ===
-  document.getElementById("file-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fileInput = document.getElementById("file-upload");
-    if (!fileInput.files.length) return alert("Выберите файл!");
-
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-
-    try {
-      const res = await fetch("/upload-file", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Файл загружен!");
-        loadFiles(); // обновляем список
-      } else {
-        alert("Ошибка: " + (data.error || "не удалось загрузить"));
-      }
-    } catch {
-      alert("Сервер недоступен");
-    }
-  });
-
-  // === Загрузка списка файлов ===
-  async function loadFiles() {
-    try {
-      const res = await fetch("/list-files", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const files = await res.json();
-      const list = document.getElementById("file-list");
-      list.innerHTML = files.map(f => `<li><a href="${f.url}" target="_blank">${f.name}</a></li>`).join("");
-    } catch {
-      console.log("Не удалось загрузить список файлов");
-    }
-  }
-
-  loadFiles();
-});
-</script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Проверка входа
-      const token = localStorage.getItem("token");
-      const role = localStorage.getItem("role");
-
-      if (!token || role !== "admin") {
-        alert("Доступ запрещён! Войдите как администратор.");
-        window.location.href = "index.html";
-      }
-
-      // Отображение информации
-      const adminInfo = document.getElementById("admin-info");
-      adminInfo.innerHTML = `
-        <p><strong>Ваш Email:</strong> juliaangelss26@gmail.com 👑</p>
-        <p>У вас полный доступ к панели управления.</p>
-      `;
-
-      // Форма загрузки аватара
-      document.getElementById("avatar-form").addEventListener("submit", (e) => {
-        e.preventDefault();
-        alert("Аватар успешно загружен (пока фейк-обработчик)!");
-      });
-
-      // Форма загрузки файлов
-      document.getElementById("file-form").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const fileInput = document.getElementById("file-upload");
-        if (fileInput.files.length === 0) return alert("Выберите файл!");
+  <div id="contact
