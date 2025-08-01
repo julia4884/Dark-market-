@@ -25,6 +25,18 @@
   </header>
 
   <main>
+    <!-- Окно чата -->
+<aside id="chat-container">
+  <div id="chat-header">
+    <button class="chat-tab active" data-tab="global">Общий чат</button>
+    <button class="chat-tab" data-tab="private">Личная почта</button>
+  </div>
+  <div id="chat-window"></div>
+  <form id="chat-form">
+    <input type="text" id="chat-input" placeholder="Введите сообщение..." required>
+    <button type="submit">Отправить</button>
+  </form>
+</aside>
     <h1 id="page-title">Главная</h1>
 
     <!-- Галерея -->
