@@ -44,27 +44,34 @@
       <div id="profile-info"></div>
       <button id="logout-btn">Выйти</button>
     </section>
+
     <!-- Чат -->
-<section id="chat-section">
-  <div id="chat-tabs">
-  <button class="chat-tab active" data-tab="global">Общий чат</button>
-  <button class="chat-tab" data-tab="private">Личные сообщения</button>
-  </div>
-  <h2>Общий чат</h2>
-  <div id="chat-messages" class="chat-box"></div>
-  
-  <!-- Стикеры -->
-  <div id="sticker-panel" class="sticker-panel"></div>
-  
-  <!-- Форма отправки -->
-  <form id="chat-form">
-    <input type="text" id="chat-input" placeholder="Напиши сообщение..." required>
-    <button type="submit">Отправить</button>
-  </form>
-</section>
+    <section id="chat-section">
+      <h2>Общий чат</h2>
+      
+      <!-- Вкладки -->
+      <div id="chat-tabs">
+        <button class="chat-tab active" data-tab="global">Общий чат</button>
+        <button class="chat-tab" data-tab="private">Личные сообщения</button>
+      </div>
+      
+      <!-- Окно сообщений -->
+      <div id="chat-window" class="chat-box"></div>
+      
+      <!-- Стикеры -->
+      <div id="sticker-panel" class="sticker-panel"></div>
+      
+      <!-- Форма отправки -->
+      <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Напиши сообщение..." required>
+        <button type="submit">Отправить</button>
+      </form>
+    </section>
+
+    <!-- Список пользователей -->
     <section id="users-section">
-  <h2>Пользователи онлайн</h2>
-  <div id="users-list" class="users-box"></div>
+      <h2>Пользователи онлайн</h2>
+      <ul id="users-list"></ul>
     </section>
   </main>
 
