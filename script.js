@@ -2,7 +2,8 @@
 let token = localStorage.getItem("token");
 let role = localStorage.getItem("role");
 
-function updateUI() {
+// Обновление интерфейса
+async function updateUI() {
   const authSection = document.getElementById("auth-section");
   const logoutSection = document.getElementById("logout-section");
 
@@ -10,48 +11,56 @@ function updateUI() {
     if (authSection) authSection.style.display = "none";
     if (logoutSection) logoutSection.style.display = "block";
 
-    fetch("/profile", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data || data.error) {
-          logout();
-          return;
-        }
+    try {
+      const res = await fetch("/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
 
-        const profileInfo = document.getElementById("profile-info");
-        if (profileInfo) {
-          let badge = "";
-          if (data.role === "admin") badge = "👑";
-          else if (data.role === "developer") badge = "💎";
+      if (!data || data.error) {
+        logout();
+        return;
+      }
 
-          profileInfo.innerHTML = `
-            <div>
-              <img src="${data.avatar}" alt="avatar" class="avatar">
-              <p><strong>${data.username}</strong> ${badge}</p>
-              <p>${data.about || "Нет описания"}</p>
-              ${
-                data.role === "admin"
-                  ? '<a href="admin.html" class="admin-btn">Перейти в админку</a>'
-                  : data.role === "developer"
-                  ? '<a href="developer.html" class="admin-btn">Перейти в кабинет разработчика 💎</a>'
-                  : '<a href="cabinet.html" class="user-btn">Перейти в личный кабинет</a>'
-              }
-            </div>
-          `;
-        }
-      })
-      .catch(() => logout());
+      // Обновляем роль (если она изменилась на сервере)
+      role = data.role;
+      localStorage.setItem("role", role);
+
+      const profileInfo = document.getElementById("profile-info");
+      if (profileInfo) {
+        let badge = "";
+        if (role === "admin") badge = "👑";
+        else if (role === "developer") badge = "💎";
+
+        profileInfo.innerHTML = `
+          <div>
+            <img src="${data.avatar}" alt="avatar" class="avatar">
+            <p><strong>${data.username}</strong> ${badge}</p>
+            <p>${data.about || "Нет описания"}</p>
+            ${
+              role === "admin"
+                ? '<a href="admin.html" class="admin-btn">Перейти в админку</a>'
+                : role === "developer"
+                ? '<a href="developer.html" class="admin-btn">Перейти в кабинет разработчика 💎</a>'
+                : '<a href="cabinet.html" class="user-btn">Перейти в личный кабинет</a>'
+            }
+          </div>
+        `;
+      }
+    } catch {
+      logout();
+    }
   } else {
     if (authSection) authSection.style.display = "block";
     if (logoutSection) logoutSection.style.display = "none";
   }
 }
 
+// Выход
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("role");
+  localStorage.removeItem("email");
   token = null;
   role = null;
   const authSection = document.getElementById("auth-section");
@@ -74,31 +83,26 @@ document.getElementById("login-btn")?.addEventListener("click", (e) => {
     body: JSON.stringify({ email, password }),
   })
     .then((res) => res.json())
-    .then((data) => {
+    .then(async (data) => {
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.role);
+        localStorage.setItem("email", email);
         token = data.token;
         role = data.role;
 
-        // Проверяем обновлённый профиль
-        fetch("/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((res) => res.json())
-          .then((user) => {
-            updateUI();
-            if (user.role === "admin") {
-              alert("Добро пожаловать, Администратор 👑");
-              window.location.href = "admin.html";
-            } else if (user.role === "developer") {
-              alert("Добро пожаловать, Разработчик 💎");
-              window.location.href = "developer.html";
-            } else {
-              alert("Вход выполнен успешно!");
-              window.location.href = "cabinet.html";
-            }
-          });
+        await updateUI();
+
+        if (role === "admin") {
+          alert("Добро пожаловать, Администратор 👑");
+          window.location.href = "admin.html";
+        } else if (role === "developer") {
+          alert("Добро пожаловать, Разработчик 💎");
+          window.location.href = "developer.html";
+        } else {
+          alert("Вход выполнен успешно!");
+          window.location.href = "cabinet.html";
+        }
       } else {
         alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
       }
@@ -135,7 +139,7 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
 document.getElementById("logout-btn")?.addEventListener("click", () => logout());
 
 // === Донат PayPal (после оплаты) ===
-async function handleDonation(orderID) {
+async function handleDonation(orderID, amount = 10) {
   try {
     const res = await fetch("/capture-order", {
       method: "POST",
@@ -143,21 +147,16 @@ async function handleDonation(orderID) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({ orderID, days: 30 }),
+      body: JSON.stringify({ orderID, days: 30, amount }),
     });
     const data = await res.json();
 
     if (data.status === "COMPLETED") {
       alert("Спасибо за поддержку!");
 
-      // Проверяем новый статус
-      const resProfile = await fetch("/profile", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      const user = await resProfile.json();
+      await updateUI();
 
-      if (user.role === "developer") {
-        localStorage.setItem("role", "developer");
+      if (role === "developer") {
         window.location.href = "developer.html";
       } else {
         window.location.reload();
