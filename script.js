@@ -183,14 +183,27 @@ const batMessages = [
   "Если боишься — жми на кошку 🐈‍⬛",
 ];
 
-function moveBat() {
+function moveBatSmoothly() {
   if (!bat) return;
+
   const x = Math.random() * (window.innerWidth - 80);
   const y = Math.random() * (window.innerHeight - 80);
   bat.style.left = `${x}px`;
   bat.style.top = `${y}px`;
+
+// Иногда делаем паузу подольше (будто отдыхает)
+let nextFlight;
+if (Math.random() < 0.3) { 
+  // 30% шанс подольше отдохнуть
+  nextFlight = Math.random() * 5000 + 5000; // 5–10 секунд
+} else {
+  nextFlight = Math.random() * 4000 + 2000; // 2–6 секунд
 }
-setInterval(moveBat, 4000);
+setTimeout(moveBatSmoothly, nextFlight);
+}
+
+// Первый запуск через 2 секунды
+setTimeout(moveBatSmoothly, 2000);
 
 bat?.addEventListener("click", () => {
   if (!batMessage) return;
