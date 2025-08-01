@@ -298,6 +298,28 @@ chatWindow.addEventListener("click", async (e) => {
     const username = target.dataset.user;
     chatInput.value = `@${username}, `;
     chatInput.focus();
+    // === Логика панели стикеров ===
+const toggleStickersBtn = document.getElementById("toggle-stickers");
+const stickerPanel = document.getElementById("sticker-panel");
+const stickers = document.querySelectorAll("#stickers .sticker");
+
+// Открыть/закрыть панель
+toggleStickersBtn.addEventListener("click", () => {
+    if (stickerPanel.style.display === "none" || !stickerPanel.style.display) {
+        stickerPanel.style.display = "block";
+    } else {
+        stickerPanel.style.display = "none";
+    }
+});
+
+// Клик по стикеру = вставка в чат
+stickers.forEach(sticker => {
+    sticker.addEventListener("click", () => {
+        const stickerTag = `[sticker:${sticker.src}]`;
+        chatInput.value += " " + stickerTag; 
+        chatInput.focus();
+    });
+});
   }
 
   // Личка
