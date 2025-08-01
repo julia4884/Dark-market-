@@ -125,5 +125,22 @@
       if (typeof updateUI === "function") updateUI();
     });
   </script>
+  <!-- Кнопка-совушка -->
+<button id="sticker-toggle" title="Стикеры">🦉</button>
+
+<!-- Панель стикеров -->
+<div id="sticker-panel">
+  <h3>Выбери стикер</h3>
+  <div id="sticker-list"></div>
+</div>
+
+<!-- Фоновое затемнение за чатом -->
+<div id="chat-overlay"></div>
+
+<!-- Поле ввода с перышком -->
+<div id="chat-input-container">
+  <input type="text" id="chat-input" placeholder="Напиши сообщение..." />
+  <button id="chat-send">Отправить</button>
+</div>
 </body>
 </html>
