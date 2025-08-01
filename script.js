@@ -221,6 +221,15 @@ const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
 const chatTabs = document.querySelectorAll(".chat-tab");
 let currentChat = "global"; // вкладка по умолчанию
+// Переключение вкладок
+chatTabs.forEach((tab) =>
+  tab.addEventListener("click", () => {
+    chatTabs.forEach((t) => t.classList.remove("active")); // убираем подсветку
+    tab.classList.add("active"); // подсвечиваем выбранную
+    currentChat = tab.dataset.tab; // меняем текущую вкладку
+    loadChat(); // обновляем чат
+  })
+);
 
 // Обновление чата
 async function loadChat() {
