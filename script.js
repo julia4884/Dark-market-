@@ -241,5 +241,90 @@ function loadImagesGallery() {
 // === Запуск ===
 document.addEventListener("DOMContentLoaded", () => {
   updateUI();
+  // === Панель сообщений кошки и мыши ===
+let currentType = "cat";
+
+function loadMessages(type) {
+  fetch(`/admin/messages`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+  })
+    .then(res => res.json())
+    .then(data => {
+      const windowEl = document.getElementById("messages-window");
+      windowEl.innerHTML = "";
+      data
+        .filter(msg => msg.type === type)
+        .forEach(msg => {
+          const div = document.createElement("div");
+          div.classList.add("message-item");
+          div.innerHTML = `
+            <span>${msg.content}</span>
+            <button class="edit-btn" data-id="${msg.id}">✏️</button>
+            <button class="delete-btn" data-id="${msg.id}">🗑️</button>
+          `;
+          windowEl.appendChild(div);
+        });
+    });
+}
+
+// Переключение вкладок
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentType = btn.dataset.type;
+    loadMessages(currentType);
+  });
+});
+
+// Добавление сообщения
+document.getElementById("chat-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const input = document.getElementById("chat-input");
+  const content = input.value.trim();
+  if (!content) return;
+
+  fetch("/admin/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+    body: JSON.stringify({ type: currentType, content })
+  })
+    .then(res => res.json())
+    .then(() => {
+      input.value = "";
+      loadMessages(currentType);
+    });
+});
+
+// Обработчики редактирования и удаления
+document.getElementById("messages-window").addEventListener("click", e => {
+  if (e.target.classList.contains("delete-btn")) {
+    const id = e.target.dataset.id;
+    fetch(`/admin/messages/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    }).then(() => loadMessages(currentType));
+  }
+  if (e.target.classList.contains("edit-btn")) {
+    const id = e.target.dataset.id;
+    const newText = prompt("Введите новый текст:");
+    if (newText) {
+      fetch(`/admin/messages/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ content: newText })
+      }).then(() => loadMessages(currentType));
+    }
+  }
+});
+
+// Загружаем сообщения при открытии страницы
+loadMessages(currentType);
   loadImagesGallery(); // Запускаем загрузку картинок, если есть блок
 });
