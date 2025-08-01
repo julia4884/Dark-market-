@@ -487,3 +487,24 @@ document.addEventListener("DOMContentLoaded", () => {
   updateUI();
   loadImagesGallery();
 });
+// === Обновление статистики ===
+async function updateStats() {
+  try {
+    const res = await fetch("/stats"); // сервер отдаёт JSON
+    if (!res.ok) throw new Error("Ошибка запроса статистики");
+    const data = await res.json();
+
+    const visitEl = document.getElementById("visit-count");
+    const uploadEl = document.getElementById("upload-count");
+
+    if (visitEl) visitEl.textContent = data.visits ?? 0;
+    if (uploadEl) uploadEl.textContent = data.uploads ?? 0;
+  } catch (err) {
+    console.error("Ошибка при обновлении статистики:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateStats();
+  setInterval(updateStats, 60000); // обновляем каждую минуту
+});
