@@ -406,16 +406,77 @@ const imagesGallery = [
   { src: "images/pic4.jpg", title: "Замок", desc: "Древние руины на утёсе." }
 ];
 
-function loadImagesGallery() {
+// === Галерея картинок + Мяук ===
+async function loadImagesGallery() {
   const container = document.getElementById("images-gallery");
   if (!container) return;
+
   container.innerHTML = imagesGallery.map(img => `
-    <div class="card">
+    <div class="card" data-id="${img.id || 1}">
       <img src="${img.src}" alt="${img.title}">
       <h3>${img.title}</h3>
       <p>${img.desc}</p>
+      <button class="meow-btn">🐾 Мяук</button>
+      <span class="like-count">0</span>
     </div>
   `).join("");
+
+  // Подгружаем лайки и статус для каждой карточки
+  for (const fileCard of container.querySelectorAll(".card")) {
+    const fileId = fileCard.dataset.id;
+    const likeCount = fileCard.querySelector(".like-count");
+    const btn = fileCard.querySelector(".meow-btn");
+
+    try {
+      // Получаем количество лайков
+      const res = await fetch(`/files/${fileId}/likes`);
+      const data = await res.json();
+      likeCount.textContent = data.total || 0;
+
+      // Проверяем, лайкал ли уже пользователь
+      const checkRes = await fetch(`/files/${fileId}/liked`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        if (checkData.liked) {
+          btn.textContent = "👍🏻 Мяук";
+        }
+      }
+    } catch {
+      likeCount.textContent = "⚠";
+    }
+
+    // Обработчик кнопки
+    btn.addEventListener("click", async () => {
+      try {
+        const res = await fetch(`/files/${fileId}/like`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // Обновляем количество лайков
+          const res2 = await fetch(`/files/${fileId}/likes`);
+          const countData = await res2.json();
+          likeCount.textContent = countData.total;
+
+          // Меняем вид кнопки
+          btn.textContent = data.liked ? "👍🏻 Мяук" : "🐾 Мяук";
+        } else {
+          alert("Ошибка: " + (data.error || "Не удалось поставить лайк"));
+        }
+      } catch {
+        alert("Сервер недоступен");
+      }
+    });
+  }
 }
 
 // === Запуск ===
