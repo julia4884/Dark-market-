@@ -403,6 +403,18 @@ stickers.forEach(sticker => {
             alert("Ошибка отправки стикера");
         }
     });
+  // === Блокировка чата для неавторизованных ===
+document.addEventListener("DOMContentLoaded", () => {
+  if (!localStorage.getItem("token")) {
+    const chatInput = document.getElementById("chat-input");
+    const chatForm = document.getElementById("chat-form");
+    const submitBtn = chatForm.querySelector("button[type=submit]");
+
+    chatInput.disabled = true;
+    submitBtn.disabled = true;
+    chatInput.placeholder = "Войдите, чтобы отправлять сообщения";
+  }
+});
 }
   // Личка
   if (target.classList.contains("pm-btn")) {
