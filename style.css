@@ -245,19 +245,6 @@ nav a:hover {
   box-shadow: 0 0 20px #22d3ee, 0 0 40px #0ea5e9;
 }
 /* === Чат === */
-#chat-container {
-  background: rgba(40, 0, 70, 0.95); /* тёмно-фиолетовый фон */
-  border: 2px solid #7c3aed;
-  border-radius: 12px;
-  padding: 15px;
-  max-width: 700px;
-  margin: 20px auto;
-  box-shadow: 0 0 20px #5b21b6, 0 0 40px #7c3aed;
-  display: flex;
-  flex-direction: column;
-  height: 400px;
-}
-
 #chat-window {
   flex: 1;
   overflow-y: auto;
