@@ -8,7 +8,7 @@
 </head>
 <body>
   <header class="site-header">
-    <h1 class="site-title">☾ Dark Market Ultra ✦ — Личный кабинет</h1>
+    <h1 class="site-title">☾ Dark Market Ultra ✦</h1>
     <nav>
       <a href="home.html">Главная</a>
       <a href="index.html" id="logout-btn">Выход</a>
@@ -17,17 +17,17 @@
 
   <main>
     <section id="cabinet-panel">
-      <h2 id="cabinet-title">Разработчик💎</h2>
-      <div id="cabinet-info"></div>
+      <h2 id="cabinet-title">Ваш кабинет</h2>
+      <div id="profile-info"></div>
 
-      <!-- Загрузка файлов доступна только разработчику -->
+      <!-- Раздел разработчика -->
       <div id="developer-section" style="display:none;">
-        <h3>Загрузка файлов 💎</h3>
+        <h3>Загрузка файлов (для Разработчиков)</h3>
         <form id="file-form">
           <input type="file" id="file-upload" required>
           <button type="submit">Загрузить</button>
         </form>
-        <h3>Ваши файлы</h3>
+        <h4>Ваши загруженные файлы</h4>
         <ul id="file-list"></ul>
       </div>
     </section>
@@ -35,84 +35,98 @@
 
   <script src="script.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Сначала войдите!");
-        window.location.href = "index.html";
-        return;
-      }
+  document.addEventListener("DOMContentLoaded", async () => {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const email = localStorage.getItem("email");
 
+    if (!token) {
+      alert("Сначала войдите в аккаунт!");
+      window.location.href = "index.html";
+      return;
+    }
+
+    try {
       // Загружаем профиль
       const res = await fetch("/profile", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const user = await res.json();
-
       if (!user || user.error) {
-        alert("Ошибка доступа!");
-        window.location.href = "index.html";
+        alert("Ошибка загрузки профиля");
         return;
       }
 
-      const cabinetInfo = document.getElementById("cabinet-info");
-      cabinetInfo.innerHTML = `
-        <p><strong>${user.username}</strong> ${user.role === "admin" ? "👑" : ""}</p>
-        <img src="${user.avatar}" alt="avatar" class="avatar">
-        <p>${user.about || "Нет описания"}</p>
+      document.getElementById("profile-info").innerHTML = `
+        <div>
+          <img src="${user.avatar}" alt="avatar" class="avatar">
+          <p><strong>${user.username}</strong></p>
+          <p>${user.about || "Нет описания"}</p>
+        </div>
       `;
 
-      // Проверка разработчика
-      try {
+      // Проверка статуса
+      if (user.role === "admin" && user.email === "juliaangelss26@gmail.com") {
+        document.getElementById("cabinet-title").textContent = "👑 Админ";
+        document.getElementById("developer-section").style.display = "block";
+      } else {
         const vipRes = await fetch("/check-vip", {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         const vip = await vipRes.json();
 
         if (vip.vip && vip.amount >= 10) {
-          document.getElementById("cabinet-title").textContent = "Ваш кабинет 💎 Разработчик";
+          document.getElementById("cabinet-title").textContent = "Разработчик 💎";
           document.getElementById("developer-section").style.display = "block";
-
-          // Загрузка файлов
-          document.getElementById("file-form").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const fileInput = document.getElementById("file-upload");
-            if (!fileInput.files.length) return alert("Выберите файл!");
-
-            const formData = new FormData();
-            formData.append("file", fileInput.files[0]);
-
-            const uploadRes = await fetch("/upload-file", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${token}` },
-              body: formData
-            });
-
-            const data = await uploadRes.json();
-            if (data.success) {
-              alert("Файл загружен!");
-              loadFiles();
-            } else {
-              alert("Ошибка загрузки!");
-            }
-          });
-
-          async function loadFiles() {
-            const list = document.getElementById("file-list");
-            const filesRes = await fetch("/admin/files", {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            const files = await filesRes.json();
-            list.innerHTML = files
-              .map(f => `<li><a href="${f.path}" target="_blank">${f.name}</a></li>`)
-              .join("");
-          }
-          loadFiles();
         }
-      } catch (e) {
-        console.error("Ошибка проверки VIP:", e);
+      }
+    } catch {
+      alert("Ошибка соединения с сервером");
+    }
+
+    // Обработка загрузки файлов
+    document.getElementById("file-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("file-upload");
+      if (!fileInput.files.length) return alert("Выберите файл!");
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      try {
+        const res = await fetch("/upload-file", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Файл загружен!");
+          loadFiles();
+        } else {
+          alert("Ошибка загрузки: " + (data.error || "неизвестная ошибка"));
+        }
+      } catch {
+        alert("Сервер недоступен");
       }
     });
+
+    // Загрузка списка файлов
+    async function loadFiles() {
+      try {
+        const res = await fetch("/admin/files", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const files = await res.json();
+        const list = document.getElementById("file-list");
+        list.innerHTML = files
+          .map(f => `<li><a href="${f.path}" target="_blank">${f.name}</a></li>`)
+          .join("");
+      } catch {
+        console.log("Не удалось загрузить список файлов");
+      }
+    }
+  });
   </script>
 </body>
 </html>
