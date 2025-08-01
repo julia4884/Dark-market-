@@ -508,26 +508,6 @@ nav a:hover {
     right: 0;
   }
   /* === Стили сообщений по ролям === */
-.message.user {
-  color: #000; /* чёрный текст */
-  text-shadow: 0 0 5px rgba(0,0,0,0.4);
-}
-
-.message.dev {
-  color: #22d3ee; /* неоново-голубой */
-  text-shadow: 0 0 10px #22d3ee, 0 0 20px #0ea5e9;
-}
-
-.message.admin {
-  color: #ffd700; /* ярко-золотой */
-  text-shadow: 0 0 10px #ffd700, 0 0 25px #ffea00;
-}
-
-/* Подсветка ников */
-.username.user { color: #000; }
-.username.dev { color: #22d3ee; text-shadow: 0 0 10px #22d3ee; }
-.username.admin { color: #ffd700; text-shadow: 0 0 10px #ffd700; }
-
 /* === Стикеры === */
 .chat-sticker {
   max-width: 120px; /* размер под окно чата */
@@ -551,16 +531,6 @@ nav a:hover {
   background: #fff;
   color: #000;
   margin-right: 10px;
-}
-#chat-send {
-  background: #5eead4;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  color: #fff;
-  transition: all 0.3s ease;
 }
 #chat-send:hover {
   background: #22d3ee;
@@ -611,13 +581,6 @@ nav a:hover {
   background: #22d3ee;
   transform: scale(1.1);
   color: #fff;
-}
-
-/* === Анимационное перышко в поле ввода === */
-#chat-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
 }
 
 #chat-input-container::before {
