@@ -19,11 +19,12 @@ function updateUI() {
           logout();
           return;
         }
+
         const profileInfo = document.getElementById("profile-info");
         if (profileInfo) {
           let badge = "";
           if (data.role === "admin") badge = "👑";
-          if (data.role === "developer") badge = "💎";
+          else if (data.role === "developer") badge = "💎";
 
           profileInfo.innerHTML = `
             <div>
@@ -79,18 +80,25 @@ document.getElementById("login-btn")?.addEventListener("click", (e) => {
         localStorage.setItem("role", data.role);
         token = data.token;
         role = data.role;
-        updateUI();
 
-        if (data.role === "admin") {
-          alert("Добро пожаловать, Администратор 👑");
-          window.location.href = "admin.html";
-        } else if (data.role === "developer") {
-          alert("Добро пожаловать, Разработчик 💎");
-          window.location.href = "developer.html";
-        } else {
-          alert("Вход выполнен успешно!");
-          window.location.href = "cabinet.html";
-        }
+        // Проверяем обновлённый профиль
+        fetch("/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+          .then((res) => res.json())
+          .then((user) => {
+            updateUI();
+            if (user.role === "admin") {
+              alert("Добро пожаловать, Администратор 👑");
+              window.location.href = "admin.html";
+            } else if (user.role === "developer") {
+              alert("Добро пожаловать, Разработчик 💎");
+              window.location.href = "developer.html";
+            } else {
+              alert("Вход выполнен успешно!");
+              window.location.href = "cabinet.html";
+            }
+          });
       } else {
         alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
       }
@@ -125,6 +133,42 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
 
 // === Выход ===
 document.getElementById("logout-btn")?.addEventListener("click", () => logout());
+
+// === Донат PayPal (после оплаты) ===
+async function handleDonation(orderID) {
+  try {
+    const res = await fetch("/capture-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ orderID, days: 30 }),
+    });
+    const data = await res.json();
+
+    if (data.status === "COMPLETED") {
+      alert("Спасибо за поддержку!");
+
+      // Проверяем новый статус
+      const resProfile = await fetch("/profile", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const user = await resProfile.json();
+
+      if (user.role === "developer") {
+        localStorage.setItem("role", "developer");
+        window.location.href = "developer.html";
+      } else {
+        window.location.reload();
+      }
+    } else {
+      alert("Оплата не завершена.");
+    }
+  } catch {
+    alert("Ошибка при подтверждении платежа");
+  }
+}
 
 // === Летучая мышь 🦇 ===
 const bat = document.getElementById("flying-bat");
