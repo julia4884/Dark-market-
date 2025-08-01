@@ -357,9 +357,25 @@ chatForm.addEventListener("submit", async (e) => {
 
 // Автообновление чата каждые 5 секунд
 setInterval(loadChat, 5000);
-});
-  }
-
+// === Отправка стикера как сообщения ===
+stickers.forEach(sticker => {
+    sticker.addEventListener("click", async () => {
+        const stickerTag = `[sticker:${sticker.src}]`;
+        try {
+            await fetch(`/chat/${currentChat}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                },
+                body: JSON.stringify({ content: stickerTag })
+            });
+            loadChat(); // обновляем чат после отправки
+        } catch {
+            alert("Ошибка отправки стикера");
+        }
+    });
+}
   // Личка
   if (target.classList.contains("pm-btn")) {
     const username = target.dataset.user;
