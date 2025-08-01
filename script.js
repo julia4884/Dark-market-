@@ -357,6 +357,33 @@ chatForm.addEventListener("submit", async (e) => {
 
 // Автообновление чата каждые 5 секунд
 setInterval(loadChat, 5000);
+  // === Загрузка стикеров при старте ===
+async function loadStickers() {
+    try {
+        const res = await fetch('/stickers');
+        const stickers = await res.json();
+
+        const stickerPanel = document.querySelector('#sticker-panel'); 
+        stickerPanel.innerHTML = ''; // очищаем, чтобы не было дублей
+
+        stickers.forEach(sticker => {
+            const img = document.createElement('img');
+            img.src = sticker.url;
+            img.alt = sticker.name;
+            img.classList.add('sticker');
+            stickerPanel.appendChild(img);
+
+            // Клик = вставка в чат
+            img.addEventListener('click', () => {
+                const stickerTag = `[sticker:${sticker.url}]`;
+                chatInput.value += " " + stickerTag;
+                chatInput.focus();
+            });
+        });
+    } catch (err) {
+        console.error("Ошибка загрузки стикеров:", err);
+    }
+}
 // === Отправка стикера как сообщения ===
 stickers.forEach(sticker => {
     sticker.addEventListener("click", async () => {
