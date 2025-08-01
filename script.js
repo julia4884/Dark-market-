@@ -249,13 +249,8 @@ async function loadChat() {
 // Отправка сообщений
 chatForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const <span>
-  ${
-    msg.content.startsWith("sticker:")
-      ? `<img src="stickers/${msg.content.replace('sticker:', '')}" alt="sticker" class="chat-sticker">`
-      : msg.content
-  }
-</span>content = chatInput.value.trim();
+ const content = chatInput.value.trim();
+if (!content) return; 
   if (!content) return;
 
   try {
