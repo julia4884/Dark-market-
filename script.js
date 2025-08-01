@@ -247,6 +247,94 @@ let currentType = "cat";
 function loadMessages(type) {
   fetch(`/admin/messages`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    // === Панель сообщений кошки и мыши ===
+let currentType = "cat"; // стартовая вкладка
+
+function loadMessages(type) {
+  fetch(`/admin/messages`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  })
+    .then(res => res.json())
+    .then(data => {
+      const windowEl = document.getElementById("messages-window");
+      windowEl.innerHTML = "";
+
+      data
+        .filter(msg => msg.type === type)
+        .forEach(msg => {
+          const div = document.createElement("div");
+          div.classList.add("message-item");
+          div.innerHTML = `
+            <span>${msg.content}</span>
+            <button class="edit-btn" data-id="${msg.id}">✏️</button>
+            <button class="delete-btn" data-id="${msg.id}">🗑️</button>
+          `;
+          windowEl.appendChild(div);
+        });
+
+      // Редактирование
+      document.querySelectorAll(".edit-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          const newContent = prompt("Введите новый текст:");
+          if (!newContent) return;
+          fetch(`/admin/messages/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ content: newContent }),
+          }).then(() => loadMessages(currentType));
+        });
+      });
+
+      // Удаление
+      document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.id;
+          if (!confirm("Удалить сообщение?")) return;
+          fetch(`/admin/messages/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          }).then(() => loadMessages(currentType));
+        });
+      });
+    });
+}
+
+// Кнопки-вкладки
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentType = btn.dataset.type;
+    loadMessages(currentType);
+  });
+});
+
+// Отправка нового сообщения
+document.getElementById("chat-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const content = document.getElementById("chat-input").value.trim();
+  if (!content) return;
+
+  fetch(`/admin/messages`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify({ type: currentType, content }),
+  })
+    .then(() => {
+      document.getElementById("chat-input").value = "";
+      loadMessages(currentType);
+    });
+});
+
+// Загружаем стартовые сообщения
+loadMessages(currentType);
   })
     .then(res => res.json())
     .then(data => {
