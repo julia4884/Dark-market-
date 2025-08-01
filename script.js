@@ -318,6 +318,20 @@ stickers.forEach(sticker => {
         const stickerTag = `[sticker:${sticker.src}]`;
         chatInput.value += " " + stickerTag; 
         chatInput.focus();
+      // Автоматическая отправка стикера
+        try {
+            await fetch(`/chat/${currentChat}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ content: stickerTag }),
+            });
+            loadChat(); // обновим чат после отправки
+        } catch {
+            alert("Ошибка отправки стикера");
+        }
     });
 });
   }
