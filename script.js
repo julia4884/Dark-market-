@@ -22,7 +22,6 @@ async function updateUI() {
         return;
       }
 
-      // Обновляем роль (если она изменилась на сервере)
       role = data.role;
       localStorage.setItem("role", role);
 
@@ -56,7 +55,6 @@ async function updateUI() {
   }
 }
 
-// Выход
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("role");
@@ -74,7 +72,6 @@ document.getElementById("login-btn")?.addEventListener("click", (e) => {
   e.preventDefault();
   const email = document.getElementById("login-email").value.trim();
   const password = document.getElementById("login-password").value.trim();
-
   if (!email || !password) return alert("Заполните все поля!");
 
   fetch("/login", {
@@ -116,7 +113,6 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
   const username = document.getElementById("register-username").value.trim();
   const email = document.getElementById("register-email").value.trim();
   const password = document.getElementById("register-password").value.trim();
-
   if (!username || !email || !password) return alert("Заполните все поля!");
 
   fetch("/register", {
@@ -135,10 +131,9 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
     .catch(() => alert("Сервер недоступен"));
 });
 
-// === Выход ===
 document.getElementById("logout-btn")?.addEventListener("click", () => logout());
 
-// === Донат PayPal (после оплаты) ===
+// === Донат PayPal ===
 async function handleDonation(orderID, amount = 10) {
   try {
     const res = await fetch("/capture-order", {
@@ -153,9 +148,7 @@ async function handleDonation(orderID, amount = 10) {
 
     if (data.status === "COMPLETED") {
       alert("Спасибо за поддержку!");
-
       await updateUI();
-
       if (role === "developer") {
         window.location.href = "developer.html";
       } else {
@@ -185,24 +178,17 @@ const batMessages = [
 
 function moveBatSmoothly() {
   if (!bat) return;
-
   const x = Math.random() * (window.innerWidth - 80);
   const y = Math.random() * (window.innerHeight - 80);
   bat.style.left = `${x}px`;
   bat.style.top = `${y}px`;
 
-// Иногда делаем паузу подольше (будто отдыхает)
-let nextFlight;
-if (Math.random() < 0.3) { 
-  // 30% шанс подольше отдохнуть
-  nextFlight = Math.random() * 5000 + 5000; // 5–10 секунд
-} else {
-  nextFlight = Math.random() * 4000 + 2000; // 2–6 секунд
-}
-setTimeout(moveBatSmoothly, nextFlight);
-}
+  let nextFlight = Math.random() < 0.3
+    ? Math.random() * 5000 + 5000
+    : Math.random() * 4000 + 2000;
 
-// Первый запуск через 2 секунды
+  setTimeout(moveBatSmoothly, nextFlight);
+}
 setTimeout(moveBatSmoothly, 2000);
 
 bat?.addEventListener("click", () => {
@@ -215,19 +201,21 @@ bat?.addEventListener("click", () => {
   batMessage.style.opacity = 1;
   setTimeout(() => (batMessage.style.display = "none"), 2500);
 });
+
 // === Чат ===
-const chatWindow = document.getElementById("chat-window");
+const chatWindow = document.getElementById("chat-messages");
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
 const chatTabs = document.querySelectorAll(".chat-tab");
-let currentChat = "global"; // вкладка по умолчанию
+let currentChat = "global";
+
 // Переключение вкладок
 chatTabs.forEach((tab) =>
   tab.addEventListener("click", () => {
-    chatTabs.forEach((t) => t.classList.remove("active")); // убираем подсветку
-    tab.classList.add("active"); // подсвечиваем выбранную
-    currentChat = tab.dataset.tab; // меняем текущую вкладку
-    loadChat(); // обновляем чат
+    chatTabs.forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentChat = tab.dataset.tab;
+    loadChat();
   })
 );
 
@@ -261,7 +249,7 @@ async function loadChat() {
   }
 }
 
-// Отправка сообщения
+// Отправка сообщений
 chatForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const content = chatInput.value.trim();
@@ -283,22 +271,7 @@ chatForm?.addEventListener("submit", async (e) => {
   }
 });
 
-// Переключение вкладок
-chatTabs.forEach((tab) =>
-  tab.addEventListener("click", () => {
-    chatTabs.forEach((t) => t.classList.remove("active"));
-    tab.classList.add("active");
-    currentChat = tab.dataset.tab;
-    loadChat();
-  })
-);
-
-// Автообновление каждые 5 секунд
-setInterval(loadChat, 5000);
-loadChat();
-// === Действия с сообщениями в чате ===
-
-// Обработчик кликов в окне чата
+// Действия в чате
 chatWindow.addEventListener("click", async (e) => {
   const target = e.target;
 
@@ -307,133 +280,15 @@ chatWindow.addEventListener("click", async (e) => {
     const username = target.dataset.user;
     chatInput.value = `@${username}, `;
     chatInput.focus();
-    // === Логика панели стикеров ===
-const toggleStickersBtn = document.getElementById("toggle-stickers");
-const stickerPanel = document.getElementById("sticker-panel");
-const stickers = document.querySelectorAll("#stickers .sticker");
-
-// Открыть/закрыть панель
-toggleStickersBtn.addEventListener("click", () => {
-    if (stickerPanel.style.display === "none" || !stickerPanel.style.display) {
-        stickerPanel.style.display = "block";
-    } else {
-        stickerPanel.style.display = "none";
-    }
-});
-
-// Клик по стикеру = вставка в чат
-stickers.forEach(sticker => {
-    sticker.addEventListener("click", () => {
-        const stickerTag = `[sticker:${sticker.src}]`;
-        chatInput.value += " " + stickerTag; 
-        chatInput.focus();
-      // Автоматическая отправка стикера
-        try {
-            await fetch(`/chat/${currentChat}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ content: stickerTag }),
-            });
-            loadChat(); // обновим чат после отправки
-        } catch {
-            alert("Ошибка отправки стикера");
-        }
-    });
-  // === Автоматическая отправка сообщений и автообновление чата ===
-chatForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const content = chatInput.value.trim();
-    if (!content) return;
-
-    try {
-        await fetch(`/chat/${currentChat}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            body: JSON.stringify({ content }),
-        });
-        chatInput.value = ""; // очищаем поле после отправки
-        loadChat(); // обновляем чат
-    } catch {
-        alert("Ошибка отправки сообщения");
-    }
-});
-
-// Автообновление чата каждые 5 секунд
-setInterval(loadChat, 5000);
-  // === Загрузка стикеров при старте ===
-async function loadStickers() {
-    try {
-        const res = await fetch('/stickers');
-        const stickers = await res.json();
-
-        const stickerPanel = document.querySelector('#sticker-panel'); 
-        stickerPanel.innerHTML = ''; // очищаем, чтобы не было дублей
-
-        stickers.forEach(sticker => {
-            const img = document.createElement('img');
-            img.src = sticker.url;
-            img.alt = sticker.name;
-            img.classList.add('sticker');
-            stickerPanel.appendChild(img);
-
-            // Клик = вставка в чат
-            img.addEventListener('click', () => {
-                const stickerTag = `[sticker:${sticker.url}]`;
-                chatInput.value += " " + stickerTag;
-                chatInput.focus();
-            });
-        });
-    } catch (err) {
-        console.error("Ошибка загрузки стикеров:", err);
-    }
-}
-  loadStickers();
-// === Отправка стикера как сообщения ===
-stickers.forEach(sticker => {
-    sticker.addEventListener("click", async () => {
-        const stickerTag = `[sticker:${sticker.src}]`;
-        try {
-            await fetch(`/chat/${currentChat}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                },
-                body: JSON.stringify({ content: stickerTag })
-            });
-            loadChat(); // обновляем чат после отправки
-        } catch {
-            alert("Ошибка отправки стикера");
-        }
-    });
-  // === Блокировка чата для неавторизованных ===
-document.addEventListener("DOMContentLoaded", () => {
-  if (!localStorage.getItem("token")) {
-    const chatInput = document.getElementById("chat-input");
-    const chatForm = document.getElementById("chat-form");
-    const submitBtn = chatForm.querySelector("button[type=submit]");
-
-    chatInput.disabled = true;
-    submitBtn.disabled = true;
-    chatInput.placeholder = "Войдите, чтобы отправлять сообщения";
   }
-});
-}
+
   // Личка
   if (target.classList.contains("pm-btn")) {
     const username = target.dataset.user;
     currentChat = "private";
     chatTabs.forEach((t) => t.classList.remove("active"));
     document.querySelector('[data-tab="private"]').classList.add("active");
-
     chatInput.placeholder = `Сообщение для ${username}...`;
-    chatInput.focus();
     chatInput.dataset.receiver = username;
     loadChat();
   }
@@ -457,6 +312,57 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// Стикеры
+async function loadStickers() {
+  try {
+    const res = await fetch("/stickers");
+    const stickers = await res.json();
+    const stickerPanel = document.getElementById("sticker-panel");
+    stickerPanel.innerHTML = "";
+
+    stickers.forEach((sticker) => {
+      const img = document.createElement("img");
+      img.src = sticker.url;
+      img.alt = sticker.name;
+      img.classList.add("sticker");
+      stickerPanel.appendChild(img);
+
+      img.addEventListener("click", async () => {
+        const stickerTag = `[sticker:${sticker.url}]`;
+        try {
+          await fetch(`/chat/${currentChat}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ content: stickerTag }),
+          });
+          loadChat();
+        } catch {
+          alert("Ошибка отправки стикера");
+        }
+      });
+    });
+  } catch (err) {
+    console.error("Ошибка загрузки стикеров:", err);
+  }
+}
+loadStickers();
+
+// Автообновление чата
+setInterval(loadChat, 5000);
+loadChat();
+
+// Блокировка чата для гостей
+document.addEventListener("DOMContentLoaded", () => {
+  if (!localStorage.getItem("token")) {
+    chatInput.disabled = true;
+    chatForm.querySelector("button[type=submit]").disabled = true;
+    chatInput.placeholder = "Войдите, чтобы отправлять сообщения";
+  }
+});
+
 // === Кошка 🐈‍⬛ ===
 const catWidget = document.getElementById("cat-widget");
 const contactFormContainer = document.getElementById("contact-form-container");
@@ -477,7 +383,6 @@ contactForm?.addEventListener("submit", (e) => {
   e.preventDefault();
   const email = document.getElementById("contact-email").value.trim();
   const message = document.getElementById("contact-message").value.trim();
-
   if (!email || !message) return alert("Заполните все поля!");
 
   fetch("/contact", {
