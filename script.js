@@ -287,6 +287,50 @@ chatTabs.forEach((tab) =>
 // Автообновление каждые 5 секунд
 setInterval(loadChat, 5000);
 loadChat();
+// === Действия с сообщениями в чате ===
+
+// Обработчик кликов в окне чата
+chatWindow.addEventListener("click", async (e) => {
+  const target = e.target;
+
+  // Ответить
+  if (target.classList.contains("reply-btn")) {
+    const username = target.dataset.user;
+    chatInput.value = `@${username}, `;
+    chatInput.focus();
+  }
+
+  // Личка
+  if (target.classList.contains("pm-btn")) {
+    const username = target.dataset.user;
+    currentChat = "private";
+    chatTabs.forEach((t) => t.classList.remove("active"));
+    document.querySelector('[data-tab="private"]').classList.add("active");
+
+    chatInput.placeholder = `Сообщение для ${username}...`;
+    chatInput.focus();
+    chatInput.dataset.receiver = username;
+    loadChat();
+  }
+
+  // Пожаловаться
+  if (target.classList.contains("report-btn")) {
+    const msgId = target.dataset.id;
+    try {
+      await fetch(`/report`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ messageId: msgId }),
+      });
+      alert("Жалоба отправлена администратору.");
+    } catch {
+      alert("Ошибка отправки жалобы");
+    }
+  }
+});
 
 // === Кошка 🐈‍⬛ ===
 const catWidget = document.getElementById("cat-widget");
