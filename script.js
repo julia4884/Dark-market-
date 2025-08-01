@@ -215,6 +215,78 @@ bat?.addEventListener("click", () => {
   batMessage.style.opacity = 1;
   setTimeout(() => (batMessage.style.display = "none"), 2500);
 });
+// === Чат ===
+const chatWindow = document.getElementById("chat-window");
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const chatTabs = document.querySelectorAll(".chat-tab");
+let currentChat = "global"; // вкладка по умолчанию
+
+// Обновление чата
+async function loadChat() {
+  try {
+    const res = await fetch(`/chat/${currentChat}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+    });
+    const messages = await res.json();
+    chatWindow.innerHTML = messages
+      .map(
+        (msg) => `
+        <div class="chat-message">
+          <span class="chat-username ${
+            msg.role === "admin" ? "admin" :
+            msg.role === "developer" ? "developer" : "user"
+          }">${msg.username}</span>:
+          <span>${msg.content}</span>
+          <div class="chat-actions">
+            <button class="reply-btn" data-user="${msg.username}">Ответить</button>
+            <button class="pm-btn" data-user="${msg.username}">Личка</button>
+            <button class="report-btn" data-id="${msg.id}">Пожаловаться</button>
+          </div>
+        </div>
+      `
+      )
+      .join("");
+  } catch {
+    chatWindow.innerHTML = "<p>Не удалось загрузить сообщения.</p>";
+  }
+}
+
+// Отправка сообщения
+chatForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const content = chatInput.value.trim();
+  if (!content) return;
+
+  try {
+    await fetch(`/chat/${currentChat}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ content }),
+    });
+    chatInput.value = "";
+    loadChat();
+  } catch {
+    alert("Ошибка отправки сообщения");
+  }
+});
+
+// Переключение вкладок
+chatTabs.forEach((tab) =>
+  tab.addEventListener("click", () => {
+    chatTabs.forEach((t) => t.classList.remove("active"));
+    tab.classList.add("active");
+    currentChat = tab.dataset.tab;
+    loadChat();
+  })
+);
+
+// Автообновление каждые 5 секунд
+setInterval(loadChat, 5000);
+loadChat();
 
 // === Кошка 🐈‍⬛ ===
 const catWidget = document.getElementById("cat-widget");
