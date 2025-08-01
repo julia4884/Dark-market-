@@ -46,12 +46,20 @@ document.addEventListener("DOMContentLoaded", () => {
       <!-- Список файлов -->
       <h3>Ваши загруженные файлы</h3>
       <ul id="file-list"></ul>
-      <!-- Управление сообщениями кошки и летучей мыши -->
-<h3>Сообщения для кошки 🐱 и летучей мыши 🦇</h3>
-<form id="message-form">
-  <select id="message-type">
-    <option value="cat">Кошка 🐱</option>
-    <option value="bat">Летучая мышь 🦇</option>
+      <!-- Панель сообщений кошки и мыши -->
+<div id="messages-panel">
+  <div class="tabs">
+    <button class="tab-btn active" data-type="cat">🐱 Кошка</button>
+    <button class="tab-btn" data-type="bat">🦇 Мышь</button>
+  </div>
+  
+  <div class="messages-window" id="messages-window"></div>
+  
+  <form id="chat-form">
+    <input type="text" id="chat-input" placeholder="Введите сообщение..." required>
+    <button type="submit">Отправить</button>
+  </form>
+</div>
   </select>
   <input type="text" id="message-content" placeholder="Текст сообщения..." required>
   <button type="submit">Добавить сообщение</button>
