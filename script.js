@@ -333,6 +333,30 @@ stickers.forEach(sticker => {
             alert("Ошибка отправки стикера");
         }
     });
+  // === Автоматическая отправка сообщений и автообновление чата ===
+chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const content = chatInput.value.trim();
+    if (!content) return;
+
+    try {
+        await fetch(`/chat/${currentChat}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ content }),
+        });
+        chatInput.value = ""; // очищаем поле после отправки
+        loadChat(); // обновляем чат
+    } catch {
+        alert("Ошибка отправки сообщения");
+    }
+});
+
+// Автообновление чата каждые 5 секунд
+setInterval(loadChat, 5000);
 });
   }
 
