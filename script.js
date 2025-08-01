@@ -226,16 +226,13 @@ async function loadChat() {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     const messages = await res.json();
-    chatWindow.innerHTML = messages
-      .map(
-        (msg) => `
-        <div class="chat-message">
-          <span class="chat-username ${
-            msg.role === "admin" ? "admin" :
-            msg.role === "developer" ? "developer" : "user"
-          }">${msg.username}</span>:
-          <span>${msg.content}</span>
-          <div class="chat-actions">
+    <span>
+  ${
+    msg.content.startsWith("sticker:")
+      ? `<img src="stickers/${msg.content.replace('sticker:', '')}" alt="sticker" class="chat-sticker">`
+      : msg.content
+  }
+</span>
             <button class="reply-btn" data-user="${msg.username}">Ответить</button>
             <button class="pm-btn" data-user="${msg.username}">Личка</button>
             <button class="report-btn" data-id="${msg.id}">Пожаловаться</button>
@@ -252,7 +249,13 @@ async function loadChat() {
 // Отправка сообщений
 chatForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const content = chatInput.value.trim();
+  const <span>
+  ${
+    msg.content.startsWith("sticker:")
+      ? `<img src="stickers/${msg.content.replace('sticker:', '')}" alt="sticker" class="chat-sticker">`
+      : msg.content
+  }
+</span>content = chatInput.value.trim();
   if (!content) return;
 
   try {
