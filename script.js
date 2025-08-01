@@ -20,16 +20,16 @@ function updateUI() {
           return;
         }
         const profileInfo = document.getElementById("profile-info");
-if (profileInfo) {
-  profileInfo.innerHTML = `
-    <div>
-      <img src="${data.avatar}" alt="avatar" class="avatar">
-      <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
-      <p>${data.about || "Нет описания"}</p>
-      ${data.role === "admin" ? '<a href="admin.html" class="admin-btn">Перейти в админку</a>' : ""}
-    </div>
-  `;
-}
+        if (profileInfo) {
+          profileInfo.innerHTML = `
+            <div>
+              <img src="${data.avatar}" alt="avatar" class="avatar">
+              <p><strong>${data.username}</strong> ${data.role === "admin" ? "👑" : ""}</p>
+              <p>${data.about || "Нет описания"}</p>
+              ${data.role === "admin" ? '<a href="admin.html" class="admin-btn">Перейти в админку</a>' : ""}
+            </div>
+          `;
+        }
       })
       .catch(() => logout());
   } else {
@@ -89,31 +89,6 @@ document.getElementById("login-btn")?.addEventListener("click", (e) => {
         } else {
           alert("Вход выполнен успешно!");
         }
-      } else {
-        alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
-      }
-    })
-    .catch(() => alert("Сервер недоступен"));
-});
-    .then((res) => res.json())
-    .then((data) => {
-  if (data.token) {
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.role);
-    token = data.token;
-    role = data.role;
-    updateUI();
-
-    if (data.role === "admin") {
-      alert("Добро пожаловать, Администратор 👑");
-      window.location.href = "admin.html";
-    } else {
-      alert("Вход выполнен успешно!");
-    }
-  } else {
-    alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
-  }
-})
       } else {
         alert("Ошибка входа: " + (data.error || "Попробуйте снова"));
       }
@@ -237,26 +212,20 @@ function loadImagesGallery() {
       <p>${img.desc}</p>
     </div>
   `).join("");
-   }
-// === Запуск ===
-document.addEventListener("DOMContentLoaded", () => {
-  updateUI();
-  // === Панель сообщений кошки и мыши ===
-let currentType = "cat";
+}
 
-function loadMessages(type) {
-  fetch(`/admin/messages`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    // === Панель сообщений кошки и мыши ===
+// === Панель сообщений кошки и мыши ===
 let currentType = "cat"; // стартовая вкладка
 
 function loadMessages(type) {
+  const windowEl = document.getElementById("messages-window");
+  if (!windowEl) return;
+
   fetch(`/admin/messages`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   })
     .then(res => res.json())
     .then(data => {
-      const windowEl = document.getElementById("messages-window");
       windowEl.innerHTML = "";
 
       data
@@ -271,39 +240,10 @@ function loadMessages(type) {
           `;
           windowEl.appendChild(div);
         });
-
-      // Редактирование
-      document.querySelectorAll(".edit-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.id;
-          const newContent = prompt("Введите новый текст:");
-          if (!newContent) return;
-          fetch(`/admin/messages/${id}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            body: JSON.stringify({ content: newContent }),
-          }).then(() => loadMessages(currentType));
-        });
-      });
-
-      // Удаление
-      document.querySelectorAll(".delete-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.id;
-          if (!confirm("Удалить сообщение?")) return;
-          fetch(`/admin/messages/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-          }).then(() => loadMessages(currentType));
-        });
-      });
     });
 }
 
-// Кнопки-вкладки
+// === События вкладок ===
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -313,10 +253,11 @@ document.querySelectorAll(".tab-btn").forEach(btn => {
   });
 });
 
-// Отправка нового сообщения
-document.getElementById("chat-form").addEventListener("submit", e => {
+// === Отправка нового сообщения ===
+document.getElementById("chat-form")?.addEventListener("submit", e => {
   e.preventDefault();
-  const content = document.getElementById("chat-input").value.trim();
+  const input = document.getElementById("chat-input");
+  const content = input.value.trim();
   if (!content) return;
 
   fetch(`/admin/messages`, {
@@ -328,67 +269,13 @@ document.getElementById("chat-form").addEventListener("submit", e => {
     body: JSON.stringify({ type: currentType, content }),
   })
     .then(() => {
-      document.getElementById("chat-input").value = "";
-      loadMessages(currentType);
-    });
-});
-
-// Загружаем стартовые сообщения
-loadMessages(currentType);
-  })
-    .then(res => res.json())
-    .then(data => {
-      const windowEl = document.getElementById("messages-window");
-      windowEl.innerHTML = "";
-      data
-        .filter(msg => msg.type === type)
-        .forEach(msg => {
-          const div = document.createElement("div");
-          div.classList.add("message-item");
-          div.innerHTML = `
-            <span>${msg.content}</span>
-            <button class="edit-btn" data-id="${msg.id}">✏️</button>
-            <button class="delete-btn" data-id="${msg.id}">🗑️</button>
-          `;
-          windowEl.appendChild(div);
-        });
-    });
-}
-
-// Переключение вкладок
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    currentType = btn.dataset.type;
-    loadMessages(currentType);
-  });
-});
-
-// Добавление сообщения
-document.getElementById("chat-form").addEventListener("submit", e => {
-  e.preventDefault();
-  const input = document.getElementById("chat-input");
-  const content = input.value.trim();
-  if (!content) return;
-
-  fetch("/admin/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`
-    },
-    body: JSON.stringify({ type: currentType, content })
-  })
-    .then(res => res.json())
-    .then(() => {
       input.value = "";
       loadMessages(currentType);
     });
 });
 
-// Обработчики редактирования и удаления
-document.getElementById("messages-window").addEventListener("click", e => {
+// === Редактирование и удаление ===
+document.getElementById("messages-window")?.addEventListener("click", e => {
   if (e.target.classList.contains("delete-btn")) {
     const id = e.target.dataset.id;
     fetch(`/admin/messages/${id}`, {
@@ -412,7 +299,9 @@ document.getElementById("messages-window").addEventListener("click", e => {
   }
 });
 
-// Загружаем сообщения при открытии страницы
-loadMessages(currentType);
-  loadImagesGallery(); // Запускаем загрузку картинок, если есть блок
+// === Запуск ===
+document.addEventListener("DOMContentLoaded", () => {
+  updateUI();
+  loadImagesGallery();
+  loadMessages(currentType);
 });
