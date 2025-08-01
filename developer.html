@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Кабинет разработчика 💎 | Dark Market Ultra</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="site-title">☾ Dark Market Ultra ✦</h1>
+    <nav>
+      <a href="home.html">Главная</a>
+      <a href="index.html" id="logout-btn">Выход</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="developer-panel">
+      <h2>Разработчик 💎</h2>
+      <div id="profile-info"></div>
+
+      <!-- Раздел загрузки файлов -->
+      <h3>Загрузка файлов</h3>
+      <form id="file-form">
+        <input type="file" id="file-upload" required>
+        <button type="submit">Загрузить</button>
+      </form>
+
+      <h3>Ваши загруженные файлы</h3>
+      <ul id="file-list"></ul>
+    </section>
+  </main>
+
+  <!-- Летучая мышь -->
+  <div id="flying-bat">🦇</div>
+  <div id="bat-message"></div>
+
+  <!-- Кошка -->
+  <div id="cat-widget">🐈‍⬛</div>
+  <div id="contact-form-container" style="display:none;">
+    <form id="contact-form">
+      <h3>Напиши админу</h3>
+      <input type="email" id="contact-email" placeholder="Ваш Email" required>
+      <textarea id="contact-message" placeholder="Ваше сообщение..." required></textarea>
+      <button type="submit">Отправить</button>
+      <button type="button" id="close-contact">Закрыть</button>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Сначала войдите в аккаунт!");
+      window.location.href = "index.html";
+      return;
+    }
+
+    try {
+      // Загружаем профиль
+      const res = await fetch("/profile", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const user = await res.json();
+      if (!user || user.error) {
+        alert("Ошибка загрузки профиля");
+        return;
+      }
+
+      document.getElementById("profile-info").innerHTML = `
+        <div>
+          <img src="${user.avatar}" alt="avatar" class="avatar">
+          <p><strong>${user.username}</strong></p>
+          <p>${user.about || "Нет описания"}</p>
+        </div>
+      `;
+
+      // Проверяем VIP доступ
+      const vipRes = await fetch("/check-vip", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const vip = await vipRes.json();
+
+      if (!vip.vip || vip.amount < 10) {
+        alert("Доступ только для разработчиков (донат от 10€)");
+        window.location.href = "cabinet.html";
+        return;
+      }
+
+      loadFiles();
+    } catch {
+      alert("Ошибка соединения с сервером");
+    }
+
+    // === Загрузка файла ===
+    document.getElementById("file-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("file-upload");
+      if (!fileInput.files.length) return alert("Выберите файл!");
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      try {
+        const res = await fetch("/upload-file?type=developer", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Файл загружен!");
+          loadFiles();
+        } else {
+          alert("Ошибка загрузки: " + (data.error || "неизвестная ошибка"));
+        }
+      } catch {
+        alert("Сервер недоступен");
+      }
+    });
+
+    // === Список файлов ===
+    async function loadFiles() {
+      try {
+        const res = await fetch("/list-files", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const files = await res.json();
+        const list = document.getElementById("file-list");
+        if (files.length === 0) {
+          list.innerHTML = "<li>Файлов пока нет.</li>";
+        } else {
+          list.innerHTML = files
+            .map(f => `<li><a href="${f.url}" target="_blank">${f.name}</a></li>`)
+            .join("");
+        }
+      } catch {
+        console.log("Не удалось загрузить список файлов");
+      }
+    }
+  });
+  </script>
+</body>
+</html>
