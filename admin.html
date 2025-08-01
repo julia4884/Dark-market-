@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   </script>
   <header class="site-header">
-    <h1 class="site-title">☾ Dark Market Ultra ✦ — Админка 👑</h1>
+    <h1 class="site-title">☾ Dark Market Ultra ✦ — 👑 Админ 👑</h1>
     <nav>
       <a href="home.html">Главная</a>
       <a href="index.html">Выход</a>
@@ -46,6 +46,18 @@ document.addEventListener("DOMContentLoaded", () => {
       <!-- Список файлов -->
       <h3>Ваши загруженные файлы</h3>
       <ul id="file-list"></ul>
+      <!-- Управление сообщениями кошки и летучей мыши -->
+<h3>Сообщения для кошки 🐱 и летучей мыши 🦇</h3>
+<form id="message-form">
+  <select id="message-type">
+    <option value="cat">Кошка 🐱</option>
+    <option value="bat">Летучая мышь 🦇</option>
+  </select>
+  <input type="text" id="message-content" placeholder="Текст сообщения..." required>
+  <button type="submit">Добавить сообщение</button>
+</form>
+
+<ul id="messages-list"></ul>
     </section>
   </main>
 
@@ -66,6 +78,69 @@ document.addEventListener("DOMContentLoaded", () => {
   </div>
 
   <script src="script.js"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  if (!token || role !== "admin") {
+    alert("Доступ запрещён! Войдите как администратор.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  const messagesList = document.getElementById("messages-list");
+  const messageForm = document.getElementById("message-form");
+
+  // Загружаем список сообщений
+  function loadMessages() {
+    fetch("/admin/messages", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        messagesList.innerHTML = "";
+        data.forEach((msg) => {
+          const li = document.createElement("li");
+          li.textContent = `${msg.type === "cat" ? "🐱" : "🦇"} ${msg.content}`;
+          messagesList.appendChild(li);
+        });
+      })
+      .catch((err) => console.error("Ошибка загрузки сообщений:", err));
+  }
+
+  // Обработка формы добавления сообщения
+  messageForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const type = document.getElementById("message-type").value;
+    const content = document.getElementById("message-content").value.trim();
+
+    if (!content) return alert("Введите текст сообщения!");
+
+    fetch("/admin/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ type, content }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alert("Сообщение добавлено!");
+          document.getElementById("message-content").value = "";
+          loadMessages();
+        } else {
+          alert("Ошибка: " + (data.error || "Попробуйте снова"));
+        }
+      })
+      .catch(() => alert("Сервер недоступен"));
+  });
+
+  loadMessages();
+});
+  </script>
   <script>
     <script>
 document.addEventListener("DOMContentLoaded", () => {
