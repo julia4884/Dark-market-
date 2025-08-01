@@ -384,6 +384,7 @@ async function loadStickers() {
         console.error("Ошибка загрузки стикеров:", err);
     }
 }
+  loadStickers();
 // === Отправка стикера как сообщения ===
 stickers.forEach(sticker => {
     sticker.addEventListener("click", async () => {
