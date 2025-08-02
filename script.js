@@ -1,5 +1,9 @@
-alert("✅ Скрипт script.js подключён и работает!");
+// === Глобальная настройка API ===
+const API_URL = "https://dark-market-backend.onrender.com"; // замени на свой бекенд на Render
+
 document.addEventListener("DOMContentLoaded", () => {
+  alert("✅ Скрипт загружен и работает!");
+
   // === Авторизация ===
   const loginBtn = document.getElementById("login-btn");
   const registerBtn = document.getElementById("register-btn");
@@ -48,7 +52,7 @@ async function updateUI() {
     if (logoutSection) logoutSection.style.display = "block";
 
     try {
-      const res = await fetch("/profile", {
+      const res = await fetch(`${API_URL}/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -111,7 +115,7 @@ document.getElementById("login-btn")?.addEventListener("click", (e) => {
   const password = document.getElementById("login-password").value.trim();
   if (!email || !password) return alert("Заполните все поля!");
 
-  fetch("/login", {
+  fetch(`${API_URL}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -152,7 +156,7 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
   const password = document.getElementById("register-password").value.trim();
   if (!username || !email || !password) return alert("Заполните все поля!");
 
-  fetch("/register", {
+  fetch(`${API_URL}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
@@ -167,211 +171,97 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
     })
     .catch(() => alert("Сервер недоступен"));
 });
+// === Чат ===
+let currentChat = "global";
 
-// === Донат PayPal ===
-async function handleDonation(orderID, amount = 10) {
+async function loadChat() {
+  if (!token) return;
+
   try {
-    const res = await fetch("/capture-order", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({ orderID, days: 30, amount }),
+    const res = await fetch(`${API_URL}/chat/${currentChat}`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
+    const messagesDiv = document.getElementById("chat-messages");
 
-    if (data.status === "COMPLETED") {
-      alert("Спасибо за поддержку!");
-      await updateUI();
-      if (role === "developer") {
-        window.location.href = "developer.html";
-      } else {
-        window.location.reload();
-      }
-    } else {
-      alert("Оплата не завершена.");
+    if (messagesDiv) {
+      messagesDiv.innerHTML = data
+        .map(
+          (msg) => `
+          <div class="chat-msg">
+            <strong>${msg.username}</strong>: ${msg.content}
+          </div>
+        `
+        )
+        .join("");
     }
-  } catch {
-    alert("Ошибка при подтверждении платежа");
+  } catch (err) {
+    console.error("Ошибка загрузки чата:", err);
   }
 }
 
-// === Летучая мышь 🦇 ===
-const bat = document.getElementById("flying-bat");
-const batMessage = document.getElementById("bat-message");
-
-const batMessages = [
-  "Добро пожаловать в тёмный мир!",
-  "Я тут просто пролетаю 🦇",
-  "Осторожно... я наблюдаю за тобой 👀",
-  "Ты сегодня отлично выглядишь!",
-  "Не забудь проверить новые разделы!",
-  "Псс... там скидки в магазине!",
-  "Если боишься — жми на кошку 🐈‍⬛",
-];
-
-function moveBatSmoothly() {
-  if (!bat) return;
-  const x = Math.random() * (window.innerWidth - 80);
-  const y = Math.random() * (window.innerHeight - 80);
-  bat.style.left = `${x}px`;
-  bat.style.top = `${y}px`;
-
-  let nextFlight = Math.random() < 0.3
-    ? Math.random() * 5000 + 5000
-    : Math.random() * 4000 + 2000;
-
-  setTimeout(moveBatSmoothly, nextFlight);
-}
-setTimeout(moveBatSmoothly, 2000);
-
-bat?.addEventListener("click", () => {
-  if (!batMessage) return;
-  const msg = batMessages[Math.floor(Math.random() * batMessages.length)];
-  batMessage.textContent = msg;
-  batMessage.style.left = bat.style.left;
-  batMessage.style.top = `calc(${bat.style.top} - 40px)`;
-  batMessage.style.display = "block";
-  batMessage.style.opacity = 1;
-  setTimeout(() => (batMessage.style.display = "none"), 2500);
-});
-
-// === Чат ===
-const chatWindow = document.getElementById("chat-messages");
-const chatForm = document.getElementById("chat-form");
-const chatInput = document.getElementById("chat-input");
-const chatTabs = document.querySelectorAll(".chat-tab");
-let currentChat = "global";
-
-// Переключение вкладок
-chatTabs.forEach((tab) =>
+document.querySelectorAll(".chat-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
-    chatTabs.forEach((t) => t.classList.remove("active"));
+    document.querySelectorAll(".chat-tab").forEach((t) =>
+      t.classList.remove("active")
+    );
     tab.classList.add("active");
     currentChat = tab.dataset.tab;
     loadChat();
-  })
-);
+  });
+});
 
-// Обновление чата
-async function loadChat() {
-  try {
-    const res = await fetch(`/chat/${currentChat}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    });
-    const messages = await res.json();
-
-    chatWindow.innerHTML = messages
-      .map(
-        (msg) => `
-        <div class="chat-message">
-          <strong>${msg.username}:</strong>
-          <span>
-            ${
-              msg.content.startsWith("sticker:")
-                ? `<img src="stickers/${msg.content.replace('sticker:', '')}" alt="sticker" class="chat-sticker">`
-                : msg.content
-            }
-          </span>
-          <button class="reply-btn" data-user="${msg.username}">Ответить</button>
-          <button class="pm-btn" data-user="${msg.username}">Личка</button>
-          <button class="report-btn" data-id="${msg.id}">Пожаловаться</button>
-        </div>
-      `
-      )
-      .join("");
-  } catch {
-    chatWindow.innerHTML = "<p>Не удалось загрузить сообщения.</p>";
-  }
-}
-
-// Отправка сообщений
-chatForm?.addEventListener("submit", async (e) => {
+document.getElementById("chat-form")?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const content = chatInput.value.trim();
+  if (!token) return alert("Войдите, чтобы писать в чат");
+
+  const input = document.getElementById("chat-input");
+  const content = input.value.trim();
   if (!content) return;
 
   try {
-    await fetch(`/chat/${currentChat}`, {
+    await fetch(`${API_URL}/chat/${currentChat}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ content }),
     });
-    chatInput.value = "";
+    input.value = "";
     loadChat();
   } catch {
     alert("Ошибка отправки сообщения");
   }
 });
 
-// Действия в чате
-chatWindow.addEventListener("click", async (e) => {
-  const target = e.target;
-
-  // Ответить
-  if (target.classList.contains("reply-btn")) {
-    const username = target.dataset.user;
-    chatInput.value = `@${username}, `;
-    chatInput.focus();
-  }
-
-  // Личка
-  if (target.classList.contains("pm-btn")) {
-    const username = target.dataset.user;
-    currentChat = "private";
-    chatTabs.forEach((t) => t.classList.remove("active"));
-    document.querySelector('[data-tab="private"]').classList.add("active");
-    chatInput.placeholder = `Сообщение для ${username}...`;
-    chatInput.dataset.receiver = username;
-    loadChat();
-  }
-
-  // Пожаловаться
-  if (target.classList.contains("report-btn")) {
-    const msgId = target.dataset.id;
-    try {
-      await fetch(`/report`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ messageId: msgId }),
-      });
-      alert("Жалоба отправлена администратору.");
-    } catch {
-      alert("Ошибка отправки жалобы");
-    }
-  }
-});
-
-// Стикеры
+// === Стикеры ===
 async function loadStickers() {
   try {
-    const res = await fetch("/stickers");
+    const res = await fetch(`${API_URL}/stickers`);
     const stickers = await res.json();
-    const stickerPanel = document.getElementById("sticker-panel");
-    stickerPanel.innerHTML = "";
+    const panel = document.getElementById("sticker-panel");
+    if (!panel) return;
 
-    stickers.forEach((sticker) => {
-      const img = document.createElement("img");
-      img.src = sticker.url;
-      img.alt = sticker.name;
-      img.classList.add("sticker");
-      stickerPanel.appendChild(img);
+    panel.innerHTML = stickers
+      .map(
+        (sticker) => `
+      <img src="${API_URL}${sticker.url}" alt="sticker" class="sticker-img">
+    `
+      )
+      .join("");
 
+    document.querySelectorAll(".sticker-img").forEach((img) => {
       img.addEventListener("click", async () => {
-        const stickerTag = `[sticker:${sticker.url}]`;
+        if (!token) return alert("Войдите, чтобы отправлять стикеры");
+        const stickerTag = `<img src="${img.src}" class="chat-sticker">`;
+
         try {
-        await fetch(`/chat/${currentChat}`, {
+          await fetch(`${API_URL}/chat/${currentChat}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ content: stickerTag }),
           });
@@ -390,15 +280,6 @@ loadStickers();
 // Автообновление чата
 setInterval(loadChat, 5000);
 loadChat();
-
-// Блокировка чата для гостей
-document.addEventListener("DOMContentLoaded", () => {
-  if (!localStorage.getItem("token")) {
-    chatInput.disabled = true;
-    chatForm.querySelector("button[type=submit]").disabled = true;
-    chatInput.placeholder = "Войдите, чтобы отправлять сообщения";
-  }
-});
 
 // === Кошка 🐈‍⬛ ===
 const catWidget = document.getElementById("cat-widget");
@@ -422,7 +303,7 @@ contactForm?.addEventListener("submit", (e) => {
   const message = document.getElementById("contact-message").value.trim();
   if (!email || !message) return alert("Заполните все поля!");
 
-  fetch("/contact", {
+  fetch(`${API_URL}/contact`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, message }),
@@ -437,10 +318,10 @@ contactForm?.addEventListener("submit", (e) => {
 
 // === Галерея картинок ===
 const imagesGallery = [
-  { src: "images/pic1.jpg", title: "Тёмный лес", desc: "Мистическая тьма и свет луны." },
-  { src: "images/pic2.jpg", title: "Космос", desc: "Неоновая галактика 🌌" },
-  { src: "images/pic3.jpg", title: "Ведьма", desc: "Силуэты магии в ночи." },
-  { src: "images/pic4.jpg", title: "Замок", desc: "Древние руины на утёсе." }
+  { id: 1, src: "images/pic1.jpg", title: "Тёмный лес", desc: "Мистическая тьма и свет луны." },
+  { id: 2, src: "images/pic2.jpg", title: "Космос", desc: "Неоновая галактика 🌌" },
+  { id: 3, src: "images/pic3.jpg", title: "Ведьма", desc: "Силуэты магии в ночи." },
+  { id: 4, src: "images/pic4.jpg", title: "Замок", desc: "Древние руины на утёсе." }
 ];
 
 async function loadImagesGallery() {
@@ -448,7 +329,7 @@ async function loadImagesGallery() {
   if (!container) return;
 
   container.innerHTML = imagesGallery.map(img => `
-    <div class="card" data-id="${img.id || 1}">
+    <div class="card" data-id="${img.id}">
       <img src="${img.src}" alt="${img.title}">
       <h3>${img.title}</h3>
       <p>${img.desc}</p>
@@ -463,47 +344,37 @@ async function loadImagesGallery() {
     const btn = fileCard.querySelector(".meow-btn");
 
     try {
-      const res = await fetch(`/files/${fileId}/likes`);
+      const res = await fetch(`${API_URL}/files/${fileId}/likes`);
       const data = await res.json();
       likeCount.textContent = data.total || 0;
 
-      const checkRes = await fetch(`/files/${fileId}/liked`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (checkRes.ok) {
-        const checkData = await checkRes.json();
-        if (checkData.liked) {
-          btn.textContent = "👍🏻 Мяук";
+      btn.addEventListener("click", async () => {
+        try {
+          const res = await fetch(`${API_URL}/files/${fileId}/like`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            const res2 = await fetch(`${API_URL}/files/${fileId}/likes`);
+            const countData = await res2.json();
+            likeCount.textContent = countData.total;
+
+            btn.textContent = data.liked ? "👍🏻 Мяук" : "🐾 Мяук";
+          } else {
+            alert("Ошибка: " + (data.error || "Не удалось поставить лайк"));
+          }
+        } catch {
+          alert("Сервер недоступен");
         }
-      }
+      });
     } catch {
       likeCount.textContent = "⚠";
     }
-
-    btn.addEventListener("click", async () => {
-      try {
-        const res = await fetch(`/files/${fileId}/like`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          const res2 = await fetch(`/files/${fileId}/likes`);
-          const countData = await res2.json();
-          likeCount.textContent = countData.total;
-
-          btn.textContent = data.liked ? "👍🏻 Мяук" : "🐾 Мяук";
-        } else {
-          alert("Ошибка: " + (data.error || "Не удалось поставить лайк"));
-        }
-      } catch {
-        alert("Сервер недоступен");
-      }
-    });
   }
 }
 
