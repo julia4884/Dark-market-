@@ -253,7 +253,6 @@ chatTabs.forEach((tab) =>
     loadChat();
   })
 );
-
 // Обновление чата
 async function loadChat() {
   try {
@@ -261,21 +260,30 @@ async function loadChat() {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     const messages = await res.json();
-    <span>
-  ${
-    msg.content.startsWith("sticker:")
-      ? `<img src="stickers/${msg.content.replace('sticker:', '')}" alt="sticker" class="chat-sticker">`
-      : msg.content
-  }
-</span>
-            <button class="reply-btn" data-user="${msg.username}">Ответить</button>
-            <button class="pm-btn" data-user="${msg.username}">Личка</button>
-            <button class="report-btn" data-id="${msg.id}">Пожаловаться</button>
-          </div>
+
+    chatWindow.innerHTML = messages
+      .map(
+        (msg) => `
+        <div class="chat-message">
+          <strong>${msg.username}:</strong>
+          <span>
+            ${
+              msg.content.startsWith("sticker:")
+                ? `<img src="stickers/${msg.content.replace('sticker:', '')}" alt="sticker" class="chat-sticker">`
+                : msg.content
+            }
+          </span>
+          <button class="reply-btn" data-user="${msg.username}">Ответить</button>
+          <button class="pm-btn" data-user="${msg.username}">Личка</button>
+          <button class="report-btn" data-id="${msg.id}">Пожаловаться</button>
         </div>
       `
       )
       .join("");
+  } catch {
+    chatWindow.innerHTML = "<p>Не удалось загрузить сообщения.</p>";
+  }
+}
   } catch {
     chatWindow.innerHTML = "<p>Не удалось загрузить сообщения.</p>";
   }
