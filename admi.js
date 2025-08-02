@@ -53,7 +53,13 @@ try {
       alert("❌ Сервер недоступен");
     }
   });
+// 📸 Клик по аватарке открывает выбор файла
+const avatarImg = document.getElementById("admin-avatar");
+const avatarInput = document.getElementById("avatar-upload");
 
+avatarImg?.addEventListener("click", () => {
+  avatarInput.click();
+});
   // === Загрузка файлов ===
   const fileForm = document.getElementById("file-form");
   fileForm?.addEventListener("submit", async (e) => {
