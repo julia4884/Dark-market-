@@ -394,8 +394,7 @@ function initPayPal() {
       console.error("Ошибка PayPal:", err);
       alert("❌ Не удалось создать заказ PayPal. Проверь сервер.");
     }
-  });
-}
+  }
 // === Запуск всех функций ===
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
