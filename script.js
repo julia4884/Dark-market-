@@ -383,7 +383,6 @@ function initPayPal() {
         throw new Error(data.error || "Ошибка создания заказа");
       }
 
-      // Перенаправление пользователя на PayPal
       const approveLink = data.links.find(link => link.rel === "approve");
       if (approveLink) {
         window.location.href = approveLink.href;
@@ -394,15 +393,18 @@ function initPayPal() {
       console.error("Ошибка PayPal:", err);
       alert("❌ Не удалось создать заказ PayPal. Проверь сервер.");
     }
-  }
+  });
+}
+
 // === Запуск всех функций ===
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
   updateUI();
   loadChat();
   loadStickers();
+  initAuth();
   initCat();
   initBat();
   loadImagesGallery();
   initPayPal();
-});                            
+});
