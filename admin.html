@@ -11,8 +11,8 @@
     const API_URL = "https://dark-market-backend.onrender.com";
 
     document.addEventListener("DOMContentLoaded", () => {
-      const role = localStorage.getItem("role");
       const token = localStorage.getItem("token");
+      const role = localStorage.getItem("role");
 
       if (!token || role !== "admin") {
         alert("Доступ запрещён! Войдите как администратор.");
@@ -89,7 +89,7 @@
           });
           const files = await res.json();
           const list = document.getElementById("file-list");
-          list.innerHTML = files.map(f => 
+          list.innerHTML = files.map(f =>
             `<li><a href="${API_URL}/${f.path}" target="_blank">${f.name}</a></li>`
           ).join("");
         } catch {
