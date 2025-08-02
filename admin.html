@@ -20,20 +20,23 @@
       <h2>👑Админ-панель 👑</h2>
       
       <!-- 🔥 Новый блок профиля -->
-      <div id="profile-header">
-        <p id="user-role"></p>
-        <!-- 🔮 Аватар админа -->
-<img id="admin-avatar" 
-     src="https://dark-market-backend.onrender.com/uploads/avatar/default.png" 
-     alt="Аватар" 
-     style="width:60px;height:60px;border-radius:50%;border:2px solid #fff;display:block;margin:10px auto;">
-        <img id="admin-avatar" class="avatar" alt="Аватар">
-        <form id="nickname-form">
-          <input type="text" id="nickname-input" placeholder="Новый ник">
-          <button type="submit">Изменить</button>
-        </form>
-        <p id="meows-count"></p>
-      </div>
+<div id="profile-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+  <!-- 🔮 Аватар -->
+  <img id="admin-avatar" 
+       src="https://dark-market-backend.onrender.com/uploads/avatar/default.png" 
+       alt="Аватар" 
+       style="width:60px;height:60px;border-radius:50%;border:2px solid #fff;">
+
+  <!-- Ник и роль -->
+  <div>
+    <p id="user-role" style="margin:0; font-weight:bold;"></p>
+    <form id="nickname-form" style="margin-top:5px;">
+      <input type="text" id="nickname-input" placeholder="Новый ник">
+      <button type="submit">Изменить</button>
+    </form>
+    <p id="meows-count" style="margin:5px 0 0;"></p>
+  </div>
+</div>
 
       <div id="admin-info"></div>
 
