@@ -396,9 +396,6 @@ function initPayPal() {
     }
   });
 }
-
-// Запуск PayPal блока после загрузки DOM
-document.addEventListener("DOMContentLoaded", initPayPal);
 // === Запуск всех функций ===
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
@@ -408,4 +405,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initCat();
   initBat();
   loadImagesGallery();
-});                            }
+  initPayPal();
+});                            
