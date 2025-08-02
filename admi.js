@@ -231,4 +231,117 @@ async function deleteMessage(id) {
 
 // Загружаем сообщения сразу при входе
 loadMessages();
+  // === Панель сообщений мышки и кошки ===
+let currentType = "bat"; // по умолчанию мышка
+
+const batTab = document.getElementById("bat-tab");
+const catTab = document.getElementById("cat-tab");
+const messageForm = document.getElementById("message-form");
+const newMessageInput = document.getElementById("new-message-input");
+const messagesList = document.getElementById("messages-list");
+
+// Переключение вкладок
+batTab.addEventListener("click", () => {
+  currentType = "bat";
+  loadMessages();
+});
+catTab.addEventListener("click", () => {
+  currentType = "cat";
+  loadMessages();
+});
+
+// Загрузка сообщений
+async function loadMessages() {
+  try {
+    const res = await fetch(`${API_URL}/messages/${currentType}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    messagesList.innerHTML = data
+      .map(
+        (msg) => `
+        <div class="message">
+          <span>${msg.text}</span>
+          <button class="edit-btn" data-id="${msg.id}">✏️</button>
+          <button class="delete-btn" data-id="${msg.id}">🗑️</button>
+        </div>`
+      )
+      .join("");
+
+    // Обработчики редактирования
+    document.querySelectorAll(".edit-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        const newText = prompt("Введите новый текст:");
+        if (newText) editMessage(id, newText);
+      });
+    });
+
+    // Обработчики удаления
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        deleteMessage(id);
+      });
+    });
+  } catch {
+    messagesList.innerHTML = "<p>Не удалось загрузить сообщения</p>";
+  }
+}
+
+// Добавление нового сообщения
+messageForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = newMessageInput.value.trim();
+  if (!text) return;
+
+  try {
+    await fetch(`${API_URL}/messages/${currentType}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+    newMessageInput.value = "";
+    loadMessages();
+  } catch {
+    alert("Не удалось добавить сообщение");
+  }
+});
+
+// Функции редактирования и удаления
+async function editMessage(id, newText) {
+  try {
+    await fetch(`${API_URL}/messages/${currentType}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ text: newText }),
+    });
+    loadMessages();
+  } catch {
+    alert("Не удалось отредактировать сообщение");
+  }
+}
+
+async function deleteMessage(id) {
+  if (!confirm("Удалить это сообщение?")) return;
+  try {
+    await fetch(`${API_URL}/messages/${currentType}/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    loadMessages();
+  } catch {
+    alert("Не удалось удалить сообщение");
+  }
+}
+
+// Первичная загрузка сообщений
+loadMessages();
 });
