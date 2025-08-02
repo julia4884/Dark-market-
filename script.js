@@ -1,3 +1,4 @@
+alert("✅ Скрипт обновлён и загружен!");
 document.addEventListener("DOMContentLoaded", () => {
   // === Авторизация ===
   const loginBtn = document.getElementById("login-btn");
