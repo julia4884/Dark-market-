@@ -5,18 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("role");
 
   if (!token || role !== "admin") {
-    alert("❌ Доступ запрещён!");
+    alert("❌ Доступ запрещён! Войдите как администратор.");
     window.location.href = "index.html";
     return;
-  }
-
-  // === Блок информации для админа ===
-  const adminInfo = document.getElementById("admin-info");
-  if (adminInfo) {
-    adminInfo.innerHTML = `
-      <p><strong>Ваш Email:</strong> juliaangelss26@gmail.com 👑</p>
-      <p>У вас полный доступ к панели управления.</p>
-    `;
   }
 
   // === Загрузка аватара ===
@@ -40,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("✅ Аватар обновлён!");
         location.reload();
       } else {
-        alert("Ошибка: " + (data.error || "не удалось загрузить"));
+        alert("Ошибка: " + (data.error || "Не удалось загрузить"));
       }
     } catch {
       alert("❌ Сервер недоступен");
@@ -68,14 +59,14 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("✅ Файл загружен!");
         loadFiles();
       } else {
-        alert("Ошибка: " + (data.error || "не удалось загрузить"));
+        alert("Ошибка: " + (data.error || "Не удалось загрузить"));
       }
     } catch {
       alert("❌ Сервер недоступен");
     }
   });
 
-  // === Список файлов ===
+  // === Загрузка списка файлов ===
   async function loadFiles() {
     try {
       const res = await fetch(`${API_URL}/admin/files`, {
@@ -83,63 +74,50 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const files = await res.json();
       const list = document.getElementById("file-list");
-      list.innerHTML = files.length
-        ? files.map(f => `<li><a href="${API_URL}/${f.path}" target="_blank">${f.name}</a></li>`).join("")
-        : "<li>Нет загруженных файлов.</li>";
+      if (!files.length) {
+        list.innerHTML = "<li>Файлов пока нет.</li>";
+      } else {
+        list.innerHTML = files
+          .map(f => `<li><a href="${API_URL}/${f.path}" target="_blank">${f.name}</a></li>`)
+          .join("");
+      }
     } catch {
       console.log("Не удалось загрузить список файлов");
     }
   }
+
   loadFiles();
 
-  // === Кошка 🐈‍⬛ ===
-  const catWidget = document.getElementById("cat-widget");
-  const contactFormContainer = document.getElementById("contact-form-container");
-  const contactForm = document.getElementById("contact-form");
-  const closeContact = document.getElementById("close-contact");
+  // === Панель управления кошкой и мышкой ===
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-input");
+  const messagesWindow = document.getElementById("messages-window");
 
-  catWidget?.addEventListener("click", () => {
-    contactFormContainer.style.display =
-      contactFormContainer.style.display === "block" ? "none" : "block";
-  });
-
-  closeContact?.addEventListener("click", () => {
-    contactFormContainer.style.display = "none";
-  });
-
-  contactForm?.addEventListener("submit", async (e) => {
+  chatForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("contact-email").value.trim();
-    const message = document.getElementById("contact-message").value.trim();
-    if (!email || !message) return alert("Заполните все поля!");
+    const message = chatInput.value.trim();
+    if (!message) return;
 
     try {
-      const res = await fetch(`${API_URL}/contact`, {
+      const res = await fetch(`${API_URL}/admin/messages`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, message }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message }),
       });
       const data = await res.json();
-      alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
-      if (data.success) contactFormContainer.style.display = "none";
+      if (data.success) {
+        const newMsg = document.createElement("p");
+        newMsg.textContent = message;
+        messagesWindow.appendChild(newMsg);
+        chatInput.value = "";
+      } else {
+        alert("Ошибка: " + (data.error || "не удалось отправить"));
+      }
     } catch {
       alert("❌ Сервер недоступен");
-    }
-  });
-
-  // === Летучая мышь 🦇 ===
-  const bat = document.getElementById("flying-bat");
-  const batMessage = document.getElementById("bat-message");
-
-  bat?.addEventListener("click", async () => {
-    try {
-      const res = await fetch(`${API_URL}/messages/bat`);
-      const data = await res.json();
-      batMessage.textContent = data.message || "🦇 Нет сообщений";
-      batMessage.style.display = "block";
-      setTimeout(() => (batMessage.style.display = "none"), 4000);
-    } catch {
-      alert("❌ Не удалось получить сообщение от мыши");
     }
   });
 });
