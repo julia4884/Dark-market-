@@ -5,51 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Личный кабинет | Dark Market Ultra</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    #flying-bat {
-      position: fixed;
-      top: 50px;
-      left: 50px;
-      font-size: 2rem;
-      cursor: pointer;
-      transition: all 1s ease;
-      z-index: 1000;
-    }
-    #bat-message {
-      position: fixed;
-      background: rgba(0,0,0,0.8);
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      display: none;
-      z-index: 1001;
-    }
-    #cat-widget {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      font-size: 2.5rem;
-      cursor: pointer;
-      z-index: 1000;
-    }
-    #contact-form-container {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      background: #1a1a1a;
-      color: white;
-      padding: 15px;
-      border: 1px solid #444;
-      border-radius: 10px;
-      z-index: 1001;
-    }
-    #contact-form input,
-    #contact-form textarea {
-      width: 100%;
-      margin-bottom: 10px;
-    }
-  </style>
 </head>
 <body>
   <header class="site-header">
@@ -63,14 +18,17 @@
   <main>
     <section id="cabinet-panel">
       <h2 id="cabinet-title">Ваш кабинет</h2>
+      
+      <!-- 🔥 Новый блок профиля -->
       <div id="profile-header">
-  <p id="user-role"></p>
-  <form id="nickname-form">
-    <input type="text" id="nickname-input" placeholder="Новый ник">
-    <button type="submit">Изменить</button>
-  </form>
-  <p id="meows-count"></p>
+        <p id="user-role"></p>
+        <form id="nickname-form">
+          <input type="text" id="nickname-input" placeholder="Новый ник">
+          <button type="submit">Изменить</button>
+        </form>
+        <p id="meows-count"></p>
       </div>
+
       <div id="profile-info"></div>
 
       <!-- Раздел файлов -->
@@ -79,11 +37,11 @@
     </section>
   </main>
 
-  <!-- Летучая мышь -->
+  <!-- 🦇 Летучая мышь -->
   <div id="flying-bat">🦇</div>
   <div id="bat-message"></div>
 
-  <!-- Кошка -->
+  <!-- 🐈‍⬛ Кошка -->
   <div id="cat-widget">🐈‍⬛</div>
   <div id="contact-form-container" style="display:none;">
     <form id="contact-form">
@@ -95,127 +53,8 @@
     </form>
   </div>
 
+  <!-- Подключения -->
   <script src="script.js"></script>
-  <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Сначала войдите в аккаунт!");
-      window.location.href = "index.html";
-      return;
-    }
-
-    try {
-      const res = await fetch("/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const user = await res.json();
-      if (!user || user.error) {
-        alert("Ошибка загрузки профиля");
-        return;
-      }
-
-      document.getElementById("profile-info").innerHTML = `
-        <div>
-          <img src="${user.avatar}" alt="avatar" class="avatar">
-          <p><strong>${user.username}</strong></p>
-          <p>${user.about || "Нет описания"}</p>
-        </div>
-      `;
-
-      loadFiles();
-    } catch {
-      alert("Ошибка соединения с сервером");
-    }
-
-    // === Загрузка списка файлов ===
-    async function loadFiles() {
-      try {
-        const res = await fetch("/list-files", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const files = await res.json();
-        const list = document.getElementById("file-list");
-        if (files.length === 0) {
-          list.innerHTML = "<li>Файлов пока нет.</li>";
-        } else {
-          list.innerHTML = files
-            .map(f => `<li><a href="${f.url}" target="_blank">${f.name}</a></li>`)
-            .join("");
-        }
-      } catch {
-        console.log("Не удалось загрузить список файлов");
-      }
-    }
-
-    // === Летучая мышь 🦇 ===
-    const bat = document.getElementById("flying-bat");
-    const batMessage = document.getElementById("bat-message");
-    const batMessages = [
-      "Добро пожаловать в тёмный мир!",
-      "Я тут просто пролетаю 🦇",
-      "Осторожно... я наблюдаю за тобой 👀",
-      "Ты сегодня отлично выглядишь!",
-      "Не забудь проверить новые разделы!",
-      "Псс... там скидки в магазине!",
-      "Если боишься — жми на кошку 🐈‍⬛",
-    ];
-
-    function moveBat() {
-      if (!bat) return;
-      const x = Math.random() * (window.innerWidth - 80);
-      const y = Math.random() * (window.innerHeight - 80);
-      bat.style.left = `${x}px`;
-      bat.style.top = `${y}px`;
-    }
-    setInterval(moveBat, 4000);
-
-    bat.addEventListener("click", () => {
-      const msg = batMessages[Math.floor(Math.random() * batMessages.length)];
-      batMessage.textContent = msg;
-      batMessage.style.left = bat.style.left;
-      batMessage.style.top = `calc(${bat.style.top} - 40px)`;
-      batMessage.style.display = "block";
-      setTimeout(() => (batMessage.style.display = "none"), 2500);
-    });
-
-    // === Кошка 🐈‍⬛ ===
-    const catWidget = document.getElementById("cat-widget");
-    const contactFormContainer = document.getElementById("contact-form-container");
-    const contactForm = document.getElementById("contact-form");
-    const closeContact = document.getElementById("close-contact");
-
-    catWidget.addEventListener("click", () => {
-      contactFormContainer.style.display =
-        contactFormContainer.style.display === "block" ? "none" : "block";
-    });
-
-    closeContact.addEventListener("click", () => {
-      contactFormContainer.style.display = "none";
-    });
-
-    contactForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("contact-email").value.trim();
-      const message = document.getElementById("contact-message").value.trim();
-      if (!email || !message) return alert("Заполните все поля!");
-
-      try {
-        const res = await fetch("/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, message }),
-        });
-        const data = await res.json();
-        alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
-        if (data.success) contactFormContainer.style.display = "none";
-      } catch {
-        alert("Сервер недоступен");
-      }
-    });
-  });
-  </script>
-  <script src="script.js"></script>
-<script src="cabinet.js"></script>
+  <script src="cabinet.js"></script>
 </body>
 </html>
