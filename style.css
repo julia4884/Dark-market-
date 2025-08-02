@@ -353,7 +353,7 @@ nav a:hover {
   #chat-container.active {
     right: 0;
   }
-
+}
 
 #lang-toggle:hover {
   background: #22d3ee;
