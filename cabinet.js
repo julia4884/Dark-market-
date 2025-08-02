@@ -5,14 +5,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("role");
   const nickname = localStorage.getItem("nickname");
 
-  // Проверка роли
+  // === Проверка авторизации ===
   if (!token || !role) {
     alert("❌ Вы не авторизованы!");
     window.location.href = "index.html";
     return;
   }
 
-  // Отображение роли и ника
+  // === Отображение роли и ника ===
   const userRoleDisplay = document.getElementById("user-role");
   if (role === "admin") {
     userRoleDisplay.innerHTML = `👑 Админ ${nickname || ""}`;
