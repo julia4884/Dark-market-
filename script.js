@@ -1,76 +1,88 @@
-const API_URL = "https://dark-market-backend.onrender.com"; 
+// === Конфиг ===
+const API_URL = "https://dark-market-backend.onrender.com";
 
+// === Проверка загрузки ===
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
 
-  // Проверка API
+  // Проверка связи с API
   (async () => {
     try {
       const res = await fetch(`${API_URL}/messages/cat`);
       if (res.ok) {
-        const data = await res.json();
-        console.log("✅ API доступен:", data);
+        console.log("✅ API доступен");
       } else {
-        console.warn("⚠ Сервер отвечает ошибкой:", res.status);
-        alert("⚠ Сервер отвечает, но с ошибкой. Проверь Render.");
+        console.warn("⚠ Сервер отвечает с ошибкой:", res.status);
       }
     } catch (err) {
-      console.warn("❌ Нет связи с бекендом:", err);
-      alert("❌ Нет связи с бекендом. Проверь Render.");
+      console.error("❌ Нет связи с бекендом:", err);
     }
   })();
+
+  updateUI();
 });
 
-// === Глобальные DOM элементы ===
-const chatInput = document.getElementById("chat-input");
-const chatForm = document.getElementById("chat-form");
-const chatMessages = document.getElementById("chat-messages");
-const stickerToggle = document.getElementById("sticker-toggle");
-const stickerPanel = document.getElementById("sticker-panel");
-const chatOverlay = document.getElementById("chat-overlay");
-
-let currentChat = "global";
-// === UI обновление ===
+// === Обновление интерфейса в зависимости от авторизации ===
 function updateUI() {
   const token = localStorage.getItem("token");
-  document.getElementById("auth-section").style.display = token ? "none" : "block";
-  document.getElementById("logout-section").style.display = token ? "block" : "none";
+  const role = localStorage.getItem("role");
+
+  const authSection = document.getElementById("auth-section");
+  const logoutSection = document.getElementById("logout-section");
+  const profileInfo = document.getElementById("profile-info");
+
+  if (token) {
+    authSection.style.display = "none";
+    logoutSection.style.display = "block";
+    profileInfo.textContent = `Вы вошли как: ${localStorage.getItem("username") || "Пользователь"}`;
+  } else {
+    authSection.style.display = "block";
+    logoutSection.style.display = "none";
+  }
+
+  // Перенаправление в админку
+  if (role === "admin" && window.location.pathname.endsWith("admin.html")) {
+    console.log("👑 Админ авторизован");
+  }
 }
 
-// === Аутентификация ===
+// === Авторизация ===
 function initAuth() {
   const loginBtn = document.getElementById("login-btn");
   const registerBtn = document.getElementById("register-btn");
   const logoutBtn = document.getElementById("logout-btn");
-loginBtn?.addEventListener("click", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
 
-  try {
-    const res = await fetch(`${API_URL}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+  // Вход
+  loginBtn?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
 
-    const data = await res.json();
-if (data.token) {
-  localStorage.setItem("token", data.token);
-  if (data.role) {
-    localStorage.setItem("role", data.role); // 👈 сохраняем роль
-  }
-  alert("✅ Успешный вход!\nТокен: " + data.token + "\nРоль: " + (data.role || "❌ нет"));
-  location.reload();
-} else {
-  alert("❌ Ошибка входа: " + (data.error || "неизвестно"));
-}
-  } catch (err) {
-    console.error("Ошибка входа:", err);
-    alert("❌ Сервер недоступен");
-  }
-});
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        if (data.role) localStorage.setItem("role", data.role);
+        if (data.username) localStorage.setItem("username", data.username);
+
+        alert("✅ Успешный вход!");
+        location.reload();
+      } else {
+        alert("Ошибка: " + (data.error || "неизвестно"));
+      }
+    } catch (err) {
+      console.error("Ошибка входа:", err);
+      alert("❌ Сервер недоступен");
+    }
+  });
+
+  // Регистрация
   registerBtn?.addEventListener("click", async (e) => {
     e.preventDefault();
     const username = document.getElementById("register-username").value;
@@ -83,6 +95,7 @@ if (data.token) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
       });
+
       const data = await res.json();
       if (data.success) {
         alert("✅ Регистрация успешна!");
@@ -90,43 +103,55 @@ if (data.token) {
       } else {
         alert("Ошибка: " + (data.error || "неизвестно"));
       }
-    } catch {
+    } catch (err) {
+      console.error("Ошибка регистрации:", err);
       alert("❌ Сервер недоступен");
     }
   });
 
+  // Выход
   logoutBtn?.addEventListener("click", () => {
     localStorage.removeItem("token");
-    alert("🚪 Вы вышли");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    alert("Вы вышли из аккаунта");
     location.reload();
   });
 }
+
+initAuth();
 // === Чат ===
+const chatForm = document.getElementById("chat-form");
+const chatInput = document.getElementById("chat-input");
+const chatMessages = document.getElementById("chat-messages");
+
 async function loadChat() {
   try {
-    const res = await fetch(`${API_URL}/chat/${currentChat}`, {
+    const res = await fetch(`${API_URL}/chat/global`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
     const data = await res.json();
 
-    chatMessages.innerHTML = data.map(msg => `
-      <div class="chat-msg ${msg.role}">
-        <span class="user">${msg.username}</span>: 
-        <span class="content">${msg.content}</span>
-      </div>
-    `).join("");
-  } catch (err) {
-    console.error("Ошибка загрузки чата:", err);
+    chatMessages.innerHTML = data
+      .map(msg => `
+        <div class="chat-message ${msg.username === localStorage.getItem("username") ? "me" : ""}">
+          <strong>${msg.username}:</strong> ${msg.content}
+        </div>
+      `)
+      .join("");
+  } catch {
+    chatMessages.innerHTML = "<p>⚠ Чат недоступен</p>";
   }
 }
 
+// Отправка сообщений
 chatForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const content = chatInput.value.trim();
   if (!content) return;
 
   try {
-    const res = await fetch(`${API_URL}/chat/${currentChat}`, {
+    const res = await fetch(`${API_URL}/chat/global`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -134,36 +159,42 @@ chatForm?.addEventListener("submit", async (e) => {
       },
       body: JSON.stringify({ content }),
     });
+
     const data = await res.json();
     if (data.success) {
       chatInput.value = "";
       loadChat();
     } else {
-      alert("Ошибка: " + (data.error || "Не удалось отправить сообщение"));
+      alert("Ошибка: " + (data.error || "не удалось отправить сообщение"));
     }
   } catch {
     alert("❌ Сервер недоступен");
   }
 });
 
+// Автообновление чата
 setInterval(loadChat, 5000);
+loadChat();
 
-// === Стикеры ===
+// === Панель стикеров ===
+const stickerToggle = document.getElementById("sticker-toggle");
+const stickerPanel = document.getElementById("sticker-panel");
+
 async function loadStickers() {
   try {
     const res = await fetch(`${API_URL}/stickers`);
     const stickers = await res.json();
-    if (!Array.isArray(stickers) || stickers.length === 0) return;
 
-    stickerPanel.innerHTML = stickers.map(st =>
-      `<img src="${API_URL}${st.url}" class="sticker" alt="${st.name}" title="${st.name}">`
-    ).join("");
+    stickerPanel.innerHTML = stickers
+      .map(sticker => `<span class="sticker">${sticker.icon}</span>`)
+      .join("");
 
-    for (const sticker of stickerPanel.querySelectorAll(".sticker")) {
-      sticker.addEventListener("click", async () => {
-        const stickerTag = `[sticker:${sticker.alt}]`;
+    for (const stickerEl of stickerPanel.querySelectorAll(".sticker")) {
+      stickerEl.addEventListener("click", async () => {
+        const stickerTag = stickerEl.textContent;
+
         try {
-          await fetch(`${API_URL}/chat/${currentChat}`, {
+          await fetch(`${API_URL}/chat/global`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -183,74 +214,84 @@ async function loadStickers() {
 }
 
 stickerToggle?.addEventListener("click", () => {
-  if (stickerPanel.style.display === "block") {
-    stickerPanel.style.display = "none";
-    chatOverlay.style.display = "none";
-  } else {
-    stickerPanel.style.display = "block";
-    chatOverlay.style.display = "block";
-  }
-});
-chatOverlay?.addEventListener("click", () => {
-  stickerPanel.style.display = "none";
-  chatOverlay.style.display = "none";
+  stickerPanel.style.display =
+    stickerPanel.style.display === "block" ? "none" : "block";
+  document.getElementById("chat-overlay").style.display =
+    stickerPanel.style.display;
 });
 
+loadStickers();
+
+// === Пёрышко 🪶 ===
+const feather = document.createElement("div");
+feather.id = "chat-feather";
+feather.textContent = "🪶";
+document.querySelector("#chat-form")?.appendChild(feather);
+
+// лёгкое подпрыгивание
+setInterval(() => {
+  feather.style.transform = "translateY(-5px)";
+  setTimeout(() => (feather.style.transform = "translateY(0)"), 300);
+}, 2000);
+
+// === Сова 🦉 ===
+const owlButton = document.getElementById("sticker-toggle");
+if (owlButton) {
+  owlButton.textContent = "🦉 Стикеры";
+  owlButton.classList.add("glow-owl"); // в style.css подсветка
+      }
 // === Кошка 🐈‍⬛ ===
-function initCat() {
-  const catWidget = document.getElementById("cat-widget");
-  const contactFormContainer = document.getElementById("contact-form-container");
-  const contactForm = document.getElementById("contact-form");
-  const closeContact = document.getElementById("close-contact");
+const catWidget = document.getElementById("cat-widget");
+const contactFormContainer = document.getElementById("contact-form-container");
+const contactForm = document.getElementById("contact-form");
+const closeContact = document.getElementById("close-contact");
 
-  catWidget?.addEventListener("click", () => {
-    if (!contactFormContainer) return;
-    contactFormContainer.style.display =
-      contactFormContainer.style.display === "block" ? "none" : "block";
-  });
+catWidget?.addEventListener("click", () => {
+  contactFormContainer.style.display =
+    contactFormContainer.style.display === "block" ? "none" : "block";
+});
 
-  closeContact?.addEventListener("click", () => {
-    if (contactFormContainer) contactFormContainer.style.display = "none";
-  });
+closeContact?.addEventListener("click", () => {
+  contactFormContainer.style.display = "none";
+});
 
-  contactForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const email = document.getElementById("contact-email").value.trim();
-    const message = document.getElementById("contact-message").value.trim();
-    if (!email || !message) return alert("Заполните все поля!");
+contactForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("contact-email").value.trim();
+  const message = document.getElementById("contact-message").value.trim();
+  if (!email || !message) return alert("Заполните все поля!");
 
-    fetch(`${API_URL}/contact`, {
+  try {
+    const res = await fetch(`${API_URL}/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, message }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
-        if (data.success) contactFormContainer.style.display = "none";
-      })
-      .catch(() => alert("Сервер недоступен"));
-  });
-}
+    });
+    const data = await res.json();
+    alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
+    if (data.success) contactFormContainer.style.display = "none";
+  } catch {
+    alert("Сервер недоступен");
+  }
+});
 
 // === Летучая мышь 🦇 ===
-function initBat() {
-  const bat = document.getElementById("flying-bat");
-  const batMsg = document.getElementById("bat-message");
+const bat = document.getElementById("flying-bat");
+const batMessage = document.getElementById("bat-message");
 
-  bat?.addEventListener("click", async () => {
-    try {
-      const res = await fetch(`${API_URL}/messages/bat`);
-      const data = await res.json();
-      batMsg.textContent = data.message || "Шшш... Я молчу 🦇";
-      batMsg.style.display = "block";
+bat?.addEventListener("click", async () => {
+  try {
+    const res = await fetch(`${API_URL}/messages/bat`);
+    const data = await res.json();
+    batMessage.textContent = data.message || "🦇 Нет сообщений";
+    batMessage.style.display = "block";
+    setTimeout(() => (batMessage.style.display = "none"), 4000);
+  } catch {
+    alert("Не удалось получить сообщение от мыши");
+  }
+});
 
-      setTimeout(() => (batMsg.style.display = "none"), 4000);
-    } catch {
-      alert("❌ Не удалось получить сообщение мыши");
-    }
-  });
- // === Галерея картинок ===
+// === Галерея картинок ===
 const imagesGallery = [
   { id: 1, src: "images/pic1.jpg", title: "Тёмный лес", desc: "Мистическая тьма и свет луны." },
   { id: 2, src: "images/pic2.jpg", title: "Космос", desc: "Неоновая галактика 🌌" },
@@ -269,11 +310,6 @@ async function loadImagesGallery() {
       <p>${img.desc}</p>
       <button class="meow-btn">🐾 Мяук</button>
       <span class="like-count">0</span>
-      <div class="comments">
-        <textarea class="comment-input" placeholder="Ваш комментарий..."></textarea>
-        <button class="comment-btn">💬 Отправить</button>
-        <div class="comment-list"></div>
-      </div>
     </div>
   `).join("");
 
@@ -281,20 +317,25 @@ async function loadImagesGallery() {
     const fileId = fileCard.dataset.id;
     const likeCount = fileCard.querySelector(".like-count");
     const btn = fileCard.querySelector(".meow-btn");
-    const commentBtn = fileCard.querySelector(".comment-btn");
-    const commentInput = fileCard.querySelector(".comment-input");
-    const commentList = fileCard.querySelector(".comment-list");
 
-    // Загружаем лайки
     try {
       const res = await fetch(`${API_URL}/files/${fileId}/likes`);
       const data = await res.json();
       likeCount.textContent = data.total || 0;
+
+      const checkRes = await fetch(`${API_URL}/files/${fileId}/liked`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      if (checkRes.ok) {
+        const checkData = await checkRes.json();
+        if (checkData.liked) {
+          btn.textContent = "👍🏻 Мяук";
+        }
+      }
     } catch {
       likeCount.textContent = "⚠";
     }
 
-    // Ставим лайк
     btn.addEventListener("click", async () => {
       try {
         const res = await fetch(`${API_URL}/files/${fileId}/like`, {
@@ -318,100 +359,63 @@ async function loadImagesGallery() {
         alert("Сервер недоступен");
       }
     });
-
-    // Загружаем комментарии
-    async function loadComments() {
-      try {
-        const res = await fetch(`${API_URL}/files/${fileId}/comments`);
-        const comments = await res.json();
-        commentList.innerHTML = comments.map(c =>
-          `<div class="comment"><b>${c.username}</b>: ${c.content}</div>`
-        ).join("");
-      } catch {
-        commentList.innerHTML = "<div class='comment'>⚠ Ошибка загрузки комментариев</div>";
-      }
-    }
-    loadComments();
-
-    // Отправляем комментарий
-    commentBtn.addEventListener("click", async () => {
-      const content = commentInput.value.trim();
-      if (!content) return alert("Введите комментарий");
-
-      try {
-        const res = await fetch(`${API_URL}/files/${fileId}/comments`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ content }),
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          commentInput.value = "";
-          loadComments();
-        } else {
-          alert("Ошибка: " + (data.error || "Не удалось добавить комментарий"));
-        }
-      } catch {
-        alert("Сервер недоступен");
-      }
-    });
   }
 }
-// === PayPal интеграция ===
-function initPayPal() {
+
+document.addEventListener("DOMContentLoaded", loadImagesGallery);
+// === PayPal Донат ===
+document.addEventListener("DOMContentLoaded", () => {
   const donateBtn = document.getElementById("donate-btn");
-  if (!donateBtn) return;
+  if (donateBtn) {
+    donateBtn.addEventListener("click", () => {
+      alert("🔮 Перенаправление на PayPal...");
+      window.location.href = `${API_URL}/paypal/donate`;
+    });
+  }
+});
 
-  donateBtn.addEventListener("click", async () => {
-    try {
-      const amount = prompt("Введите сумму доната в EUR:");
-      if (!amount || isNaN(amount)) {
-        return alert("⚠ Пожалуйста, введите корректную сумму.");
-      }
+// === Защита гостей в чате ===
+document.addEventListener("DOMContentLoaded", () => {
+  const chatInput = document.getElementById("chat-input");
+  const chatForm = document.getElementById("chat-form");
 
-      const res = await fetch(`${API_URL}/create-order`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ amount }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.id) {
-        throw new Error(data.error || "Ошибка создания заказа");
-      }
-
-      // Перенаправление пользователя на PayPal
-      const approveLink = data.links.find(link => link.rel === "approve");
-      if (approveLink) {
-        window.location.href = approveLink.href;
-      } else {
-        alert("⚠ Не удалось получить ссылку PayPal.");
-      }
-    } catch (err) {
-      console.error("Ошибка PayPal:", err);
-      alert("❌ Не удалось создать заказ PayPal. Проверь сервер.");
+  if (!localStorage.getItem("token")) {
+    if (chatInput) chatInput.disabled = true;
+    if (chatForm) {
+      const submitBtn = chatForm.querySelector("button[type=submit]");
+      if (submitBtn) submitBtn.disabled = true;
     }
-  });
-} // ← вот этой скобки у тебя не хватало!
+    if (chatInput) chatInput.placeholder = "Войдите, чтобы отправлять сообщения";
+  }
+});
 
-// === Запуск всех функций ===
+// === Проверка загрузки скрипта ===
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  alert("🔎 DEBUG: Токен = " + (token || "❌ нет") + ", Роль = " + (role || "❌ нет"));
-  updateUI();
-  loadChat();
-  loadStickers();
-  initCat();
-  initBat();
-  loadImagesGallery();
-  initPayPal();
+  
+  // Проверка API
+  (async () => {
+    try {
+      const res = await fetch(`${API_URL}/messages/cat`);
+      if (res.ok) {
+        const data = await res.json();
+        console.log("✅ API доступен:", data);
+      } else {
+        console.warn("⚠ Сервер отвечает ошибкой:", res.status);
+        alert("⚠ Сервер отвечает, но с ошибкой. Проверь Render.");
+      }
+    } catch (err) {
+      console.warn("❌ Нет связи с бекендом:", err);
+      alert("❌ Нет связи с бекендом. Проверь Render.");
+    }
+  })();
+});
+
+// === Итоговый запуск всех функций ===
+document.addEventListener("DOMContentLoaded", () => {
+  initAuth();        // авторизация
+  initStickers();    // стикеры
+  initCatAndBat();   // кошка и летучая мышь
+  loadImagesGallery(); // галерея
+  loadChat();        // чат
 });
