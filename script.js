@@ -3,7 +3,12 @@ const API_URL = "https://dark-market-backend.onrender.com"; // замени на
 
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
-
+});
+// Проверка API
+fetch(`${API_URL}/messages/cat`)
+  .then(res => res.json())
+  .then(data => console.log("✅ API доступен:", data))
+  .catch(() => alert("❌ Нет связи с бекендом. Проверь Render."));
   // === Авторизация ===
   const loginBtn = document.getElementById("login-btn");
   const registerBtn = document.getElementById("register-btn");
