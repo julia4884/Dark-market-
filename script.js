@@ -404,6 +404,9 @@ function initPayPal() {
 // === Запуск всех функций ===
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+  alert("🔎 DEBUG: Токен = " + (token || "❌ нет") + ", Роль = " + (role || "❌ нет"));
   updateUI();
   loadChat();
   loadStickers();
