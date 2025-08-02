@@ -17,7 +17,7 @@
 
   <main>
     <section id="admin-panel">
-      <h2>Добро пожаловать в Админ-панель 👑</h2>
+      <h2>👑Админ-панель 👑</h2>
       
       <!-- 🔥 Новый блок профиля -->
       <div id="profile-header">
@@ -48,6 +48,21 @@
       <!-- Список файлов -->
       <h3>Ваши загруженные файлы</h3>
       <ul id="file-list"></ul>
+      <!-- Панель сообщений для кошки и мышки -->
+<div id="messages-panel">
+  <h3>🐈‍⬛ Кошка и 🦇 Мышь</h3>
+  <div class="tabs">
+    <button class="tab-btn active" data-type="cat">Кошка</button>
+    <button class="tab-btn" data-type="bat">Мышь</button>
+  </div>
+
+  <div class="messages-window" id="messages-window"></div>
+
+  <form id="chat-form">
+    <input type="text" id="chat-input" placeholder="Введите сообщение..." required>
+    <button type="submit">Отправить</button>
+  </form>
+</div>
     </section>
   </main>
 
