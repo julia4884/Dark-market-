@@ -1,6 +1,5 @@
 // === Глобальная настройка API ===
 const API_URL = "https://dark-market-backend.onrender.com"; // замени на свой бекенд на Render
-
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
 
@@ -20,14 +19,75 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("❌ Нет связи с бекендом. Проверь Render.");
     }
   })();
+
+  // Запускаем сразу нужные фичи
+  initCatAndBat();
+  initAuth();
 });
-  // === Авторизация ===
+function initCatAndBat() {
+  const catWidget = document.getElementById("cat-widget");
+  const contactFormContainer = document.getElementById("contact-form-container");
+  const contactForm = document.getElementById("contact-form");
+  const closeContact = document.getElementById("close-contact");
+
+  catWidget?.addEventListener("click", () => {
+    if (!contactFormContainer) return;
+    contactFormContainer.style.display =
+      contactFormContainer.style.display === "block" ? "none" : "block";
+  });
+
+  closeContact?.addEventListener("click", () => {
+    if (contactFormContainer) contactFormContainer.style.display = "none";
+  });
+
+  contactForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const email = document.getElementById("contact-email").value.trim();
+    const message = document.getElementById("contact-message").value.trim();
+    if (!email || !message) return alert("Заполните все поля!");
+
+    fetch(`${API_URL}/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, message }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        alert(data.success ? "Сообщение отправлено!" : "Ошибка: " + data.error);
+        if (data.success) contactFormContainer.style.display = "none";
+      })
+      .catch(() => alert("Сервер недоступен"));
+  });
+}
+
+function initAuth() {
   const loginBtn = document.getElementById("login-btn");
   const registerBtn = document.getElementById("register-btn");
-  const logoutBtn = document.getElementById("logout-btn");
 
-  // Поддержка новых id без ломки старых
-  function getById(...ids) {
+  loginBtn?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+
+    try {
+      const res = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        alert("✅ Успешный вход!");
+        location.reload();
+      } else {
+        alert("Ошибка: " + (data.error || "неизвестно"));
+      }
+    } catch {
+      alert("❌ Сервер недоступен");
+    }
+  });
+}
     for (let id of ids) {
       const el = document.getElementById(id);
       if (el) return el;
