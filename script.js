@@ -42,30 +42,34 @@ function initAuth() {
   const loginBtn = document.getElementById("login-btn");
   const registerBtn = document.getElementById("register-btn");
   const logoutBtn = document.getElementById("logout-btn");
+loginBtn?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
 
-  loginBtn?.addEventListener("click", async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("login-email").value;
-    const password = document.getElementById("login-password").value;
+  try {
+    const res = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-    try {
-      const res = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        alert("✅ Успешный вход!");
-        location.reload();
-      } else {
-        alert("Ошибка: " + (data.error || "неизвестно"));
+    const data = await res.json();
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      if (data.role) {
+        localStorage.setItem("role", data.role); // 👈 сохраняем роль
       }
-    } catch {
-      alert("❌ Сервер недоступен");
+      alert("✅ Успешный вход!");
+      location.reload();
+    } else {
+      alert("Ошибка: " + (data.error || "неизвестно"));
     }
-  });
+  } catch (err) {
+    console.error("Ошибка входа:", err);
+    alert("❌ Сервер недоступен");
+  }
+});
 
   registerBtn?.addEventListener("click", async (e) => {
     e.preventDefault();
