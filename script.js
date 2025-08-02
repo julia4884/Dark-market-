@@ -1,6 +1,23 @@
 alert("🚀 Финальный скрипт загружен!");
 // === Конфиг ===
 const API_URL = "https://dark-market-backend.onrender.com";
+// === Тестовый запрос к серверу для отладки ===
+(async () => {
+  try {
+    const res = await fetch(`${API_URL}/messages/cat`, {
+      headers: { "Authorization": `Bearer ${localStorage.getItem("token") || ""}` }
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      alert(`⚠️ Render ответил ошибкой!\nСтатус: ${res.status}\nСообщение: ${text}`);
+    } else {
+      const data = await res.json();
+      alert("✅ Render ответил успешно!\nДанные: " + JSON.stringify(data));
+    }
+  } catch (err) {
+    alert("❌ Render не отвечает: " + err.message);
+  }
+})();
 
 // === Проверка загрузки ===
 document.addEventListener("DOMContentLoaded", () => {
