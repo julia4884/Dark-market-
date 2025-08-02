@@ -59,6 +59,66 @@ const avatarInput = document.getElementById("avatar-upload");
 
 avatarImg?.addEventListener("click", () => {
   avatarInput.click();
+  // === Обработка выбора файла для аватара ===
+avatarInput?.addEventListener("change", async () => {
+    if (!avatarInput.files.length) return;
+
+    const formData = new FormData();
+    formData.append("avatar", avatarInput.files[0]);
+
+    try {
+        const res = await fetch("/upload-avatar", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            },
+            body: formData
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            // заменяем аватарку без перезагрузки
+            avatarImg.src = data.avatar + "?t=" + new Date().getTime();
+            alert("✅ Аватар успешно обновлён!");
+        } else {
+            alert("❌ Ошибка: " + (data.error || "Не удалось загрузить аватар"));
+        }
+    } catch (err) {
+        console.error("Ошибка загрузки:", err);
+        alert("❌ Сервер недоступен");
+    }
+});
+
+// === Обновление ника без перезагрузки ===
+const nicknameForm = document.getElementById("nickname-form");
+nicknameForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const newNick = document.getElementById("nickname-input").value.trim();
+    if (!newNick) return alert("Введите ник!");
+
+    try {
+        const res = await fetch("/profile", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            },
+            body: JSON.stringify({ username: newNick })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            alert("✅ Ник успешно обновлён!");
+            document.getElementById("user-role").innerText = newNick;
+        } else {
+            alert("❌ Ошибка: " + (data.error || "Не удалось обновить ник"));
+        }
+    } catch (err) {
+        console.error("Ошибка:", err);
+        alert("❌ Сервер недоступен");
+    }
+});
 });
   // === Загрузка файлов ===
   const fileForm = document.getElementById("file-form");
