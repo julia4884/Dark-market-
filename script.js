@@ -1,4 +1,22 @@
 alert("✅ script.js собака сутулая подключен");
+
+// Проверяем кнопки
+document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("login-button");
+    const sendBtn = document.getElementById("chat-send");
+
+    if (loginBtn) {
+        alert("🔑 Кнопка входа найдена!");
+    } else {
+        alert("❌ Кнопка входа НЕ найдена!");
+    }
+
+    if (sendBtn) {
+        alert("💬 Кнопка отправки найдена!");
+    } else {
+        alert("❌ Кнопка отправки НЕ найдена!");
+    }
+});
 // === Авторизация ===
 let token = localStorage.getItem("token");
 let role = localStorage.getItem("role");
