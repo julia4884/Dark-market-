@@ -85,14 +85,27 @@ function initAuth() {
 
       const data = await res.json();
       if (data.token) {
-        localStorage.setItem("token", data.token);
-        if (data.role) localStorage.setItem("role", data.role);
-        if (data.username) localStorage.setItem("username", data.username);
+  localStorage.setItem("token", data.token);
 
-        alert("✅ Успешный вход!");
-        location.reload();
-      } else {
-        alert("Ошибка: " + (data.error || "неизвестно"));
+  if (data.role) {
+    localStorage.setItem("role", data.role); // сохраняем роль
+  }
+
+  if (data.username) {
+    localStorage.setItem("username", data.username);
+  }
+
+  alert("✅ Успешный вход!\nРоль: " + (data.role || "❌ нет"));
+  // Перенаправление в нужный кабинет
+if (data.role === "admin") {
+    window.location.href = "/admin.html";
+} else if (data.role === "developer") {
+    window.location.href = "/developer.html";
+} else {
+    window.location.href = "/cabinet.html";
+}
+} else {
+  alert("Ошибка: " + (data.error || "неизвестно"));
       }
     } catch (err) {
       console.error("Ошибка входа:", err);
