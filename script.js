@@ -1,4 +1,3 @@
-alert("✅ Скрипт обновлён и загружен!");
 document.addEventListener("DOMContentLoaded", () => {
   // === Авторизация ===
   const loginBtn = document.getElementById("login-btn");
@@ -253,6 +252,7 @@ chatTabs.forEach((tab) =>
     loadChat();
   })
 );
+
 // Обновление чата
 async function loadChat() {
   try {
@@ -284,16 +284,11 @@ async function loadChat() {
     chatWindow.innerHTML = "<p>Не удалось загрузить сообщения.</p>";
   }
 }
-  } catch {
-    chatWindow.innerHTML = "<p>Не удалось загрузить сообщения.</p>";
-  }
-}
 
 // Отправка сообщений
 chatForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
- const content = chatInput.value.trim();
-if (!content) return; 
+  const content = chatInput.value.trim();
   if (!content) return;
 
   try {
@@ -371,7 +366,7 @@ async function loadStickers() {
       img.addEventListener("click", async () => {
         const stickerTag = `[sticker:${sticker.url}]`;
         try {
-          await fetch(`/chat/${currentChat}`, {
+        await fetch(`/chat/${currentChat}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -447,7 +442,6 @@ const imagesGallery = [
   { src: "images/pic4.jpg", title: "Замок", desc: "Древние руины на утёсе." }
 ];
 
-// === Галерея картинок + Мяук ===
 async function loadImagesGallery() {
   const container = document.getElementById("images-gallery");
   if (!container) return;
@@ -462,23 +456,18 @@ async function loadImagesGallery() {
     </div>
   `).join("");
 
-  // Подгружаем лайки и статус для каждой карточки
   for (const fileCard of container.querySelectorAll(".card")) {
     const fileId = fileCard.dataset.id;
     const likeCount = fileCard.querySelector(".like-count");
     const btn = fileCard.querySelector(".meow-btn");
 
     try {
-      // Получаем количество лайков
       const res = await fetch(`/files/${fileId}/likes`);
       const data = await res.json();
       likeCount.textContent = data.total || 0;
 
-      // Проверяем, лайкал ли уже пользователь
       const checkRes = await fetch(`/files/${fileId}/liked`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       if (checkRes.ok) {
         const checkData = await checkRes.json();
@@ -490,7 +479,6 @@ async function loadImagesGallery() {
       likeCount.textContent = "⚠";
     }
 
-    // Обработчик кнопки
     btn.addEventListener("click", async () => {
       try {
         const res = await fetch(`/files/${fileId}/like`, {
@@ -503,12 +491,10 @@ async function loadImagesGallery() {
         const data = await res.json();
 
         if (data.success) {
-          // Обновляем количество лайков
           const res2 = await fetch(`/files/${fileId}/likes`);
           const countData = await res2.json();
           likeCount.textContent = countData.total;
 
-          // Меняем вид кнопки
           btn.textContent = data.liked ? "👍🏻 Мяук" : "🐾 Мяук";
         } else {
           alert("Ошибка: " + (data.error || "Не удалось поставить лайк"));
@@ -524,42 +510,4 @@ async function loadImagesGallery() {
 document.addEventListener("DOMContentLoaded", () => {
   updateUI();
   loadImagesGallery();
-});
-// === Обновление статистики ===
-async function updateStats() {
-  try {
-    const res = await fetch("/stats"); // сервер отдаёт JSON
-    if (!res.ok) throw new Error("Ошибка запроса статистики");
-    const data = await res.json();
-
-    const visitEl = document.getElementById("visit-count");
-    const uploadEl = document.getElementById("upload-count");
-
-    if (visitEl) visitEl.textContent = data.visits ?? 0;
-    if (uploadEl) uploadEl.textContent = data.uploads ?? 0;
-  } catch (err) {
-    console.error("Ошибка при обновлении статистики:", err);
-  }
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  updateStats();
-  setInterval(updateStats, 60000); // обновляем каждую минуту
-  // === Логика для кнопки-совушки и панели стикеров ===
-const stickerToggle = document.getElementById('sticker-toggle');
-const stickerPanel = document.getElementById('sticker-panel');
-const chatOverlay = document.getElementById('chat-overlay');
-
-if (stickerToggle && stickerPanel && chatOverlay) {
-  stickerToggle.addEventListener('click', () => {
-    stickerPanel.classList.toggle('active');
-    chatOverlay.classList.toggle('active');
-  });
-
-  // Закрытие панели при клике по затемнению
-  chatOverlay.addEventListener('click', () => {
-    stickerPanel.classList.remove('active');
-    chatOverlay.classList.remove('active');
-  });
-}
 });
