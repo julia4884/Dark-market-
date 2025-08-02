@@ -167,8 +167,6 @@ document.getElementById("register-btn")?.addEventListener("click", (e) => {
     .catch(() => alert("Сервер недоступен"));
 });
 
-document.getElementById("logout-btn")?.addEventListener("click", () => logout());
-
 // === Донат PayPal ===
 async function handleDonation(orderID, amount = 10) {
   try {
