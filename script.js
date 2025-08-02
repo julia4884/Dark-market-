@@ -1,3 +1,4 @@
+console.log("✅ script.js загружен и выполняется");
 // === Авторизация ===
 let token = localStorage.getItem("token");
 let role = localStorage.getItem("role");
