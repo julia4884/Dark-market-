@@ -20,6 +20,35 @@ document.addEventListener("DOMContentLoaded", () => {
     alert(msg);
 });
 alert("✅ script.js собака сутулая подключен");
+// ==== Поддержка новых id без ломки старых ====
+
+// Функция-хелпер для выбора элемента по id (новый или старый)
+function getById(...ids) {
+  for (let id of ids) {
+    const el = document.getElementById(id);
+    if (el) return el;
+  }
+  return null;
+}
+
+// Привязка к полям ввода
+const chatInput = getById("chat-input-main", "chat-input");
+const chatSendBtn = getById("chat-send-main", "chat-send");
+const stickerPanel = getById("sticker-panel-main", "sticker-panel");
+const stickerPanelOwl = getById("sticker-panel-owl", "sticker-panel");
+const stickerToggle = getById("sticker-toggle");
+
+// Пример: проверка доступности элементов
+console.log("🔍 Проверка элементов:");
+console.log("chatInput:", chatInput);
+console.log("chatSendBtn:", chatSendBtn);
+console.log("stickerPanel:", stickerPanel);
+console.log("stickerPanelOwl:", stickerPanelOwl);
+
+// Теперь можно использовать chatInput, chatSendBtn и др.
+// например, если у тебя где-то в коде:
+// document.getElementById("chat-input").value
+// заменяй на: chatInput.value
 
 // === Авторизация ===
 let token = localStorage.getItem("token");
