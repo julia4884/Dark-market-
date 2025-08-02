@@ -1,22 +1,26 @@
-alert("✅ script.js собака сутулая подключен");
-
-// Проверяем кнопки
+// 🚨 тестовый блок
 document.addEventListener("DOMContentLoaded", () => {
+    let msg = "🚨 Проверка script.js\n";
+
+    // Проверяем кнопки
     const loginBtn = document.getElementById("login-button");
     const sendBtn = document.getElementById("chat-send");
+    const regBtn = document.getElementById("register-button");
+    const donateBtn = document.getElementById("donate-button");
+    const catBtn = document.getElementById("cat-widget");
+    const batBtn = document.getElementById("flying-bat");
 
-    if (loginBtn) {
-        alert("🔑 Кнопка входа найдена!");
-    } else {
-        alert("❌ Кнопка входа НЕ найдена!");
-    }
+    msg += loginBtn ? "✅ Кнопка входа найдена\n" : "❌ Кнопка входа НЕ найдена\n";
+    msg += sendBtn ? "✅ Кнопка отправки найдена\n" : "❌ Кнопка отправки НЕ найдена\n";
+    msg += regBtn ? "✅ Кнопка регистрации найдена\n" : "❌ Кнопка регистрации НЕ найдена\n";
+    msg += donateBtn ? "✅ Кнопка доната найдена\n" : "❌ Кнопка доната НЕ найдена\n";
+    msg += catBtn ? "✅ Кнопка кошки найдена\n" : "❌ Кнопка кошки НЕ найдена\n";
+    msg += batBtn ? "✅ Кнопка мышки найдена\n" : "❌ Кнопка мышки НЕ найдена\n";
 
-    if (sendBtn) {
-        alert("💬 Кнопка отправки найдена!");
-    } else {
-        alert("❌ Кнопка отправки НЕ найдена!");
-    }
+    alert(msg);
 });
+alert("✅ script.js собака сутулая подключен");
+
 // === Авторизация ===
 let token = localStorage.getItem("token");
 let role = localStorage.getItem("role");
