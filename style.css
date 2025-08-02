@@ -495,15 +495,7 @@ nav a:hover {
     right: 0;
   }
   /* === Стили сообщений по ролям === */
-/* === Стикеры === */
-.chat-sticker {
-  max-width: 120px; /* размер под окно чата */
-  max-height: 120px;
-  margin: 5px 0;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
+
 .chat-sticker:hover {
   border-color: #5eead4; /* подсветка в тон сайту */
   box-shadow: 0 0 15px #22d3ee, 0 0 30px #0ea5e9;
@@ -588,25 +580,6 @@ nav a:hover {
 #chat-input {
   padding-left: 35px; /* чтобы не налезало на перышко */
   }
-
-#chat-input-container::before {
-  content: "🪶";
-  position: absolute;
-  left: 10px;
-  font-size: 20px;
-  animation: featherFloat 2s infinite ease-in-out;
-  pointer-events: none;
-}
-
-@keyframes featherFloat {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-  100% { transform: translateY(0); }
-}
-
-#chat-input {
-  padding-left: 35px; /* отступ, чтобы текст не налезал на перышко */
-}
 
 /* === Эффект свечения окна чата === */
 #chat-container {
