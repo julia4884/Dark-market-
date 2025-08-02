@@ -55,16 +55,16 @@ loginBtn?.addEventListener("click", async (e) => {
     });
 
     const data = await res.json();
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      if (data.role) {
-        localStorage.setItem("role", data.role); // 👈 сохраняем роль
-      }
-      alert("✅ Успешный вход!");
-      location.reload();
-    } else {
-      alert("Ошибка: " + (data.error || "неизвестно"));
-    }
+if (data.token) {
+  localStorage.setItem("token", data.token);
+  if (data.role) {
+    localStorage.setItem("role", data.role); // 👈 сохраняем роль
+  }
+  alert("✅ Успешный вход!\nТокен: " + data.token + "\nРоль: " + (data.role || "❌ нет"));
+  location.reload();
+} else {
+  alert("❌ Ошибка входа: " + (data.error || "неизвестно"));
+}
   } catch (err) {
     console.error("Ошибка входа:", err);
     alert("❌ Сервер недоступен");
