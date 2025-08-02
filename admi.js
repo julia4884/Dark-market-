@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "index.html";
     return;
   }
-  // Загружаем данные профиля
+// Загружаем данные профиля
 try {
   const res = await fetch(`${API_URL}/profile`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -17,7 +17,9 @@ try {
   const user = await res.json();
   if (user && !user.error) {
     document.getElementById("admin-avatar").src =
-      user.avatar || "https://dark-market-backend.onrender.com/default-avatar.png";
+      user.avatar
+        ? `${API_URL}/uploads/avatar/${user.avatar}`
+        : `${API_URL}/uploads/avatar/default.png`;
   }
 } catch {
   console.log("Не удалось загрузить аватар");
