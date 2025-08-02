@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
+        
       });
       const data = await res.json();
       if (data.success) {
