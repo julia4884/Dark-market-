@@ -87,6 +87,32 @@ avatarInput?.addEventListener("change", async () => {
         console.error("Ошибка загрузки:", err);
         alert("❌ Сервер недоступен");
     }
+  // 🎯 Кнопка личного кабинета — проверка роли
+document.getElementById("profile-btn")?.addEventListener("click", async () => {
+  try {
+    const res = await fetch(`${API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    });
+
+    if (!res.ok) throw new Error("Ошибка авторизации");
+
+    const user = await res.json();
+
+    if (user.role === "admin") {
+      window.location.href = "/admin.html";
+    } else if (user.role === "developer") {
+      window.location.href = "/dev.html";
+    } else {
+      window.location.href = "/profile.html";
+    }
+
+  } catch (err) {
+    console.error("Ошибка перехода в кабинет:", err);
+    alert("❌ Сначала войдите в систему");
+    window.location.href = "/login.html";
+  }
 });
 
 // === Обновление ника без перезагрузки ===
