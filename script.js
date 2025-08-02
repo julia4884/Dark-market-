@@ -1,3 +1,4 @@
+alert("✅ Скрипт script.js подключён и работает!");
 document.addEventListener("DOMContentLoaded", () => {
   // === Авторизация ===
   const loginBtn = document.getElementById("login-btn");
