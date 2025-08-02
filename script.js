@@ -1,4 +1,4 @@
-const API_URL = "https://dark-market.onrender.com"; // замени на свой Render backend
+const API_URL = "https://dark-market-backend.onrender.com"; 
 
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
