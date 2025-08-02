@@ -1,58 +1,78 @@
-// 🚨 тестовый блок
 document.addEventListener("DOMContentLoaded", () => {
-    let msg = "🚨 Проверка script.js\n";
+  // === Авторизация ===
+  const loginBtn = document.getElementById("login-btn");
+  const registerBtn = document.getElementById("register-btn");
+  const logoutBtn = document.getElementById("logout-btn");
 
-    // Проверяем кнопки
-    const loginBtn = document.getElementById("login-button");
-    const sendBtn = document.getElementById("chat-send");
-    const regBtn = document.getElementById("register-button");
-    const donateBtn = document.getElementById("donate-button");
-    const catBtn = document.getElementById("cat-widget");
-    const batBtn = document.getElementById("flying-bat");
-
-    msg += loginBtn ? "✅ Кнопка входа найдена\n" : "❌ Кнопка входа НЕ найдена\n";
-    msg += sendBtn ? "✅ Кнопка отправки найдена\n" : "❌ Кнопка отправки НЕ найдена\n";
-    msg += regBtn ? "✅ Кнопка регистрации найдена\n" : "❌ Кнопка регистрации НЕ найдена\n";
-    msg += donateBtn ? "✅ Кнопка доната найдена\n" : "❌ Кнопка доната НЕ найдена\n";
-    msg += catBtn ? "✅ Кнопка кошки найдена\n" : "❌ Кнопка кошки НЕ найдена\n";
-    msg += batBtn ? "✅ Кнопка мышки найдена\n" : "❌ Кнопка мышки НЕ найдена\n";
-
-    alert(msg);
-});
-alert("✅ script.js собака сутулая подключен");
-// ==== Поддержка новых id без ломки старых ====
-
-// Функция-хелпер для выбора элемента по id (новый или старый)
-function getById(...ids) {
-  for (let id of ids) {
-    const el = document.getElementById(id);
-    if (el) return el;
+  // Поддержка новых id без ломки старых
+  function getById(...ids) {
+    for (let id of ids) {
+      const el = document.getElementById(id);
+      if (el) return el;
+    }
+    return null;
   }
-  return null;
-}
 
-// Привязка к полям ввода
-const chatInput = getById("chat-input-main", "chat-input");
-const chatSendBtn = getById("chat-send-main", "chat-send");
-const stickerPanel = getById("sticker-panel-main", "sticker-panel");
-const stickerPanelOwl = getById("sticker-panel-owl", "sticker-panel");
-const stickerToggle = getById("sticker-toggle");
+  // Привязка к полям ввода
+  const chatInput   = getById("chat-input-main", "chat-input");
+  const chatSendBtn = getById("chat-send-main", "chat-send");
+  const stickerPanel = getById("sticker-panel-main", "sticker-panel");
+  const stickerPanelOwl = getById("sticker-panel-owl", "sticker-panel");
+  const stickerToggle = getById("sticker-toggle");
 
-// Пример: проверка доступности элементов
-console.log("🔍 Проверка элементов:");
-console.log("chatInput:", chatInput);
-console.log("chatSendBtn:", chatSendBtn);
-console.log("stickerPanel:", stickerPanel);
-console.log("stickerPanelOwl:", stickerPanelOwl);
-
-// Теперь можно использовать chatInput, chatSendBtn и др.
-// например, если у тебя где-то в коде:
-// document.getElementById("chat-input").value
-// заменяй на: chatInput.value
+  console.log("✅ Проверка элементов:");
+  console.log("chatInput:", chatInput);
+  console.log("chatSendBtn:", chatSendBtn);
+  console.log("stickerPanel:", stickerPanel);
+  console.log("stickerToggle:", stickerToggle);
 
 // === Авторизация ===
-let token = localStorage.getItem("token");
-let role = localStorage.getItem("role");
+  let token = localStorage.getItem("token");
+  let role = localStorage.getItem("role");
+
+  // Обновление интерфейса
+  async function updateUI() {
+    const authSection = document.getElementById("auth-section");
+    const logoutSection = document.getElementById("logout-section");
+
+    if (token) {
+      if (authSection) authSection.style.display = "none";
+      if (logoutSection) logoutSection.style.display = "block";
+
+      try {
+        const res = await fetch("/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+
+        if (!data || data.error) {
+          logout();
+          return;
+        }
+
+        document.getElementById("profile-info").textContent =
+          `Добро пожаловать, ${data.username || "пользователь"}!`;
+
+      } catch (err) {
+        console.error("Ошибка загрузки профиля:", err);
+        logout();
+      }
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    location.reload();
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", logout);
+  }
+
+  updateUI();
+});
+
 
 // Обновление интерфейса
 async function updateUI() {
