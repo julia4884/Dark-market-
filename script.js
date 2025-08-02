@@ -1,3 +1,4 @@
+alert("🚀 Финальный скрипт загружен!");
 // === Конфиг ===
 const API_URL = "https://dark-market-backend.onrender.com";
 
