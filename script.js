@@ -26,46 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("stickerPanel:", stickerPanel);
   console.log("stickerToggle:", stickerToggle);
 
-// === Авторизация ===
-  let token = localStorage.getItem("token");
-  let role = localStorage.getItem("role");
-
-  // Обновление интерфейса
-  async function updateUI() {
-    const authSection = document.getElementById("auth-section");
-    const logoutSection = document.getElementById("logout-section");
-
-    if (token) {
-      if (authSection) authSection.style.display = "none";
-      if (logoutSection) logoutSection.style.display = "block";
-
-      try {
-        const res = await fetch("/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-
-        if (!data || data.error) {
-          logout();
-          return;
-        }
-
-        document.getElementById("profile-info").textContent =
-          `Добро пожаловать, ${data.username || "пользователь"}!`;
-
-      } catch (err) {
-        console.error("Ошибка загрузки профиля:", err);
-        logout();
-      }
-    }
-  }
-
-  function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    location.reload();
-  }
-
   if (logoutBtn) {
     logoutBtn.addEventListener("click", logout);
   }
@@ -73,8 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
   updateUI();
 });
 
+// === Глобальные переменные ===
+let token = localStorage.getItem("token");
+let role = localStorage.getItem("role");
 
-// Обновление интерфейса
+// === Обновление интерфейса ===
 async function updateUI() {
   const authSection = document.getElementById("auth-section");
   const logoutSection = document.getElementById("logout-section");
@@ -127,6 +90,7 @@ async function updateUI() {
   }
 }
 
+// === Выход ===
 function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("role");
