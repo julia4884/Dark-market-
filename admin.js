@@ -88,7 +88,8 @@ avatarInput?.addEventListener("change", async () => {
         alert("❌ Сервер недоступен");
     }
   // 🎯 Кнопка личного кабинета — проверка роли
-document.getElementById("profile-btn")?.addEventListener("click", async () => {
+document.getElementById("cabinet-link")?.addEventListener("click", async (e) => {
+  e.preventDefault(); // чтобы не прыгал по #
   try {
     const res = await fetch(`${API_URL}/me`, {
       headers: {
