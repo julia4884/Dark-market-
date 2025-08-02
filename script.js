@@ -3,12 +3,24 @@ const API_URL = "https://dark-market-backend.onrender.com"; // замени на
 
 document.addEventListener("DOMContentLoaded", () => {
   alert("✅ Скрипт загружен и работает!");
+
+  // Проверка API (безопасная)
+  (async () => {
+    try {
+      const res = await fetch(`${API_URL}/messages/cat`);
+      if (res.ok) {
+        const data = await res.json();
+        console.log("✅ API доступен:", data);
+      } else {
+        console.warn("⚠ Сервер отвечает ошибкой:", res.status);
+        alert("⚠ Сервер отвечает, но с ошибкой. Проверь Render.");
+      }
+    } catch (err) {
+      console.warn("❌ Нет связи с бекендом:", err);
+      alert("❌ Нет связи с бекендом. Проверь Render.");
+    }
+  })();
 });
-// Проверка API
-fetch(`${API_URL}/messages/cat`)
-  .then(res => res.json())
-  .then(data => console.log("✅ API доступен:", data))
-  .catch(() => alert("❌ Нет связи с бекендом. Проверь Render."));
   // === Авторизация ===
   const loginBtn = document.getElementById("login-btn");
   const registerBtn = document.getElementById("register-btn");
